@@ -288,6 +288,9 @@ module Make(A: MERGEABLE) = struct
   module BC_store = BC_store(A)
   type branch = BC_store.branch
 
+  (*
+   * Lightweight branching thread monad
+   *)
   module Lwbt = struct
     type 'a t = branch -> 'a Lwt.t
     let return (x : 'a) : 'a t = 
@@ -300,6 +303,15 @@ module Make(A: MERGEABLE) = struct
     let clone_do name (f: 'a t) : 'a t = fun br ->
       BC_store.clone_force br name >>= fun new_br ->
       f new_br
+    let commit () : 'a t = fun br ->
+      BC_store.init () >>= fun repo -> 
+      BC_store.master repo >>= fun master -> 
+      BC_store.merge br ~into:master
+    let pull () : 'a t = fun br ->
+      BC_store.init () >>= fun repo -> 
+      BC_store.master repo >>= fun master -> 
+      BC_store.merge master ~into:br
+    let (>>=) = bind
   end
 
   module type VERSIONED = sig
@@ -307,7 +319,7 @@ module Make(A: MERGEABLE) = struct
     type t
     val new_of: M.t -> t Lwbt.t
     val to_m: t -> M.t
-    val set_latest: t -> M.t -> unit Lwbt.t
+    val try_set_latest: t -> M.t -> unit Lwbt.t
     val get_latest: t -> t Lwbt.t
   end
 
@@ -328,7 +340,7 @@ module Make(A: MERGEABLE) = struct
 
     let to_m (_,m) = m
 
-    let set_latest (path,_) l_key branch = 
+    let try_set_latest (path,_) l_key branch = 
       let bc_store = branch "updating a handle" in
         BC_store.update bc_store path (BC_store.T1 l_key)
 
@@ -357,7 +369,7 @@ module Make(A: MERGEABLE) = struct
 
     let to_m (_,m) = m
 
-    let set_latest (path,_) t_key branch = 
+    let try_set_latest (path,_) t_key branch = 
       let bc_store = branch "updating a handle" in
         BC_store.update bc_store path (BC_store.T2 t_key)
 
