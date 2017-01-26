@@ -10,13 +10,11 @@ module Lwb = Eg3.Lwb
 
 
 (* let (run : 'a Lwt.t -> 'a) = Lwt_main.run *)
-Serializable a => a -> a -> unit
-let main x y =
+let main () =
   let master = Lwb.master_st in
   let (>>=) a b = let open Lwb in a >>= b in
   let vl = Lwb.run_st master @@
             let l = [1;2;3] in 
-            let x = large_in_mem_computation (l) in 
             IntVList.add_new [5;6] in
   let wip = Lwb.clone_st "wip" master in
   let vl' = Lwb.run_st master
@@ -40,3 +38,4 @@ let main x y =
     ();;
 
 main ();;
+
