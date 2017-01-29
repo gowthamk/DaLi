@@ -1,5 +1,5 @@
 (*
- * Hypothetical example to demonstrate programming model.
+ * Hypothetical example to demonstrate the programming model.
  *)
 
 (*
@@ -28,8 +28,6 @@ type 'a db = {q: 'a Queue.t; timestamp: Time.t}
 (*
  * The main function. Please read from the bottom.
  *)
-               (int db) ((int db) Vpst_snapshot.t) Vpst.t
-               (int db) (int) Vpst.t
 let main () = 
   let (>>=) a b = let open Vpst in a >>= b in
   (*

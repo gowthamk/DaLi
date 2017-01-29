@@ -1,0 +1,7 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [1][-]{section.2}{The Branch Concurrency Model}{}% 2
+\BOOKMARK [2][-]{subsection.2.1}{Generalizing to branch hierarchies of any depth}{section.2}% 3
+\BOOKMARK [2][-]{subsection.2.2}{Blocking sync only when necessary}{section.2}% 4
+\BOOKMARK [1][-]{section.3}{Instantiations}{}% 5
+\BOOKMARK [2][-]{subsection.3.1}{Single-node database}{section.3}% 6
+\BOOKMARK [2][-]{subsection.3.2}{Replicated data store}{section.3}% 7

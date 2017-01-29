@@ -1,0 +1,155 @@
+\documentclass[preprint]{article}
+
+\usepackage{mathtools}
+\usepackage{mathpartir}
+\usepackage{fullpage}
+\usepackage{ifpdf}
+\usepackage{graphicx}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{subcaption}
+\usepackage{stmaryrd}
+\usepackage[numbers]{natbib}
+\usepackage{amsthm}
+\usepackage{listings}          % format code
+
+\ifpdf
+  \usepackage{hyperref}
+  \usepackage{graphicx}
+\else
+  \usepackage[dvips]{graphicx}
+  \usepackage[dvips]{hyperref}
+\fi
+
+\newcounter{copyrightbox}
+
+% Math mode
+%-----------
+\newenvironment{nop}{}{}
+\newenvironment{smathpar}{
+\begin{nop}\small\begin{mathpar}}{
+\end{mathpar}\end{nop}\ignorespacesafterend}
+
+% Theorem
+%--------
+\newtheorem{theorem}{Theorem}
+
+% Listings
+%----------
+\lstloadlanguages{haskell}
+\newcommand{\lsthaskell}{\lstset{
+      language=haskell,
+      basicstyle=\ttfamily\ninett\footnotesize,
+      flexiblecolumns=false,
+			tabsize=2,
+      %basewidth={0.5em,0.45em},
+      %aboveskip={3pt},
+      %belowskip={3pt},
+      keywordstyle=\color{blue}\bfseries,
+      commentstyle=\color{darkgreen}\itshape,
+      morekeywords={foldl,fold},
+			classoffset=1,
+			upquote=true,
+			keywordstyle=\color{Fuchsia}\bfseries,
+			classoffset=0,
+			mathescape=true,
+      literate={+}{{$+$}}1 {/}{{$/$}}1 {*}{{$*$}}1 % {=}{{$=$}}1
+               {>}{{$>$}}1 {<}{{$<$}}1
+							 {dollar}{{\$}}1
+               {\\\\}{{\char`\\\char`\\}}1
+               {->}{{$\rightarrow$}}2 {>=}{{$\geq$}}2 {<-}{{$\leftarrow$}}2
+               {<=}{{$\leq$}}2 {=>}{{$\Rightarrow$}}2
+               {\ .}{{$\circ$}}2 {\ .\ }{{$\circ$}}2
+               {>>}{{>>}}2 {>>=}{{>>=}}2 {=<<}{{=<<}}2
+               {|}{{$\mid$}}1
+							 {(-}{{$\in$}}1
+						   {psi1}{{$\psi_1$}}1 {psi2}{{$\psi_2$}}1
+							 {cup}{{$\cup$}}1
+							 {cap}{{$\cap$}}1
+							 {forall}{{$\forall$}}1
+							 {vee}{{$\vee$}}1
+							 {wedge}{{$\wedge$}}1
+               {`member`}{{$\in$}}1
+               {s.empty}{{\{\}}}1
+               {leftbrace}{\{}1
+               {rightbrace}{\}}1
+               {profile0sing}{{ \{{\tt profile0}\}}}1
+               {\$singleton\$startv}{{ \hspace{2.4em} \{{\tt startv}\}}}1
+               {\$singleton\$n}{{  \{{\tt n}\}}}1
+               {dotdotdot}{{$\ldots$}}3
+    }}
+\lstnewenvironment{codehaskell}
+    { % \centering
+			\lsthaskell
+      \lstset{}%
+      \csname lst@setfirstlabel\endcsname}
+    { %\centering
+      \csname lst@savefirstlabel\endcsname}
+
+\newcommand{\lstml}{
+\lstset{ %
+language=ML, % choose the language of the code
+basicstyle=\small\ttfamily,       % the size of the fonts that are used for the code
+keywordstyle=\color{Bittersweet},
+% numbers=left,                   % where to put the line-numbers
+numberstyle=\tiny,      % the size of the fonts that are used for the line-numbers
+stepnumber=1,                   % the step between two line-numbers. If it is 1 each line will be numbered
+numbersep=5pt,                  % how far the line-numbers are from the code
+showspaces=false,               % show spaces adding particular underscores
+showstringspaces=false,         % underline spaces within strings
+showtabs=false,                 % show tabs within strings adding particular underscores
+% frame=single,                   % adds a frame around the code
+tabsize=2,                      % sets default tabsize to 2 spaces
+captionpos=b,                   % sets the caption-position to bottom
+breaklines=true,                % sets automatic line breaking
+breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+commentstyle=\itshape\color{MidnightBlue},
+%escapeinside={\%*}{*)},         % if you want to add a comment within your code
+morekeywords={relation, not, : , /\\}
+}}
+\lstnewenvironment{codeml}
+    { % \centering
+			\lstml
+      \lstset{}%
+      \csname lst@setfirstlabel\endcsname}
+    { %\centering
+      \csname lst@savefirstlabel\endcsname}
+% Formatting
+%---------
+\newcommand{\C}[1]{\code{#1}}
+\newcommand{\tuplee}[1]{\langle #1 \rangle}
+\newcommand*{\rom}[1]{\expandafter\romannumeral #1}
+
+% Formatting commands
+% -------------------
+\newcommand{\code}[1]{\,{\tt #1}\,}
+\newcommand{\spc}[0]{\quad}
+\newcommand{\ALT}{~\mid~}
+\newcommand{\rel}[1]{{R}_{\mathit{#1}}}
+\newcommand{\conj}{\wedge}
+\newcommand{\disj}{~\vee~}
+\newcommand{\rulelabel}[1]{\textrm{\sc {#1}}}
+\newcommand{\ilrulelabel}[1]{{\sc #1}}
+\newcommand{\RULE}[2]{\frac{\begin{array}{c}#1\end{array}}
+                           {\begin{array}{c}#2\end{array}}}
+\newcommand{\denot}[1]{\llbracket #1 \rrbracket}
+\date{}
+\begin{document}
+
+\title{DaLi - Concurrency Model}
+%\subtitle{Research Summary}
+
+% \author{Gowtham Kaki \\ \small{Purdue University} \hspace*{0.1in}
+%   \small{{\tt gkaki@purdue.edu}} }
+
+\maketitle
+
+\input{content}
+
+
+{
+%\small
+\bibliographystyle{plainnat} \small \bibliography{report}
+}
+
+\end{document}
+

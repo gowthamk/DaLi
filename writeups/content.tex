@@ -1,0 +1,204 @@
+\section{Introduction}
+
+In this document, I describe the concurrency model of dali, and ways
+to realize it on single and distributed machines.
+
+\section{The Branch Concurrency Model}
+
+\begin{figure}[ht]
+
+\includegraphics[scale=0.75]{Figures/sync-1}
+
+\caption{The branch concurrency model with a simple two-level
+hierarchy}
+\label{fig:sync-1}
+\end{figure}
+
+A DaLi program consists of multiple concurrent threads operating on a
+persistent shared state. The OCaml type of the shared state
+distinguishes it from the thread-local state. Unlike imperative
+programs, where the there exists a single copy of the shared state
+that is \emph{updated} by concurrent threads, DaLi programs manage
+shared state in a fashion similar to the version control software,
+i.e., by \emph{forking} off new (concurrent) versions and
+\emph{merging} them back. We refer to a totally-ordered sequence of
+versions as a \emph{branch}. The program starts execution in its main
+thread with an initial version of the shared state, which is the first
+version of the \emph{master} branch. Certain operations performed by
+the program (described later) result in the creation of later versions
+on the master branch. Forking off new threads by the program results
+in forking off new versions of the state along the new branches; each
+thread is associated a new branch. In Fig.~\ref{fig:sync-1} for
+example, main thread ($M$) operating on the master branch ($m$)
+creates two new threads - $T_1$ and $T_2$, which fork off two new
+branches - $t_1$ and $t_2$, respectively. The first versions on both
+the branches, i.e., $t_1(1)$ and $t_2(1)$, denote the same state (same
+as the forked version $m(1)$ on the master), yet the versions themselves
+are deemed distinct and concurrent. Formally, $t_1(1) \neq t_2(1) \neq
+m(1)$, but $\denot{t_1(1)} = \denot{t_2(1)} = \denot{m(1)}$.
+% Note that the thread fork operation is blocking; the caller thread
+% blocks until all the child threads finish execution and return. 
+
+The concurrency model allows threads to periodically synchronize their
+branches with the master branch via the \C{sync\_next\_version}
+operation. The operation is so named because it synchronizes the
+immediate next version on the caller thread's branch with a version on
+the master that is later than (or same as) the last master version
+known to the branch. Concurrent threads that only serve read requests
+are expected to periodically sync with the master to contain the
+staleness of the data served. However, threads may also wish to
+write new data and make it available globally. For this purpose,
+\C{sync\_next\_version} allows the caller to (optionally) pass an
+argument proposing the next version of the state. If there haven't
+been any later versions on the master since the last known version,
+the proposal is accepted and published as the next version on the
+branch, and also the master. If there have been later master versions,
+then latest such version is merged with the proposed version and
+published. For this reason, applications are expected to implement a
+merge function for the type of the state. In Fig.~\ref{fig:sync-1},
+thread $T_2$ proposes a new version (the blue dot), which is merged
+with the version $m(2)$ of the master (merge highlighted in the green
+background), and the result is published as the version $t_2(2)$ on
+the $t_2$ branch and $m(3)$ on the master branch. It may sometimes
+transpire that the version proposed by the thread may be in conflict
+with the latest version on the master, in which case the merge
+function is allowed to return an error value and fail. This scenario
+is captured in Fig.~\ref{fig:sync-1} in the red background. The
+failure of merge results in the thread's proposal not being accepted,
+and master's version being published as the next version on the
+branch. In Fig.~\ref{fig:sync-1}, the failure of merge in $T_1$
+results in master's $m(3)$ getting published as $t_1(2)$ on $t_1$.
+Note that this version denotes the same state as present on the $t_2$
+branch, which incorporates $T_2$'s proposal, thus demonstrating the
+information flow among the branches.
+
+The threads can access the lastest version on their branches via the
+\C{get\_latest\_version} operation. If the last merge operation is a
+success, then this operation returns the merged version, allowing the
+thread to continue its computation. If the last merge operation
+failed, then it allows the thread to read the latest version of the 
+master and revise its proposal for the next \C{sync} operation. 
+
+The behavior of \C{sync\_next\_version} and \C{get\_latest\_version}
+is more-or-less same in the main thread. While \C{sync} without a
+propoisal is effectively a \C{nop} in the main thread, a \C{sync} with
+a proposal tries to merge the proposal with the lastest master
+version, which happens to be the local version for the main thread. As
+with other threads, \C{sync} fails if the proposed version is
+incompatible with the later version. There is however a slight
+difference in behavior of the \C{get\_latest\_version} in the main
+thread; unlike in other threads, successive calls to
+\C{get\_latest\_version} in the main thread may return different
+results even if they are not interleaved by a \C{sync} operation. This
+happens if one of the child threads syncs its branch with the master
+inbetween the two calls.
+
+\subsection{Generalizing to branch hierarchies of any depth}
+
+\begin{figure}[t]
+\centering
+\includegraphics[scale=0.75]{Figures/sync-2}
+
+\caption{The branch concurrency model generalized to hierarchies of
+any depth}
+\label{fig:sync-2}
+\end{figure}
+
+Observe that the branch concurrency model desribed above confines
+branching to a 2-level hierarchy with the master branch at the top and
+forked branches at the bottom. The model does not define the behavior
+of the version/thread fork operation originating from one of the child
+threads. We now generalize the model for branch hierarchies of any
+depth, while also eliminating the slight asymmetry between the main
+thread and the child threads described above. We achieve this
+generalization by redefining the \C{sync\_next\_version} operation as
+a two-step process that first merges the proposed version with the
+latest version on the current branch, and then merges the result with
+the latest version on the parent branch (note: not necessarily the
+master branch). The additional first step is now necessary because the
+latest version on the current branch may not be same as the one that
+was last read through the \C{get\_latest\_version}; a new version may
+have since been committed by one of the child threads of the current
+thread. The first step merges the proposed version with this version.
+The second stepe merges the result of the first step with the lastest
+version on the master, and publishes the merge result on both the
+branches.
+
+In Fig.~\ref{fig:sync-2}, thread $T_1$ forks a child $T_2$, which
+forks $T_3$. The initial versions on the corresponding branches are
+$t_1(1)$, $t_2(1)$, and $t_3(1)$, respectively. Thread $T_2$ starts a
+local computation on its initial version copied into its heap (the red
+dot). At some point, $T_3$ publishes a later version ($t_2(2)$) to its
+parent. A little while later, $T_2$ concludes its local computation
+and proposes a candidate for the new version on $t_2$ (the blue dot;
+the dotted line connecting the red and blue dots denotes data
+dependency). This candidate is merged with the latest local version
+($t_2(2)$), and also the latest parent version ($t_1(2)$), and the
+merge result\footnote{Convergence requires merge to be commutative, so
+the order of merging doesn't matter.} is published as $t_2(3)$ on the
+local branch and $t_1(3)$ on the parent branch. Subsequence
+\C{get\_latest\_version} returns these versions on both the branches.
+
+Observe that the behavior of \C{sync\_next\_version} and
+\C{get\_latest\_version} is now uniform across all the threads. The
+first and second steps (resp.) of \C{sync\_next\_version} are
+effectively nop for the root and leaves of the thread hierarchy,
+because the master branch doesn't have a parent and the bottom-most
+branch doesn't have a child.
+the main thread doesn't have a parent,
+
+\subsection{Blocking sync only when necessary}
+
+One problem with the previous model is that the call to
+\C{sync\_later\_version} always blocks until the merge operation
+succeeds and the result is published on both the branches. This is
+unnecessary if the merge operation is always guaranteed to succeed (for
+e.g., in the case of a mergeable queue). A non-blocking \C{sync} is
+more appropriate for such cases. Selective non-blocking behavior for
+can be accommodated in the semantics of \C{sync} as following: Along
+with the proposal for the later version, \C{sync} also accepts the
+current continuation of the caller. If there is a possiblity that any
+of the two merge operations might fail, then \C{sync} waits until it
+obtains the result of merges before calling the continuation with an
+appropriate status.  Otherwise, it calls the current continuation
+immediately, reporting success status. Some subsequent (but not
+necessarily immediate) call to \C{get\_latest\_version} is guaranteed
+to return the merged version\footnote{This guarantee is conditional on
+the EC guarantee of the underlying machine and the commutativity
+property of the merge function.}.
+
+But how does the \C{sync} know if the merge might return conflict? By
+observing the diff (\C{git diff}) of the proposed and the latest local
+versions w.r.t to the last known version of the parent. For example,
+let us consider an application whose shared state contains three data
+items - \C{x}, \C{y}, and \C{z}, which are indepedently mergeable. Suppose
+that the type of the merge function for \C{z} indicates a possibility of
+conflict (\C{type 'a result = Ok of 'a | Conflict}), whereas the merge
+functions for \C{x} and \C{y} do not admit that possibility. Let the last
+know parent version be \C{\{x=a; y=b; z=c\}}, the latest local version
+be \C{\{x=a'; y=b'; z=c\}}, and the proposed version be \C{\{x=a''; y=b;
+z=c\}}. It is clear that the merge function on \C{z} will not be called
+while merging the versions, hence there is not possibility that the
+merge fails. Consequencely, \C{sync} can be non-blocking in this case.
+On the other hand, if \C{z} is assigned \C{c'} in the proposed version,
+then the merge on \C{z} will be called, which might fail. Therefore,
+\C{sync} needs to block.
+
+The banality of selective blocking optimization belies its true
+importance, for the selectively blocking \C{sync} is what lets DaLi
+implement a highly available replicated data store with on-demand
+strong consistency, without requiring programmers to explicitly reason
+about the consistency.  
+
+\section{Instantiations}
+
+DaLi's concurrency model is general enough that it can be instantiated
+in system-specific ways. 
+
+\subsection{Single-node database}
+
+ToDo.
+
+\subsection{Replicated data store}
+
+ToDo.
