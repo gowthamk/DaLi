@@ -6,3 +6,4 @@ irmin
 *.cmo
 *.o
 *.cmx
+trash.ml
