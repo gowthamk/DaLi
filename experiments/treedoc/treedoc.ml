@@ -7,6 +7,8 @@ module TreeDoc = struct
   type dir = L | R (* You can either take left or right *)
   type path = dir list
 
+  let blank = N
+
   let rec insert_left t x = match t with
     | N -> B (N, x, N)
     | B (t1,_,t2) -> insert_left t1 x
@@ -25,7 +27,7 @@ module TreeDoc = struct
         let lt' = update lt path' x in B (lt',y,rt)
     | (R::path', B (lt,y,rt)) -> 
         let rt' = update rt path' x in B (lt,y,rt')
-    | _ -> failwith "Unexpcted path for modification"
+    | _ -> failwith "Unexpected path for modification"
 
   let rec in_order_iter f = function
     | N -> ()
@@ -94,5 +96,3 @@ let main () =
   let t3 = insert t1 [L;L;R] "wheatish" in
   let _ = print_doc @@ merge t1 t2 t3 in 
     ();;
-
-main ();;

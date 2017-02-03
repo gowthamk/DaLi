@@ -218,11 +218,21 @@ module BC_store = struct
   let read = Store.read
 end
 
-module Vpst = struct
+module Vpst : sig
+  type 'a t
+  val return : 'a -> 'a t
+  val bind : 'a t -> ('a -> 'b t) -> 'b t
+  val with_init_version_do: Canvas.t -> 'a t -> 'a
+  val fork_version : 'a t -> unit t
+  val get_latest_version: unit -> Canvas.t t
+  val sync_next_version: ?v:Canvas.t -> Canvas.t t
+  val liftLwt : 'a Lwt.t -> 'a t
+end= struct
   type branch = BC_store.branch
-  type named_branch = {name: string; branch: branch}
-  type st = {master : named_branch;
-             local  : named_branch}
+  type st = {master    : branch;
+             local     : branch;
+             name      : string;
+             next_id   : int}
   type 'a t = st -> ('a * st) Lwt.t
 
   (* The path at which the db is stored on all branches. *)
@@ -235,60 +245,57 @@ module Vpst = struct
     fun st -> (m1 st >>= fun (a,st') -> f a st')
 
   let with_init_version_do (v: Canvas.t) (m: 'a t) =
-    let m_name = "main_master" in
-    let t_name = "main_local" in
-    BC_store.init () >>= fun repo -> 
-    BC_store.master repo >>= fun m_br -> 
-    let m_store = m_br "creating state on master" in
-    ICanvas.of_canvas v >>= fun k ->
-    BC_store.update m_store path k >>= fun () ->
-    BC_store.clone_force m_br t_name >>= fun t_br ->
-    let st = {master = {name=m_name; branch=m_br}; 
-              local  = {name=t_name; branch=t_br}} in
-    let (a,_) = Lwt_main.run @@ m st in
-      a
+    Lwt_main.run 
+      begin
+        BC_store.init () >>= fun repo -> 
+        BC_store.master repo >>= fun m_br -> 
+        let m_store = m_br "creating state on master" in
+        ICanvas.of_canvas v >>= fun k ->
+        BC_store.update m_store path k >>= fun () ->
+        BC_store.clone_force m_br "1_local" >>= fun t_br ->
+        let st = {master=m_br; local=t_br; name="1"; next_id=1} in
+        m st >>= fun (a,_) -> Lwt.return a
+      end
     
-  let fork_version (m: 'a t) = fun (st: st) ->
+  let fork_version (m: 'a t) :unit t = fun (st: st) ->
     let thread_f () = 
-      let id_key = Lwt.new_key () in
-      let thread_id = match Lwt.get id_key with
-        | Some id -> id
-        | None -> failwith "Thread id not found" in
-      let m_name = thread_id^"_master" in
-      let t_name = thread_id^"_local" in
-      let parent_m_br = st.master.branch in
+      let child_name = st.name^"_"^(string_of_int st.next_id) in
+      let parent_m_br = st.master in
       (* Ideally, the following has to happen: *)
       (* BC_store.clone_force parent_m_br m_name >>= fun m_br -> *)
       (* But, we currently default to an SC mode. Master is global. *)
       let m_br = parent_m_br in
-      BC_store.clone_force m_br t_name >>= fun t_br ->
-      let new_st = {master = {name=m_name; branch=m_br}; 
-                    local  = {name=t_name; branch=t_br}} in
+      BC_store.clone_force m_br (child_name^"_local") >>= fun t_br ->
+      let new_st = {master = m_br; local  = t_br; 
+                    name = child_name; next_id = 1} in
         m new_st in
     begin
-      Lwt.async thread_f
+      Lwt.async thread_f;
+      Lwt.return ((), {st with next_id=st.next_id+1})
     end
 
   let get_latest_version () : Canvas.t t = fun (st: st) ->
-    let bc_store = st.local.branch "reading local state" in
+    let bc_store = st.local "reading local state" in
     BC_store.read bc_store path >>= fun k ->
     ICanvas.to_canvas @@ from_just k >>= fun td ->
     Lwt.return (td,st)
 
-  let sync_next_version (v: Canvas.t) : unit t = fun (st: st) ->
+  let sync_next_version ?v : Canvas.t t = fun (st: st) ->
     (* How do you commit the next version? Simply update path? *)
     (* 1. Commit to the local branch *)
-    let bc_store = st.local.branch "committing local state" in
-    ICanvas.of_canvas v >>= fun k ->
-    BC_store.update bc_store path k >>= fun () ->
+    let bc_store = st.local "committing local state" in
+    (match v with | None -> Lwt.return ()
+      | Some v -> 
+          ICanvas.of_canvas v >>= fun k -> 
+          BC_store.update bc_store path k) >>= fun () ->
     (* 2. Merge local master to the local branch *)
-    BC_store.merge st.master.branch 
-      ~into:st.local.branch >>= fun () ->
+    BC_store.merge st.master ~into:st.local >>= fun () ->
     (* 3. Merge local branch to the local master *)
-    BC_store.merge st.local.branch 
-      ~into:st.master.branch >>= fun () ->
-    Lwt.return ((),st)
-    
+    BC_store.merge st.local ~into:st.master >>= fun () ->
+    get_latest_version () st
+   
+  let liftLwt (m: 'a Lwt.t) : 'a t = fun st ->
+    m >>= fun a -> Lwt.return (a,st)
 
 end
 

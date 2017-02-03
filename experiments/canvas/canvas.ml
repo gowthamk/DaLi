@@ -73,8 +73,11 @@ let rec set_px canvas loc px =
               t'
 
 let set_px canvas loc px = 
-  let t' = set_px canvas loc px in
-    {canvas with t=t'}
+  if loc.x > canvas.max_x || loc.y > canvas.max_y then
+    failwith "set_px: location out of canvas bounds"
+  else
+    let t' = set_px canvas loc px in
+      {canvas with t=t'}
 
 let rec get_px canvas loc = match canvas.t with
   | N px -> px
@@ -151,16 +154,54 @@ let rec merge old v1 v2 =
         (* pixels are merged by mixing colors *)
         let px' = color_mix px1 px2 in N px'
 
+let rec print min_x min_y max_x max_y t = 
+  if min_x > max_x || min_y > max_y then ()
+  else match t with 
+    | N px when not (px = default_pixel) -> 
+        if min_x = max_x && min_y = max_y 
+        then Printf.printf "<%d,%d>: (%d,%d,%d)\n" min_x min_y 
+               (Char.code px.r) (Char.code px.g) (Char.code px.b)
+        else Printf.printf "<%d,%d> to <%d,%d>: (%d,%d,%d)\n"
+                min_x min_y max_x max_y (Char.code px.r)
+                (Char.code px.g) (Char.code px.b) 
+    | N px -> ()
+    | B {tl_t; tr_t; bl_t; br_t} -> 
+        let (mid_x, mid_y) = (min_x + (max_x - min_x + 1)/2, 
+                              min_y + (max_y - min_y + 1)/2) in
+        begin
+          print min_x min_y mid_x mid_y tl_t;
+          print (mid_x+1) min_y max_x mid_y tr_t;
+          print min_x (mid_y+1) mid_x max_y bl_t;
+          print (mid_x+1) (mid_y+1) max_x max_y br_t;
+        end 
+
+let print {max_x; max_y; t} = print 0 0 max_x max_y t
+
+let print c = 
+  for x=1 to c.max_x do
+    for y=1 to c.max_y do
+      let px = get_px c {x=x; y=y} in
+        if not (px = default_pixel)
+        then Printf.printf "<%d,%d>: (%d,%d,%d)\n" x y 
+               (Char.code px.r) (Char.code px.g) (Char.code px.b)
+        else ()
+    done
+  done
+
 let main () =
   let c = new_canvas 128 128 in
   let loc = {x=93; y=127} in
-  let px = get_px (set_px c loc @@ rgb @@ Char.chr 23) loc  in
+  let c' = set_px c loc @@ rgb @@ Char.chr 23 in
+  let _ = print c' in
+  let px = get_px c' loc  in
   let _ = Printf.printf "px(%d,%d)=(%d,%d,%d)\n" loc.x loc.y
           (Char.code px.r) (Char.code px.g) (Char.code px.b) in
   let loc' = {x=45; y=78} in
   let px' = get_px c loc' in
   let _ = Printf.printf "px(%d,%d)=(%d,%d,%d)\n" loc'.x loc'.y
           (Char.code px'.r) (Char.code px'.g) (Char.code px'.b) in
+  let c' = set_px c {x=98;y=17} @@ rgb @@ Char.chr 23 in
+  let _ = print c' in
     ();;
 
-main ();;
+(* main ();; *)
