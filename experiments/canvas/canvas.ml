@@ -4,12 +4,14 @@ let default_pixel = {r=Char.chr 255; g=Char.chr 255; b=Char.chr 255}
 type t = 
   | N of pixel
   | B of {tl_t: t; tr_t: t; 
-          br_t: t; bl_t: t} (* 4 quadrants clockwise starting from top-left *)
+          bl_t: t; br_t: t} (* 4 quadrants *)
 
 type canvas = {max_x:int; max_y:int; t:t}
 type loc = {x:int; y:int}
 
 let blank = N default_pixel
+
+let plain px = N px
 
 let new_canvas max_x max_y = 
   {max_x=max_x; max_y=max_y; t=blank}
@@ -122,6 +124,9 @@ let color_mix px1 px2 : pixel =
 
 let b_of_n px = 
   B {tl_t=N px; tr_t=N px; bl_t=N px; br_t=N px}
+    
+let make_b (tl,tr,bl,br) = 
+  B {tl_t=tl; tr_t=tr; bl_t=bl; br_t=br}
 
 let rgb px = {r=px; g=px; b=px}
 
