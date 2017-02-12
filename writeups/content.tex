@@ -190,6 +190,42 @@ implement a highly available replicated data store with on-demand
 strong consistency, without requiring programmers to explicitly reason
 about the consistency.  
 
+\section{Operational Semantics}
+
+\input{opsem}
+
+\begin{figure}[!h]
+\begin{smathpar}
+\begin{array}{lcll}
+(\push{v_1}, v::b)_t;M[t\mapsto v_2::m] & \stepsto & 
+    ((),v_1::v::b)_t;M[t \mapsto v'::v_2::m] & \texttt{where}~
+    t\neq t'~\texttt{and}\\
+  & & & v\,=\,\C{merge}\,v\,v_1\,v_2 ~\texttt{and}~ \\
+\end{array}
+\end{smathpar}
+
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  t\neq t' \spc
+  v_1 \not\succeq v_2 \conj v_2 \not\succeq v_1 \spc
+  v = \C{merge}(\C{lca}(M(t),M(t')), v_1, v_2)
+}
+{
+  (s,b)_t;M[t\mapsto v_1::m_1][t'\mapsto v_2::m_2] ~\stepsto~
+  (s,b)_t;M[t \mapsto v::v_1::m_1][t'\mapsto v_2::m_2]
+}
+\end{array}
+\end{smathpar}
+%
+
+\caption{DaLi: Low-level Operational Semantics}
+\label{fig:low-opsem}
+\end{figure}
+
+
+
 \section{Instantiations}
 
 DaLi's concurrency model is general enough that it can be instantiated

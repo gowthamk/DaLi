@@ -1,0 +1,32 @@
+\section{Introduction}
+
+Distributed programs are challenging to write because they must juggle
+two distinct mechanisms.  The first deals with application logic - how
+do we define computation to be robust in the presence of disconnected
+non-coherent communication among distributed threads of control?  The
+second deals with system concerns - how do define notions of
+atomicity, distribution, persistence, and replication?  Because of the
+subtleties in dealing with the latter, especially when high
+availability (low response latency) is desired, systems typically
+separate these mechanisms into separate tools or services (e.g., CRDTs
+have a well-defined semantics in an eventually consistent system that
+may experience network partitions, while database and related storage
+systems provide support for atomic transactions, persistence,
+replication.  Unfortunately, because these different mechanisms have
+vastly different semantics and goals, program structure becomes
+complicated and muddled.  More importantly, it becomes problematic to
+relate properties relevant to applications to the guarantees provided
+by these lower-level services.  In this paper, we propose a radically
+different vision of a distributed application that is predicated on
+defining both mechanisms within the same language framework, with
+those aspects not directly related to coherence and consistency
+encapsulated within a library.  This not only simplifies program
+reasoning, but leads to significant expressivity gains since
+language-level types and abstractions are directly supported by the
+library.   Realizing this vision leads to a radically different
+programming model, one which realizes a monadic functional version
+control system centered around data, rather than file coherence.  We
+have implemented an end-to-end instantiation of this idea in OCaml
+called DaLi and demonstrate how efficient distributed applications can
+be written and deployed without having to deal with \emph{any}
+system-centric features.

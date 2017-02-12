@@ -1,0 +1,59 @@
+\begin{figure*}[!t]
+%
+\textbf{Syntax}\\
+%
+\begin{smathpar}
+\renewcommand{\arraystretch}{1.2}
+\begin{array}{lclcl}
+\multicolumn{5}{c} {
+  t \in \mathtt{Thread\; Ids} \qquad
+% v \in \mathtt{ML\; Values} \qquad
+  v,e \in \mathtt{ML\; Expressions} \qquad
+}\\
+s & \in & \mathtt{Expressions} & \coloneqq & e \ALT s \bind  s \ALT 
+\return{s} \ALT \run{s}{s}\\
+ & & & & \ALT \fork{s} \ALT \pull \ALT \push{s} \\
+b & \in & \mathtt{Branches} & \coloneqq & [\,] \ALT v::b \\
+p & \in & \mathtt{Programs} & \coloneqq & (s,b)_t \ALT p\,||\,p \\
+\end{array}
+\end{smathpar}
+%
+%% It is possible to define e and s mutually recursively, such their
+%% evaluation relations are also mutually recursive (multiple
+%% reduction steps of one relation is a single step of other). 
+
+%
+\textbf{Evaluation Contexts}\\
+%
+\begin{smathpar}
+\renewcommand{\arraystretch}{1.2}
+\begin{array}{lcl}
+E & \coloneqq & \bullet \ALT \bullet \bind s \ALT \return{\bullet}
+    \ALT \run{\bullet}{e}\\
+P & \coloneqq & E_t \ALT \bullet\,||\,p \ALT p\,||\,\bullet \\
+\end{array}
+\end{smathpar}
+%
+
+%
+\textbf{Reduction Relation} \quad \fbox {$p;\;M \stepsto p';\;M'$} \\
+%
+%
+\begin{smathpar}
+\begin{array}{lcll}
+(\run{v}{s},b)_t;M & \stepsto & (s,[v])_t;M[t\mapsto[v]] & \\
+(\fork{s},v::b)_t;M & \stepsto & ((),v::b)_t\,||\,(s,[v])_{t'};
+    M[t'\mapsto M(t)] & \texttt{where}\; t'\not\in dom(M)\\
+(\pull,b)_t;M[t\mapsto v::m] & \stepsto & (v,v::b)_t;M[t\mapsto v::m] & \\
+(\push{v_1}, v::b)_t;M[t\mapsto v_2::m] & \stepsto & 
+    ((),v_1::v::b)_t;M'[t \mapsto v'::v_2::m] & \texttt{where}~
+    v'\,=\,\C{merge}\,v\,v_1\,v_2 ~\texttt{and}~ \\
+    & & & \forall (t'\in dom(M)).~ M'(t') = v'::M(t') \\
+
+\end{array}
+\end{smathpar}
+
+
+\caption{DaLi: Syntax and High-level Operational Semantics}
+\label{fig:opsem}
+\end{figure*}
