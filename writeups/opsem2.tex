@@ -1,0 +1,82 @@
+\begin{figure*}[!t]
+%
+\textbf{Syntax}\\
+%
+\begin{smathpar}
+\renewcommand{\arraystretch}{1.2}
+\begin{array}{lclcl}
+\multicolumn{5}{c} {
+  t \in \mathtt{Thread\; Ids} \qquad
+% v \in \mathtt{ML\; Values} \qquad
+  v,e \in \mathtt{ML\; Expressions} \qquad
+}\\
+s & \in & \mathtt{Expressions} & \coloneqq & e \ALT s \bind  s \ALT 
+  \return{s} \ALT \run{s}{s}\\
+   & & & & \ALT \fork{s} \ALT \pull \ALT \push{s} \\
+f & \in & \mathtt{Operations} & \coloneqq & \C{INIT} \ALT \C{FORK}(b) 
+  \ALT \C{PUSH} \ALT \C{MERGE}(b)\\
+b & \in & \mathtt{Branches} & \coloneqq & [(v,f)] \ALT (v,f)::b \\
+p & \in & \mathtt{Programs} & \coloneqq & (s,b)_t \ALT p\,||\,p \\
+\end{array}
+\end{smathpar}
+%
+%% It is possible to define e and s mutually recursively, such their
+%% evaluation relations are also mutually recursive (multiple
+%% reduction steps of one relation is a single step of other). 
+
+%
+\textbf{Evaluation Contexts}\\
+%
+\begin{smathpar}
+\renewcommand{\arraystretch}{1.2}
+\begin{array}{lcl}
+E & \coloneqq & \bullet \ALT \bullet \bind s \ALT \return{\bullet}
+    \ALT \run{\bullet}{e}\\
+P & \coloneqq & E_t \ALT \bullet\,||\,p \ALT p\,||\,\bullet \\
+\end{array}
+\end{smathpar}
+%
+
+%
+\textbf{Reduction Relation} \quad \fbox {$p;\;H \stepsto p';\;H'$} \\
+%
+%
+\begin{smathpar}
+\begin{array}{lcll}
+(\run{v}{s},\_)_t;H & \stepsto & (s,v)_t;H[t\mapsto[(v,\C{INIT})]] & \\
+(\fork{s},v)_t;H & \stepsto & ((),v)_t\,||\,(s,v)_{t'};
+    H[t'\mapsto [(v',\C{FORK} H(t))] & \texttt{where}\; t'\not\in dom(H)\\
+(\pull,v)_t;H(t\mapsto (v',\_)::m) & \stepsto & (v',v')_t;H & \\
+% (\push{v_1}, v::b)_t;H[t\mapsto (v_2::m, v_0)] & \stepsto & 
+%     ((),v_1::v::b)_t;H'[t \mapsto (v'::v_2::m, v_0)] & \texttt{where}~
+%     v'\,=\,\C{merge}\,v\,v_1\,v_2 ~\texttt{and}~ \\
+%     & & & \forall (t'\in dom(H)).~ H'(t') = v'::H(t') \\
+(\push{v_1}, v)_t;H(t\mapsto (v_2,f)::m) & \stepsto & 
+    ((),v_1)_t;H[t \mapsto (v',\C{PUSH})::(v_2,f)::m] & \texttt{where}~
+    v'\,=\,\C{merge}\,v\,v_1\,v_2\\
+% & & & v\,=\,\C{merge}\,v\,v_1\,v_2 ~\texttt{and}~ \\
+\end{array}
+\end{smathpar}
+%
+
+%
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  t_1\neq t_2 \spc
+  v_1 \not\succeq v_2 \spc
+  \C{world}(H,t_2) \succeq_{\circ} \C{world}(H,t_1)\spc 
+  v = \C{merge}(\C{lca}(H,t_1,t_2), v_1, v_2) \spc
+}
+{
+  (s,v_0)_t;H(t_1 \mapsto (v_1,f_1)::m_1)(t_2 \mapsto (v_2,f_2)::m_2) ~\stepsto~
+  (s,v_0)_t;H[t_1 \mapsto (v,\C{MERGE} H(t_2))::(v_1,f_1)::m_1]
+}
+\end{array}
+\end{smathpar}
+%
+
+\caption{DaLi: Syntax and High-level Operational Semantics}
+\label{fig:opsem}
+\end{figure*}

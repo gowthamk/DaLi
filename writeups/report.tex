@@ -11,6 +11,7 @@
 \usepackage[numbers]{natbib}
 \usepackage{amsthm}
 \usepackage{listings}          % format code
+\usepackage{bm}
 
 \ifpdf
   \usepackage{hyperref}
@@ -132,6 +133,14 @@ morekeywords={relation, not, : , /\\}
 \newcommand{\RULE}[2]{\frac{\begin{array}{c}#1\end{array}}
                            {\begin{array}{c}#2\end{array}}}
 \newcommand{\denot}[1]{\llbracket #1 \rrbracket}
+\newcommand{\bind}{>\!\!>\!\!=}
+\newcommand{\coloneqq}{::=}
+\newcommand{\stepsto}{\longrightarrow}
+\newcommand{\return}[1]{\C{return}\;#1}
+\newcommand{\run}[2]{\C{run}\;#1\;#2}
+\newcommand{\fork}[1]{\C{fork}\;#1}
+\newcommand{\push}[1]{\C{push}\;#1}
+\newcommand{\pull}{\C{pull}}
 \date{}
 \begin{document}
 
