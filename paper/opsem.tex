@@ -1,0 +1,81 @@
+\begin{figure*}[!t]
+\raggedright
+%
+\textbf{Syntax}\\
+%
+\begin{smathpar}
+\renewcommand{\arraystretch}{1.2}
+\begin{array}{lclcl}
+\multicolumn{5}{c} {
+  t \in \mathtt{Thread\; Ids} \qquad
+% v \in \mathtt{ML\; Values} \qquad
+  e,v \in \mathtt{ML\; Expressions,\; Values} \qquad
+}\\
+s & \in & \mathtt{Expressions} & \coloneqq & e \ALT s \bind  s \ALT 
+  \return{s} \ALT \run{s}{s}\\
+   & & & & \ALT \fork{s} \ALT \pull \ALT \push{s} \\
+f & \in & \mathtt{Tags} & \coloneqq & \C{INIT} \ALT \C{FORK} \;b 
+  \ALT \C{PUSH} \ALT \C{MERGE} \;b\\
+b & \in & \mathtt{Branches} & \coloneqq & [(v,f)] \ALT (v,f)::b \\
+p & \in & \mathtt{Programs} & \coloneqq & s_t \ALT p\,||\,p \\
+\end{array}
+\end{smathpar}
+%
+\bigskip
+%% If we are feeling adventurous, we can try defining e and s 
+%% mutually recursively, such that their evaluation relations 
+%% are also mutually recursive (multiple reduction steps of one 
+%% relation is a single step of other). 
+
+%
+\textbf{Evaluation Contexts}\\
+%
+\begin{smathpar}
+\renewcommand{\arraystretch}{1.2}
+\begin{array}{lcl}
+E & \coloneqq & \bullet \ALT \bullet \bind s \ALT \return{\bullet}
+    \ALT \run{\bullet}{e}\\
+P & \coloneqq & E_t \ALT \bullet\,||\,p \ALT p\,||\,\bullet \\
+\end{array}
+\end{smathpar}
+%
+\bigskip
+
+%
+\textbf{Reduction Relation} \quad \fbox {$p;\;H \stepsto p';\;H'$} \\
+%
+%
+\begin{smathpar}
+\begin{array}{lcll}
+(\run{v}{s})_t;H & \stepsto & s_t; H[t\mapsto[(v,\C{INIT})]] & \\
+(\fork{s})_t;H & \stepsto & ()_t\,||\, s_{t'}; H[t'\mapsto [(v, \C{FORK} H(t))]] & 
+    \texttt{where}\; t'\not\in dom(H)\\
+(\push{v})_t;H & \stepsto & ()_t;H[t \mapsto (v,\C{PUSH})::H(t)] & \\
+% & & & v\,=\,\C{merge}\,v\,v_1\,v_2 ~\texttt{and}~ \\
+(\pull)_t;H(t \mapsto (v,\_)::m) & \stepsto & v_t;H & \\
+\end{array}
+\end{smathpar}
+%
+
+%
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  t\neq t' \spc
+  \under{H}{v \not\succeq v'} \spc
+  \C{mergeable}(H(t),H(t')) \spc
+% \C{world}(H,t') \semsucceq \C{world}(H,t)\spc 
+  v_m = \C{merge}(\C{lca}(H(t),H(t')), v, v') \spc
+}
+{
+  (\pull)_t;H(t \mapsto (v,f)::m)(t' \mapsto (v',\_)::\_) ~\stepsto~
+  (\pull)_t;H[t \mapsto (v_m,\C{MERGE}\; H(t'))::(v,f)::m]
+}
+\end{array}
+\end{smathpar}
+%
+
+\caption{\name: Syntax and Operational Semantics}
+\label{fig:opsem}
+\end{figure*}

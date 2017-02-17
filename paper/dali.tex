@@ -11,11 +11,59 @@
 
 
 %% Some recommended packages.
-\usepackage{booktabs}   %% For formal tables:
-                        %% http://ctan.org/pkg/booktabs
-\usepackage{subcaption} %% For complex figures with subfigures/subcaptions
-                        %% http://ctan.org/pkg/subcaption
+\usepackage{mathtools}
+\usepackage{mathpartir}
+\usepackage{fullpage}
+\usepackage{ifpdf}
+\usepackage{graphicx}
+%\usepackage[usenames,dvipsnames]{color}
+\usepackage{subcaption}
+\usepackage{stmaryrd}
+%\usepackage[numbers]{natbib}
+\usepackage{amsthm}
+\usepackage{listings}          % format code
+\usepackage{xspace}
 
+% Math mode
+%-----------
+\newenvironment{nop}{}{}
+\newenvironment{smathpar}{
+\begin{nop}\small\begin{mathpar}}{
+\end{mathpar}\end{nop}\ignorespacesafterend}
+
+% Name
+%-----
+\newcommand{\name}{{\sf DaLi}\xspace}
+
+% Formatting
+%---------
+\newcommand{\C}[1]{\code{#1}}
+\newcommand{\tuplee}[1]{\langle #1 \rangle}
+\newcommand*{\rom}[1]{\expandafter\romannumeral #1}
+
+% Formatting commands
+% -------------------
+\newcommand{\code}[1]{\,{\tt #1}\,}
+\newcommand{\spc}[0]{\quad}
+\newcommand{\ALT}{~\mid~}
+\newcommand{\rel}[1]{{R}_{\mathit{#1}}}
+\newcommand{\conj}{~\wedge~}
+\newcommand{\disj}{~\vee~}
+\newcommand{\rulelabel}[1]{\textrm{\sc {#1}}}
+\newcommand{\ilrulelabel}[1]{{\sc #1}}
+\newcommand{\RULE}[2]{\frac{\begin{array}{c}#1\end{array}}
+                           {\begin{array}{c}#2\end{array}}}
+\newcommand{\denot}[1]{\llbracket #1 \rrbracket}
+\newcommand{\bind}{>\!\!>\!\!=}
+\newcommand{\coloneqq}{::=}
+\newcommand{\stepsto}{\longrightarrow}
+\newcommand{\return}[1]{\C{return}\;#1}
+\newcommand{\run}[2]{\C{run}\;#1\;#2}
+\newcommand{\fork}[1]{\C{fork}\;#1}
+\newcommand{\push}[1]{\C{push}\;#1}
+\newcommand{\pull}{\C{pull}}
+\newcommand{\semsucceq}{\succeq_{\circ}}
+\newcommand{\under}[2]{#1\,\vdash\,#2}
 
 \makeatletter\if@ACM@journal\makeatother
 %% Journal information (used by PACMPL format)
@@ -182,6 +230,8 @@ Text of abstract \ldots.
 
 
 \input{intro}
+
+\input{semantics}
 
 %% Acknowledgments
 % \begin{acks}                            %% acks environment is optional

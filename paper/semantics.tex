@@ -1,0 +1,31 @@
+\section{Operational Semantics}
+
+\input{opsem}
+
+\begin{definition} [\bfseries Semantic Successor]
+Version $v_2$ is a semantic successor of version $v_1$ under a history
+$H$ (written $\under{H}{v_2 \semsucceq v_1}$) if and only if:
+\begin{itemize}
+  \item There exists a branch $b$ in $H$ (i.e., $\exists(t\in
+  dom(H)).\,H(t) = b$) in which $v_2$ immediately succeeds
+  $v_1$, but $v_2$ is not a result of a merge operation (i.e.,
+  $v_2$'s tag is not \C{MERGE}), or
+  \item There exists a branch $b$ in $H$ that contains
+  $(v_2, \C{MERGE}\;(v_1,f_1)::b')$, for some $f_1$ and $b'$, or
+  \item $v_2$ is a transitive semantic successor of $v_1$, i.e., 
+  $\exists v.~ \under{H}{v \semsucceq v_1} \conj \under{H}{v_2
+  \semsucceq v}$ 
+\end{itemize}
+\end{definition}
+
+\begin{definition} [\bfseries Successor]
+Version $v_2$ is a syntactic successor (or simply, successor) of
+version $v_1$ under a history $H$ (written $\under{H}{v_2 \succeq
+v_1}$) if and only if:
+\begin{itemize}
+  \item $v_2$ is a semantic successor of $v_1$, or
+  \item $v_2$ is a result of a merge, and $v_2$ immediately succeeds
+  $v_1$ in some branch $b$ in $H$, or
+  \item $v_2$ is a transitive successor of $v_1$.
+\end{itemize}
+\end{definition}
