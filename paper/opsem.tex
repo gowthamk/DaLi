@@ -47,7 +47,9 @@ P & \coloneqq & E_t \ALT \bullet\,||\,p \ALT p\,||\,\bullet \\
 %
 \begin{smathpar}
 \begin{array}{lcll}
-(\run{v}{s})_t;H & \stepsto & s_t; H[t\mapsto[(v,\C{INIT})]] & \\
+(\run{v}{s})_t;\cdot & \stepsto & 
+  s_t; \cdot[t_{\top} \mapsto [(v,\C{INIT})]]
+            [t\mapsto [(v,\C{FORK}\; [(v,\C{INIT})])]] & \\
 (\fork{s})_t;H & \stepsto & ()_t\,||\, s_{t'}; H[t'\mapsto [(v, \C{FORK} H(t))]] & 
     \texttt{where}\; t'\not\in dom(H)\\
 (\push{v})_t;H & \stepsto & ()_t;H[t \mapsto (v,\C{PUSH})::H(t)] & \\
