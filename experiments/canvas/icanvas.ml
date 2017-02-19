@@ -265,6 +265,8 @@ end= struct
       (* BC_store.clone_force parent_m_br m_name >>= fun m_br -> *)
       (* But, we currently default to an SC mode. Master is global. *)
       let m_br = parent_m_br in
+      (* fork_version forking the master, when executed in the context
+       * of a branch is counter-intuitive. FixMe. *)
       BC_store.clone_force m_br (child_name^"_local") >>= fun t_br ->
       let new_st = {master = m_br; local  = t_br; 
                     name = child_name; next_id = 1} in

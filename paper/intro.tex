@@ -23,10 +23,75 @@ those aspects not directly related to coherence and consistency
 encapsulated within a library.  This not only simplifies program
 reasoning, but leads to significant expressivity gains since
 language-level types and abstractions are directly supported by the
-library.   Realizing this vision leads to a radically different
+library.  Realizing this vision leads to a radically different
 programming model, one which realizes a monadic functional version
 control system centered around data, rather than file coherence.  We
 have implemented an end-to-end instantiation of this idea in OCaml
 called DaLi and demonstrate how efficient distributed applications can
 be written and deployed without having to deal with \emph{any}
 system-centric features.
+
+Points:
+\begin{itemize}
+  \item Language is often considered the pivot of the thought process.
+  Unsurprisingly, programmers are conditioned to reason in terms of
+  the language-level abstractions. However, reality of underlying
+  systems often force programmers to think in terms of low-level
+  abstractions that are counter-intuitive from the language
+  standpoint. Even functional programmers are often exposed to this
+  rather unfortunate state of affairs.
+
+  \item Consider, for example, an OCaml programmer who wishes to
+  manage an ordered set of elements in a binary tree, while using a
+  hashtable to quickly obtain references into the tree. While the
+  programmer enjoys high-level abstractions and safety guarantees of
+  OCaml insofar as the program only accesses in-memory data, she has
+  to let go of this convenience if the application requires data
+  persistence. She has to now re-engineer her application around the
+  data model enforced by the underlying storage engine (e.g.,
+  relational data model, or key-value data model), complicating
+  programming, and potentially compormising the language safety
+  guarantees in the process. For instance, while OCaml guarantees the
+  safety of all references, references between tables in a database
+  are unsafe, and have been known to lead to bugs.
+
+  \item Add replication to persistence, and the problems grow
+  manifold. The impossibility of obtaining strong consistency
+  guarantees without compromising scalability/availability under
+  decentralized replication means that applications can now exhibit
+  anomalous behaviors that are often incomprehensible to the
+  programmer. The standard artifacts of replication made available to
+  the programmer, namely mutable key-value pairs, expose the underlying
+  system reality in its full ugliness. While the programmer may manage
+  to reason about the contents of a key-value cell with much effort,
+  the reasoningly unfortunately does not compose; each key-value pair
+  can be manipulated independently, which makes it almost impossible
+  to obtain guarantees over a collection of data items in the same
+  vein as a high-level data structure (e.g., a binary search tree).
+  CRDTs are an attempt to provide high-level semantics of replication
+  for certain useful data types, however CRDTs do not come with a
+  an associated replicated storage system and a programming framework,
+  and programmers are again faced with the task of bridging the gap
+  between the high-level semantics of the CRDT to the abstractions and
+  guarantees offered by the underlying storage system. Moreover,
+  standard data structures need significant re-engineering to be
+  considered CRDTs (e.g., functions need to return \emph{effects} all
+  of which need to commute), and programmers receive little or no tool
+  support in this process. Moreover, CRDTs famously do not compose (in
+  the sense that the invariants over the composition cannot be
+  preserved), requiring programmers to resort to extraneous
+  mechanisms with system-specific properties, such as transactions.
+
+  \item In this paper we describe a library called \name that adresses
+  the aforementioned problems. \name lets programmers obtain add
+  persistence and fully-decentralized replication to their
+  applications without ever having to leave the comforts of high-level
+  reasoning in OCaml. Thus, in keeping with the long tradition of
+  Functional Programming, programmers are \emph{completely} shielded
+  from the reality of the underlying system implementation. This
+  elevation from the low-level reasoning to the high-level reasoning
+  concretely manifests as reasoning in terms of \emph{mergeable} data
+  types instead of \emph{replicated} data types; replication being a
+  system-level concern.
+
+\end{itemize}

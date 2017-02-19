@@ -43,18 +43,14 @@ P & \coloneqq & E_t \ALT \bullet\,||\,p \ALT p\,||\,\bullet \\
 %
 \begin{smathpar}
 \begin{array}{lcll}
-(\run{v}{s},\_)_t;H & \stepsto & (s,v)_t;H[t\mapsto[(v,\C{INIT})]] & \\
-(\fork{s},v)_t;H & \stepsto & ((),v)_t\,||\,(s,v)_{t'};
-    H[t'\mapsto [(v',\C{FORK} H(t))] & \texttt{where}\; t'\not\in dom(H)\\
-(\pull,v)_t;H(t\mapsto (v',\_)::m) & \stepsto & (v',v')_t;H & \\
-% (\push{v_1}, v::b)_t;H[t\mapsto (v_2::m, v_0)] & \stepsto & 
-%     ((),v_1::v::b)_t;H'[t \mapsto (v'::v_2::m, v_0)] & \texttt{where}~
-%     v'\,=\,\C{merge}\,v\,v_1\,v_2 ~\texttt{and}~ \\
-%     & & & \forall (t'\in dom(H)).~ H'(t') = v'::H(t') \\
-(\push{v_1}, v)_t;H(t\mapsto (v_2,f)::m) & \stepsto & 
-    ((),v_1)_t;H[t \mapsto (v',\C{PUSH})::(v_2,f)::m] & \texttt{where}~
-    v'\,=\,\C{merge}\,v\,v_1\,v_2\\
+(\run{v}{s},\_)_t;H & \stepsto & (s,[(v,\C{FORK} [(v,\C{INIT})])])_t;H[t\mapsto[(v,\C{INIT})]] & \\
+(\fork{s},b)_t;H & \stepsto & ((),b)_t\,||\,
+                              (s,[(v,\C{FORK} m_{t'})])_{t'};
+    H[t'\mapsto m_{t'}] & \texttt{where}\; t'\not\in dom(H)\\
+    & & & ~\texttt{and}~ m_{t'}=[(v, \C{FORK} H(t))]\\
+(\push{v}, b)_t;H & \stepsto & ((),(v,\C{PUSH})::b)_t;H & \\
 % & & & v\,=\,\C{merge}\,v\,v_1\,v_2 ~\texttt{and}~ \\
+(\pull, \_)_t;H(t \mapsto (v,\_)::m) & \stepsto & (v, [(v,\C{FORK} H(t))])_t;H & \\
 \end{array}
 \end{smathpar}
 %
@@ -72,6 +68,21 @@ P & \coloneqq & E_t \ALT \bullet\,||\,p \ALT p\,||\,\bullet \\
 {
   (s,v_0)_t;H(t_1 \mapsto (v_1,f_1)::m_1)(t_2 \mapsto (v_2,f_2)::m_2) ~\stepsto~
   (s,v_0)_t;H[t_1 \mapsto (v,\C{MERGE} H(t_2))::(v_1,f_1)::m_1]
+}
+\end{array}
+\end{smathpar}
+%
+
+%
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  \C{world}(b) \succeq_{\circ} \C{world}(H,t_1)\spc 
+  v = \C{merge}(\C{lca}(H,t_1,t_2), v_1, v_2) \spc
+}
+{
+  (s,(v,\C{PUSH})::b)_t;H ~\stepsto~ (s,[(v',\C{FORK}\, m)])_t;H[t \mapsto m]
 }
 \end{array}
 \end{smathpar}
