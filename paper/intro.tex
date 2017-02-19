@@ -82,16 +82,67 @@ Points:
   preserved), requiring programmers to resort to extraneous
   mechanisms with system-specific properties, such as transactions.
 
-  \item In this paper we describe a library called \name that adresses
-  the aforementioned problems. \name lets programmers obtain add
+  \item In this paper we describe an OCaml library called \name that
+  adresses the aforementioned problems. \name lets programmers add
   persistence and fully-decentralized replication to their
   applications without ever having to leave the comforts of high-level
   reasoning in OCaml. Thus, in keeping with the long tradition of
   Functional Programming, programmers are \emph{completely} shielded
-  from the reality of the underlying system implementation. This
-  elevation from the low-level reasoning to the high-level reasoning
-  concretely manifests as reasoning in terms of \emph{mergeable} data
-  types instead of \emph{replicated} data types; replication being a
-  system-level concern.
+  from the complexities of the underlying system model. This elevation
+  from the low-level reasoning to the high-level reasoning concretely
+  manifests as reasoning in terms of \emph{mergeable} data types
+  instead of \emph{replicated} data types; replication being a
+  system-level concern. A mergeable data type library is a standard
+  OCaml data type library equipped with a \C{merge} function that
+  describes how to merge two concurrent versions of the data type that
+  originated from a single common ancestor. Thus, any OCaml data type
+  for which a meaningful merge function can be written is a mergeable
+  type. We give multiple examples of mergeable types useful in
+  practice, present a simple theory that guides programmers in writing
+  merge functions, and describe the tool support available to them in
+  this process. \name also comes with a novel programming model that
+  realizes a monadic functional version control system centered around
+  data, rather than file coherence. The \name monad lets programmers
+  write and compose concurrent computations around multiple versions
+  of a mergeable data type. The computation makes progress by forking
+  concurrent versions of the existing versions, creating later
+  versions of the existing versions along a \emph{branch}, or by
+  merging existing versions across the branches. However, as we shall
+  see, unconstrained branching may yield a branching structure that
+  becomes unmergeable, thus leading to \emph{stuck} states. An
+  important property of the \name library is that it suitably
+  constrains the branching structure to avoid stuck states without
+  introducing additional coordination that compromises the
+  decentralized nature of the computation. Futhermore, \name
+  profitably exploits the provenance information available via the
+  branching structure to make the application resilient to network
+  partitions. As a result, OCaml programmers get the benefits of
+  persistence and highly available replication, while they continue to
+  enjoy the comforts of high-level reasoning and the familiarity of
+  the standard library data types.
+
+  Our contributions are summarized below:
+  \begin{itemize}
+    \item We formally introduce the concept of a mergeable data type,
+    as an alternative to a replicated data type, to admit high-level
+    reasoning about replicated data in functional programs.
+
+    \item We describe the \name library that transparently adds
+    persistence and replication features to a mergeable type. \name
+    comes with a programming model that brings to bear the power and
+    flexibility of a version control system on administration of the
+    replicated data. \name however hides the complexity of version
+    control behind a monad, and exposes its functionality via a simple
+    API that lets programmers define and compose concurrent OCaml
+    computations around replicated data. 
+
+    \item We present a formalization of the \name programming model,
+    and prove results that guarantee eventual convergence of
+    concurrent versions, and progress (stuck-freeness) guarantees.
+
+    \item We describe an implementation of \name atop the Irmin store,
+    and describe multiple examples, and two case studies that
+    attest to the practical utility of \name.
+  \end{itemize}
 
 \end{itemize}
