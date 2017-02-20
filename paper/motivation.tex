@@ -29,21 +29,22 @@ programming model via a series of examples.
   \begin{ocaml}
     module Counter: sig
       type t
-      type eff = t -> t
+      type eff 
       val add: int -> t-> eff
       val mult: int -> t -> eff
+      val apply: eff -> t -> t
       val read: t -> int
     end = struct
       type t = int
-      type eff = t -> t
-      let add x v = fun v' -> v' + (abs x)
-      let mult x v = 
-        fun v' -> v' + v * (abs x - 1) 
+      type eff = Add of int
+      let add x v = Add (abs x)
+      let mult x v = Add (v * (abs x - 1))
+      let apply (Add x) v = x + v
       let read v = v
     end
   \end{ocaml}
 
-\caption{\C{Counter} library re-engineered for op-based replication}
+\caption{\C{Counter} library re-engineered for effect-based replication}
 \label{fig:counter-rdt}
 \end{subfigure}
 % \begin{minipage}{0.62\textwidth}
@@ -82,29 +83,41 @@ single machine, its state may also need to be replicated and
 persisted. Unfortunately, replication doesn't come for free, and
 existing techniques require significant re-engineering of the
 application and its libraries to support replication. A method often
-adopted~\cite{crdts,gotsman-popl16} is to re-define the operations to
-return \emph{effects} instead of values.  For instance, a \C{Counter}
-operation returns a function of type $\C{Counter.t} \rightarrow
-\C{Counter.t}$, which is then applied to the counter values at all
-replicas to realize its effect.  Fig.~\ref{fig:counter-rdt} shows the
+adopted~\cite{crdts, pldi15, gotsman-popl16} is to re-define the operations to
+return \emph{effects} instead of values.  An \emph{effect} is a tag that
+identifies the operation to be applied uniformly at all
+replicas to incorporate the effects of the original operaton. For
+instance, \C{Counter.add x v} operation returns \C{Add x} effect,
+which, when applied at a replica (see \C{apply}), adds \C{x} to the 
+local counter value.  Fig.~\ref{fig:counter-rdt} shows the
 \C{Counter} library with operations re-defined to returns effects.
 Such re-engineering has to be done carefully, lest an operation may
 may end up causing an unintended effect at a remote replica. For
-instance, while the effect of a \C{mult x v} operation may intuitively
-seem to be \C{fun v' -> (abs x) * v'}, it is incorrect for it affects
-different replicas differently, depending on the local counter value.
-Fig.~\ref{fig:counter-rdt} therefore defines the result of \C{mult x
-v} as an effect that increments the counter value by \C{v * (abs x -
-1)} uniformly at all replicas. Likewise, accidentally defining the
-effect of an \C{add x v} operation as \C{fun v' -> (abs x) + v}
-results in replacing the counter value at a remote replica with the
-one at origin replica, thereby losing updates at the remote replica.
-Thus, reasoning about the correctness of effects often involves
-appeals to system-specific artifacts, such as replicas, which don't
-normally manifest in the program.  While checking the effects for
+instance, one may incorrectly define \C{mult x v} operation as
+generating a \C{Mult x} effect, for it is easy to overlook the fact
+that \C{apply (Mult x)} affects different replicas differently
+depending on the counter value. Thus, reasoning about the correctness
+of effects often involves appeals to system-specific artifacts, such
+as replicas, which don't normally manifest in the program.  While
+checking the effects (or rather their application via \C{apply}) for
 commutativity may help catch some of these oversights, commutativity
-is a non-local property, and automatic verification is difficult in
-general. Besides the possibility of new bugs, re-engineering libraries
-to return effects has obvious software engineering problems in the
-sense that it breaks backwards compatibility with the existing code.
+is a non-local property, and automatically verifying it is difficult.
+Besides introducing the possibility of new bugs, re-engineering
+libraries to return effects has obvious software engineering problems
+in the sense that it breaks backwards compatibility with the existing
+code.
+
+Another downside with effect-generating replicated data type libraries
+is that they don't compose. For instance, let us say that an
+application wants to use two replicated counters, $c_1$ and $c_2$,
+bound by an invariant $c_2 \ge c_1$, which the application duly the
+invariant when updating $c_2$ and $c_1$. Nonetheless, it may still
+witness anamolous states that violate the invariant because updates to
+$c_1$ and $c_2$ are applied independently in any order. For example,
+if a replica increments both the counters by 1 each, the \C{read} at
+another replica, where $(c_1,c_2) = (2,2)$ may witness the increment
+to $c_1$, but not $c_2$, thus violating the invariant. The intention
+to atomically apply both the effects cannot be captured in the absence
+of external mechanisms to compose effects (such as effect-based
+transactions).  
 
