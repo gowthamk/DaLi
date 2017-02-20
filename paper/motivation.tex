@@ -1,0 +1,110 @@
+\section{Motivation}
+
+In this section, we motivate mergeable data types and \name
+programming model via a series of examples. 
+
+\subsection{Counter}
+
+\begin{figure}
+
+\begin{subfigure}[b]{0.4\textwidth}
+  \begin{ocaml}
+    module Counter: sig
+      type t
+      val add: int -> t -> t
+      val mult: int -> t -> t
+      val read: t -> int
+    end = struct
+      type t = int
+      let add x v = v + (abs x)
+      let mult x v = v * (abs x)
+      let read v = v
+    end
+  \end{ocaml}
+
+\caption{\C{Counter} library in OCaml}
+\label{fig:counter-adt}
+\end{subfigure}
+\begin{subfigure}[b]{0.56\textwidth}
+  \begin{ocaml}
+    module Counter: sig
+      type t
+      type eff = t -> t
+      val add: int -> t-> eff
+      val mult: int -> t -> eff
+      val read: t -> int
+    end = struct
+      type t = int
+      type eff = t -> t
+      let add x v = fun v' -> v' + (abs x)
+      let mult x v = 
+        fun v' -> v' + v * (abs x - 1) 
+      let read v = v
+    end
+  \end{ocaml}
+
+\caption{\C{Counter} library re-engineered for op-based replication}
+\label{fig:counter-rdt}
+\end{subfigure}
+% \begin{minipage}{0.62\textwidth}
+%   \begin{ocaml}
+%     module Counter = struct
+%       include Counter
+%       type t = counter [@@deriving persistence]
+%       let merge old v1 v2 = old + (v1 - old) 
+%                                 + (v2 - old)
+%     end
+%   \end{ocaml}
+% \end{minipage}
+
+% \caption{\C{Counter} library in OCaml equipped with a \C{merge}
+% function. The \C{deriving} syntax~\cite{ppx-deriving} is processed by
+% \name's meta-programming library to automatically derive a persistent
+% variant of the \C{Counter}}
+
+% \label{fig:counter}
+\end{figure}
+
+We will start with a simple example of a counter that nonetheless
+demonstrates the benefits of our approach. An OCaml implementation of
+the \C{Counter} library is shown in Fig.~\ref{fig:counter-adt}.
+\C{Counter} supports two (update) operations - \C{add} and \C{mult} -
+that let a non-negative integer value to be added to the counter, and
+multiply the counter, respectively. Observe that the library is
+written in an idiomatic style in OCaml; any OCaml programmer faced
+with the task of implementing the counting functionality would
+presumably write the same.  
+
+The counter implementation of Fig.~\ref{fig:counter-adt} serves the
+application well as long as it is used in-memory on a single machine.
+However, as the application grows in complexity and scales beyond a
+single machine, its state may also need to be replicated and
+persisted. Unfortunately, replication doesn't come for free, and
+existing techniques require significant re-engineering of the
+application and its libraries to support replication. A method often
+adopted~\cite{crdts,gotsman-popl16} is to re-define the operations to
+return \emph{effects} instead of values.  For instance, a \C{Counter}
+operation returns a function of type $\C{Counter.t} \rightarrow
+\C{Counter.t}$, which is then applied to the counter values at all
+replicas to realize its effect.  Fig.~\ref{fig:counter-rdt} shows the
+\C{Counter} library with operations re-defined to returns effects.
+Such re-engineering has to be done carefully, lest an operation may
+may end up causing an unintended effect at a remote replica. For
+instance, while the effect of a \C{mult x v} operation may intuitively
+seem to be \C{fun v' -> (abs x) * v'}, it is incorrect for it affects
+different replicas differently, depending on the local counter value.
+Fig.~\ref{fig:counter-rdt} therefore defines the result of \C{mult x
+v} as an effect that increments the counter value by \C{v * (abs x -
+1)} uniformly at all replicas. Likewise, accidentally defining the
+effect of an \C{add x v} operation as \C{fun v' -> (abs x) + v}
+results in replacing the counter value at a remote replica with the
+one at origin replica, thereby losing updates at the remote replica.
+Thus, reasoning about the correctness of effects often involves
+appeals to system-specific artifacts, such as replicas, which don't
+normally manifest in the program.  While checking the effects for
+commutativity may help catch some of these oversights, commutativity
+is a non-local property, and automatic verification is difficult in
+general. Besides the possibility of new bugs, re-engineering libraries
+to return effects has obvious software engineering problems in the
+sense that it breaks backwards compatibility with the existing code.
+
