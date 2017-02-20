@@ -140,6 +140,18 @@ and the possibility of new bugs. Thus, adding persistence to
 applications while preserving high-level safety gurantees offered by
 the language abstraction is a non-trivial problem.
 
-
+\name lets programmers add replication and persistence to their
+applications without having to re-engineer their abstractions or
+reason about lower-level artifacts. Here is how you write a mergeable
+counter in \name:
+\begin{figure}[!h]
+  \begin{ocaml}
+    module Counter = struct
+      include Counter
+      type mergeable_t = t [@@deriving persistence]
+      let merge old v1 v2 = old + (v1 - old) + (v2 - old)
+    end
+  \end{ocaml}
+\end{figure}
 
 
