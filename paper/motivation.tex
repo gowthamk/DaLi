@@ -110,8 +110,8 @@ code.
 Another downside with effect-generating replicated data type libraries
 is that they don't compose. For instance, let us say that an
 application wants to use two replicated counters, $c_1$ and $c_2$,
-bound by an invariant $c_2 \ge c_1$, which the application duly the
-invariant when updating $c_2$ and $c_1$. Nonetheless, it may still
+bound by an invariant $c_2 \ge c_1$, which the application duly
+enforces when updating $c_2$ and $c_1$. Nonetheless, it may still
 witness anamolous states that violate the invariant because updates to
 $c_1$ and $c_2$ are applied independently in any order. For example,
 if a replica increments both the counters by 1 each, the \C{read} at
@@ -119,5 +119,27 @@ another replica, where $(c_1,c_2) = (2,2)$ may witness the increment
 to $c_1$, but not $c_2$, thus violating the invariant. The intention
 to atomically apply both the effects cannot be captured in the absence
 of external mechanisms to compose effects (such as effect-based
-transactions).  
+transactions~\cite{pldi15}).  
+
+Persistence adds another dimension to the problem. Functional data
+structures are often large in-memory linked structures that admit
+functional updates by creating newer versions that share most of their
+structure with previous versions. Sharing is the key to efficiency,
+without which every functional update takes time that is at least
+linear in the size of the data structure. Unfortunately, the
+straightforward way to persist a data structure on disk in a
+machine-agnostic format (e.g., JSON) requires serialization, which is
+linear in the size of the data structure. An alternative is to
+maintain a separate on-disk copy of the data and administer it via a
+database system. The downside is that the programmer is now required
+to reason in terms of a lower-level abstraction (e.g., a relational
+data model) in order to maintain coherence between in-memory and
+on-disk representations. Safety guarantees over the in-memory data do
+not carry over to the disk, which introduces additional complications
+and the possibility of new bugs. Thus, adding persistence to
+applications while preserving high-level safety gurantees offered by
+the language abstraction is a non-trivial problem.
+
+
+
 
