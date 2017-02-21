@@ -36,14 +36,14 @@
   end
   \end{ocaml}
 
-\label{fig:canvas-sig}
 \caption{\drawsome: a sample \name application}
+\label{fig:canvas-sig}
 \end{figure}
 
 In this section, we describe the \name programming model through the
 example of a collaborative drawing application we call \drawsome.
 
-Fig.~\ref{canvas-sig} shows the signature of the \drawsome
+Fig.~\ref{fig:canvas-sig} shows the signature of the \drawsome
 application. \drawsome represents a free-hand drawing canvas as a tree
 of quadrants, where each quadrant is simply a leaf node unless it has
 pixels of different colors. Quadrants are expanded into a tree
@@ -245,8 +245,8 @@ function for a data type given its invariants. Like \C{Canvas.merge},
 merge functions often need to compare multiple versions of a data type
 for structural equality, which, when performed naively, incurs cost
 linear in the size of versions. The representation of a versioned data
-type in \name is optimized for performing comparisons such that
-structural equality can be determined in constant time. Such
+type in \name is optimized for performing comparisons that allows
+structural equality to be determined in constant time. Such
 engineering details, which contribute to the practicality of our
 programming model are also discussed in subsequent sections.
 
