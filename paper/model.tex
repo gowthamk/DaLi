@@ -10,7 +10,7 @@
     val get_current_version: unit -> 'a 'a t
     val with_init_version_do: 'a -> 'a 'b t -> 'b
     val fork_version : 'a 'b t -> 'a unit t
-    val sync_next_version: unit -> ?v:'a -> 'a 'a t
+    val sync ()_next_version: unit -> ?v:'a -> 'a 'a t
   end
   \end{ocaml}
 
@@ -54,6 +54,15 @@ creating a new canvas, setting the pixel at a specified coordinate,
 and returning the pixel at a given coordinate. The \C{merge} function
 and \C{deriving versioned} directive are explained below.
 
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{Figures/canvas-merging}
+
+\caption{Merging concurrent versions (\C{v1} and \C{v2} ) of a drawing
+canvas. \C{lca} is their common ancestor.}
+\label{fig:canvas-merging}
+\end{figure}
+
 \drawsome lets multiple users collaborate on a canvas that is
 conceptually shared among all the collaborators. Under a shared-memory
 abstraction, there would be a single copy of the canvas that is
@@ -80,15 +89,16 @@ concurrent versions (\C{v1} and \C{v2}), and their least common
 ancestor (\C{lca}) - the version from which the two concurrent
 versions evolved independently. The merge function can make use of the
 pixel values of the common ancestor to merge the pixel values on both
-the canvases. For instance, if \C{v1} colors the pixel at $(0,0)$ red,
-and \C{v2} colors it green, and the color of the pixel in \C{lca} is
-red, then it means that only \C{v2} modified the color. Hence the
+the canvases. For instance, if the color of a pixel in \C{v1} is white,
+and in \C{v2} it is green, and its color in \C{lca} is
+white, then it means that only \C{v2} modified the color. Hence the
 pixel is colored green in the merged canvas. On the other hand, if the
-pixel is colored white in the original canvas, then it means that both
+pixel is red in \C{v1}, then it means that both
 \C{v1} and \C{v2} have modified the color. In such case, an appopriate
-color mixing algorithm can be used to determine the color of pixel.
+color-mixing algorithm can be used to determine the color of pixel.
 For instance, the pixel can be colored yellow - an additive
-combination of red and green.
+combination of red and green. The logic is illustrated in
+Fig.~\ref{fig:canvas-merging}.
 
 The \name programming model lets programmers define and compose
 concurrent computations around versioned data structures.
@@ -103,21 +113,77 @@ monad's \C{get}; it returns the versioned state encapsulated by the
 monad. \C{with\_init\_version\_do} runs a monadic computation against
 a given initial version and returns the result. \C{fork\_version}
 returns a computation that forks a new concurrent version from the
-current version, and runs the given monadic computation asynchronously
-against the forked version.  The semantics of \C{sync\_next\_version}
-(simply called \C{sync}) is somewhat involved: the function accepts a
+current version, and runs the given monadic computation async ()hronously
+against the forked version.  The semantics of \C{sync ()\_next\_version}
+(simply called \C{sync ()}) is somewhat involved: the function accepts a
 \emph{proposal} for the next version of the state, where \C{next} is
 defined w.r.t the current version, and returns (via a monad) the
 actual next version, which becomes the current version for rest of the
 computation.  The next version is created by merging the proposal with
 a subset of concurrent versions that became available since the last
-merge or fork. Thus, \C{sync} effectively lets a computation sync with
-the concurrent computations and obtain their latest updates.
+merge or fork. Thus, \C{sync ()} effectively lets a computation sync
+() with a subset of concurrent computations and obtain their latest
+updates.
 
 \begin{figure}
-
-
-
-\caption{\drawsome: a sample collaborative }
-\label{fig:dali-canvas}
+\centering
+\begin{tabular}{l||l||l}
+\begin{ocaml}
+let alice_f : C.t unit t = 
+  get () >>= fun c0 -> 
+  fork bob_f >>= fun () ->
+  let c0' = C.draw_line c0 
+    {x=10;y=20}
+    {x=40;y=20} in
+  sync () ~v:c0' >>= 
+  fun c1 ->
+  let c1' = C.draw_line c1 
+    {x=10;y=40} 
+    {x=40;y=40} in
+  sync () ~v:c1' >>= 
+  fun c2 -> return ()
+\end{ocaml}
+&
+\begin{ocaml}
+let bob_f : C.t unit t = 
+  get () >>= fun c0 -> 
+  fork cheryl_f >>= 
+  fun () ->
+  let c0' = C.draw_line c0 
+    {x=10;y=20} 
+    {x=10;y=40} in
+  sync () ~v:c0' >>= 
+  fun c1 -> sync () >>= 
+  fun c2 -> return ()
+\end{ocaml}
+&
+\begin{ocaml}
+let cheryl_f : C.t unit t = 
+  get () >>= fun c0 -> 
+  let c0' = C.draw_line c0 
+    {x=40;y=20} 
+    {x=40;y=20} in
+  sync () ~v:c0' >>= 
+  fun c1 -> sync () >>= 
+  fun c2 -> return ()
+\end{ocaml}
+\\
+\end{tabular}
+\caption{\drawsome: A collaborative drawing session between Alice,
+Bob, and Cheryl}
+\label{fig:canvas-sessions-code}
 \end{figure}
+
+Fig.~\ref{fig:canvas-sessions} shows a collaborative editing session
+between Alice, Bob and Cheryl.
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.6]{Figures/canvas-sessions}
+
+\caption{\drawsome: Collaborative drawing session visualized}
+\label{fig:canvas-sessions}
+\end{figure}
+
+
+
