@@ -1,0 +1,123 @@
+\section{Programming Model}
+
+\begin{figure}
+
+  \begin{ocaml}
+  module type DALI = sig
+    type 'a 'b t
+    val return : 'b -> 'a 'b t
+    val bind : 'a 'b t -> ('b -> 'a 'c t) -> 'a 'c t
+    val get_current_version: unit -> 'a 'a t
+    val with_init_version_do: 'a -> 'a 'b t -> 'b
+    val fork_version : 'a 'b t -> 'a unit t
+    val sync_next_version: unit -> ?v:'a -> 'a 'a t
+  end
+  \end{ocaml}
+
+\label{fig:dali-monad}
+\caption{Signature of the \name monad}
+\end{figure}
+
+\begin{figure}
+
+  \begin{ocaml}
+  module type CANVAS = sig
+    type pixel = {r:char; g:char; b:char}
+    type tree = 
+      | N of pixel
+      | B of {tl: tree; tr: tree; bl: tree; br: tree} 
+    type t = {max_x:int; max_y:int; canvas:tree} [@@deriving versioned]
+    type loc = {x:int; y:int}
+  
+    val new_canvas: int -> int -> t
+    val set_px: t -> loc -> pixel -> t
+    val get_px: t -> loc -> pixel
+    val merge: (* lca *)t -> (* v1 *)t -> (* v2 *)t -> t
+  end
+  \end{ocaml}
+
+\label{fig:canvas-sig}
+\caption{\drawsome: a sample \name application}
+\end{figure}
+
+In this section, we describe the \name programming model through the
+example of a collaborative drawing application we call \drawsome.
+
+Fig.~\ref{canvas-sig} shows the signature of the \drawsome
+application. \drawsome represents a free-hand drawing canvas as a tree
+of quadrants, where each quadrant is simply a leaf node unless it has
+pixels of different colors. Quadrants are expanded into a tree
+structures as an when pixels are colored (the color scheme used is
+rgb). The representation is thus optimized for sparse canvases, such
+as whiteboards. The application supports three simple operations:
+creating a new canvas, setting the pixel at a specified coordinate,
+and returning the pixel at a given coordinate. The \C{merge} function
+and \C{deriving versioned} directive are explained below.
+
+\drawsome lets multiple users collaborate on a canvas that is
+conceptually shared among all the collaborators. Under a shared-memory
+abstraction, there would be a single copy of the canvas that is
+updated concurrently by multiple clients such that from the
+perspective of any single client, the canvas would change without any
+explicit intervention. \name ascribes functional semantics to sharing
+by letting each client work on its own version of the state (a data
+structure), and later merging the concurrent versions on-demand. Thus,
+the primary artifact of the \name programming model is a versioned
+data structure. The library operates on a representation of versioned
+data structures optimized for persistence on disk
+(Sec.~\ref{sec:persistence}). \name's meta-programming component
+automatically synthesizes this representation, along with the
+functions that translate between representations, for the data type
+definitions marked with the ppx~\cite{ppx} directive \C{deriving
+versioned}. Concretely, for the \C{Canvas} module, \name synthesizes
+a \C{Canvas.Versioned} module with a type \C{t}, and functions
+\C{of\_canvas} and \C{to\_canvas} of types \C{Canvas.t $\rightarrow$
+t} and \C{t $\rightarrow$ Canvas.t}, respectively.
+
+\name requires a three-way \C{merge} function to merge the concurrent
+versions of a drawing canvas. The three arguments include two
+concurrent versions (\C{v1} and \C{v2}), and their least common
+ancestor (\C{lca}) - the version from which the two concurrent
+versions evolved independently. The merge function can make use of the
+pixel values of the common ancestor to merge the pixel values on both
+the canvases. For instance, if \C{v1} colors the pixel at $(0,0)$ red,
+and \C{v2} colors it green, and the color of the pixel in \C{lca} is
+red, then it means that only \C{v2} modified the color. Hence the
+pixel is colored green in the merged canvas. On the other hand, if the
+pixel is colored white in the original canvas, then it means that both
+\C{v1} and \C{v2} have modified the color. In such case, an appopriate
+color mixing algorithm can be used to determine the color of pixel.
+For instance, the pixel can be colored yellow - an additive
+combination of red and green.
+
+The \name programming model lets programmers define and compose
+concurrent computations around versioned data structures.
+Fig.~\ref{fig:dali-monad} shows the signature of the \name module that
+implements the programming model along the lines of the well-known
+\C{State} monad~\cite{wadler-monad}. The monad encapsulates a
+versioned functional state (\C{'a}) and the type \C{'a 'b t}
+represents a monadic computation that returns a \C{'b} result.
+Functions \C{return} and \C{bind} have their usual monadic
+interpretation. \C{get\_current\_version} is like the \C{State}
+monad's \C{get}; it returns the versioned state encapsulated by the
+monad. \C{with\_init\_version\_do} runs a monadic computation against
+a given initial version and returns the result. \C{fork\_version}
+returns a computation that forks a new concurrent version from the
+current version, and runs the given monadic computation asynchronously
+against the forked version.  The semantics of \C{sync\_next\_version}
+(simply called \C{sync}) is somewhat involved: the function accepts a
+\emph{proposal} for the next version of the state, where \C{next} is
+defined w.r.t the current version, and returns (via a monad) the
+actual next version, which becomes the current version for rest of the
+computation.  The next version is created by merging the proposal with
+a subset of concurrent versions that became available since the last
+merge or fork. Thus, \C{sync} effectively lets a computation sync with
+the concurrent computations and obtain their latest updates.
+
+\begin{figure}
+
+
+
+\caption{\drawsome: a sample collaborative }
+\label{fig:dali-canvas}
+\end{figure}
