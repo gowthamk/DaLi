@@ -1,148 +1,256 @@
 \section{Introduction}
 
-Distributed programs are challenging to write because they must juggle
-two distinct mechanisms.  The first deals with application logic - how
-do we define computation to be robust in the presence of disconnected
-non-coherent communication among distributed threads of control?  The
-second deals with system concerns - how do define notions of
-atomicity, distribution, persistence, and replication?  Because of the
-subtleties in dealing with the latter, especially when high
-availability (low response latency) is desired, systems typically
-separate these mechanisms into separate tools or services (e.g., CRDTs
-have a well-defined semantics in an eventually consistent system that
-may experience network partitions, while database and related storage
-systems provide support for atomic transactions, persistence,
-replication.  Unfortunately, because these different mechanisms have
-vastly different semantics and goals, program structure becomes
-complicated and muddled.  More importantly, it becomes problematic to
-relate properties relevant to applications to the guarantees provided
-by these lower-level services.  In this paper, we propose a radically
-different vision of a distributed application that is predicated on
-defining both mechanisms within the same language framework, with
-those aspects not directly related to coherence and consistency
-encapsulated within a library.  This not only simplifies program
-reasoning, but leads to significant expressivity gains since
-language-level types and abstractions are directly supported by the
-library.  Realizing this vision leads to a radically different
-programming model, one which realizes a monadic functional version
-control system centered around data, rather than file coherence.  We
-have implemented an end-to-end instantiation of this idea in OCaml
-called DaLi and demonstrate how efficient distributed applications can
-be written and deployed without having to deal with \emph{any}
-system-centric features.
+Real-world distributed programs are challenging to write and maintain
+because they inevitably juggle and conflate two distinct mechanisms.
+The first concerns the expression of application logic - how do we
+define computations that are robust in the presence of distributed
+communication among concurrently executing threads of control?  The
+second deals with system concerns - how do we express notions of
+visibility, replication, and consistency when the nodes participating
+in such computations may be geographically distributed and the
+networks that connect them unreliable?  To simplify reasoning in such
+complicated environments, models often make strong assumptions on the
+guarantees provided by an implementation (such as
+serializablity~\cite{...} or strong consistency~\cite{...}) that may
+inadvertently mask important albeit unpleasant realities related to
+network partitions~\cite{...}, or which may ignore important system
+architectural features that assume replicated program state~\cite{...}
+to provide high availability and fault tolerance.  On the other hand,
+when these properties are explicitly exposed to the programmer, e.g.,
+by requiring that applications be written in terms of specialized
+distributed data structures~\cite{...} or control
+primitives~\cite{...}, simplicity, composability, and
+ease-of-reasoning suffers.
 
-Points:
+To illustrate how these kinds of problems manifest in practice,
+consider how we might write a simple counter library (see
+Fig.~\ref{fig:counter-adt}).  A \C{Counter} supports two (update)
+operations - \C{add} and \C{mult} - that lets a non-negative integer
+value be added or multiplied to the counter, resp.  Observe that the
+library is written in an idiomatic style in OCaml, with no special
+reasoning principles needed to realize desired functionality.  As long
+as applications use the library on a single machine, this
+implementation suffices well.  If the library is used in the context
+of a more sophisticated application, say one whose computation is
+distributed among a collection of machines, its state may need to be
+replicated.  Unfortunately, replication doesn't come for free.  Global
+synchronous coordination among all nodes is problematic in distributed
+systems.  Thus, applying an \C{Add} operation on one node may not be
+instanteously witnessed on another, which may in turn be
+simultaneously attempting to perform its own \C{Add} or \C{Mult}
+action.  While synchronizing the activities of all nodes to ensure at
+most one such operation is performed at a time is impractical,
+designating a single node to hold the counter state eschewing
+replicating altogether (as in a client-server configuration), is also
+an undesirable solution, given its sensitivity to network partitions
+and server failures.  But, simply replicating counter state among
+nodes, without having any coordination protocol, is an equally
+infeasible approach.
+
+A method often adopted~\cite{crdts, pldi15, gotsman-popl16} to address
+this tension is to re-define a datatype's operations to return
+\emph{effects} instead of values.  An \emph{effect} is a tag that
+identifies the operation to be applied uniformly at all replicas to
+incorporate the effects of the original
+operaton. Fig.~\ref{fig:counter-rdt} shows the \C{Counter} library
+with operations re-defined to returns effects.  Observe that the
+\C{Counter.add x v} operation now returns an \C{Add x} effect, which,
+when applied at a replica (see \C{apply} in the figure), adds \C{x} to
+the local counter value.  Assuming effects are commutative, they can
+be processed asynchronously using a log local to each replica.  This
+implementation produces an eventually consistent global state in which
+all replicas will eventually contain the same counter value.  While
+effects provide a low-level operational basis for handling replicated
+state, the \emph{ad hoc} nature of the solution confounds desirable
+high-level reasoning principles.  Indeed, the semantic gap between the
+two versions of the counter, one cognizant of replication and the
+other not, breaks backward compatibility.  More significantly, its
+non-trivial construction must be developed in different guises for
+every distributed data structure used by the application.
+\begin{figure}
+\begin{subfigure}[b]{0.4\textwidth}
+  \begin{ocaml}
+    module Counter: sig
+      type t
+      val add: int -> t -> t
+      val mult: int -> t -> t
+      val read: t -> int
+    end = struct
+      type t = int
+      let add x v = v + (abs x)
+      let mult x v = v * (abs x)
+      let read v = v
+    end
+  \end{ocaml}
+\caption{\C{Counter} library in OCaml}
+\label{fig:counter-adt}
+\end{subfigure}
+\begin{subfigure}[b]{0.56\textwidth}
+  \begin{ocaml}
+    module Counter: sig
+      type t
+      type eff 
+      val add: int -> t-> eff
+      val mult: int -> t -> eff
+      val apply: eff -> t -> t
+      val read: t -> int
+    end = struct
+      type t = int
+      type eff = Add of int
+      let add x v = Add (abs x)
+      let mult x v = Add (v * (abs x - 1))
+      let apply (Add x) v = x + v
+      let read v = v
+    end
+  \end{ocaml}
+\caption{\C{Counter} library re-engineered for effect-based replication}
+\label{fig:counter-rdt}
+\end{subfigure}
+\end{figure}
+Lack of composability is another important downside of this approach.
+Consider an application that uses two replicated counters, $c_1$ and
+$c_2$, bound by the invariant $c_2 \ge c_1$, duly enforced by the
+application when updating $c_2$ or $c_1$.  An execution may
+nonetheless witness anamolous states that violate the invariant
+because updates to $c_1$ and $c_2$ are applied independently in any
+order on any replica.  For example, if a replica increments both
+counters, a \C{read} operation performed at another replica may
+witness the increment to $c_1$, but not $c_2$, thus violating the
+invariant. The intention to atomically apply both effects cannot be
+captured in the absence of external mechanisms to compose effects
+(such as effect-based transactions~\cite{pldi15}).
+
+On the other hand, a functional programmer is likely to approach the
+problems very differently.  Rather than thinking about a low-level
+operational variant of distributed state given in terms of explicit
+effects as described above, a declarative interpretation of a
+decentralized computation could be naturally described in terms of a
+version tree whose root contains the initial counter value, and whose
+branches represent different versions maintained by different nodes,
+with the state produced by a counter's operations on a node recorded
+along the node's local branch.  Now, a globally consistent view of a
+counter can be explained simply in terms of \emph{merge} operations of
+different branch tips.  Treating replication as merging yields a
+counter implementation that bears strong similarity to the original
+sequential one:
+  \begin{ocaml}
+    module Counter = struct
+      include Counter
+      type mergeable_t = t [@@deriving persistence]
+      let merge lca v1 v2 = lca + (v1 - lca) + (v2 - lca)
+    end
+  \end{ocaml}
+The role of \C{lca} (least common ancestor) here captures salient
+history - the state resulting from the merge of two versions derived
+from the same ancestor state should not unwittingly duplicate the
+contributions of the ancestor.  This interpretation of a replicated
+datatype is thus given in terms of multi-versions of a program state
+impicitly associated with the different nodes that comprise a
+distributed application and a logical notion of a \emph{master}
+representing some consistent, but not necessarily current, view of
+global state.
+\begin{figure}
+  \begin{center}
+    \includegraphics[scale=0.35]{Figures/dali-counter}
+  \end{center}
+  \caption{\small A multi-version counter can be expressed as a
+    sequence of versions managed by logically-distributed concurrently
+    executing threads.  Local versions produced by these threads
+    periodically merge their state with one another.  In the figure,
+    when the local version of Node 3, labeled 20, merges with the
+    local version of Node 1, whose counter state is 15 at the time, a
+    new counter value is produced.  This value takes into account the
+    previous merged state (10) from which the two versions were
+    derived to yield a new merged state of 25.  Observe that there is
+    no explicit synchronization or coordination among versions.  In
+    the figure, red circles represent state produced through merging,
+    and blue circles represent local counter state produced by
+    applying counter operations on a node-local version.  }
+\end{figure}
+
+The \name programming model realizes a monadic functional version
+control system centered around data, rather than file coherence.  The
+\name monad lets programmers write and compose concurrent computations
+around multiple (implicit) versions of a mergeable datatype.  A
+computation makes progress by forking concurrent versions of existing
+versions, creating later versions along a \emph{branch}, or by merging
+branch tips.  An important soundness property of the model is that
+instances of a replicated datatype whose merge operation is
+commutative with respect to its local version arguments is guaranteed
+to eventually converge to the same value on all replicas.  As a
+result, OCaml programmers get the benefits of highly available
+(low-latency) distributed computation, while continuing to enjoy the
+comforts of high-level reasoning and familiarity of standard library
+datatypes.  Notably, while \name's programming model makes no explitic
+reference to any specific operational manifestation of a distributed
+system (e.g., programmers do not need to worry about replicas and
+their management), it can be nonetheless efficiently realized on
+existing geo-replicated distributed systems.
+
+Our contributions are summarized below:
+
 \begin{itemize}
-  \item Language is often considered the pivot of the thought process.
-  Unsurprisingly, programmers are conditioned to reason in terms of
-  the language-level abstractions. However, reality of underlying
-  systems often force programmers to think in terms of low-level
-  abstractions that are counter-intuitive from the language
-  standpoint. Even functional programmers are often exposed to this
-  rather unfortunate state of affairs.
-
-  \item Consider, for example, an OCaml programmer who wishes to
-  manage an ordered set of elements in a binary tree, while using a
-  hashtable to quickly obtain references into the tree. While the
-  programmer enjoys high-level abstractions and safety guarantees of
-  OCaml insofar as the program only accesses in-memory data, she has
-  to let go of this convenience if the application requires data
-  persistence. She has to now re-engineer her application around the
-  data model enforced by the underlying storage engine (e.g.,
-  relational data model, or key-value data model), complicating
-  programming, and potentially compormising the language safety
-  guarantees in the process. For instance, while OCaml guarantees the
-  safety of all references, references between tables in a database
-  are unsafe, and have been known to lead to bugs.
-
-  \item Add replication to persistence, and the problems grow
-  manifold. The impossibility of obtaining strong consistency
-  guarantees without compromising scalability/availability under
-  decentralized replication means that applications can now exhibit
-  anomalous behaviors that are often incomprehensible to the
-  programmer. The standard artifacts of replication made available to
-  the programmer, namely mutable key-value pairs, expose the underlying
-  system reality in its full ugliness. While the programmer may manage
-  to reason about the contents of a key-value cell with much effort,
-  the reasoningly unfortunately does not compose; each key-value pair
-  can be manipulated independently, which makes it almost impossible
-  to obtain guarantees over a collection of data items in the same
-  vein as a high-level data structure (e.g., a binary search tree).
-  CRDTs are an attempt to provide high-level semantics of replication
-  for certain useful data types, however CRDTs do not come with a
-  an associated replicated storage system and a programming framework,
-  and programmers are again faced with the task of bridging the gap
-  between the high-level semantics of the CRDT to the abstractions and
-  guarantees offered by the underlying storage system. Moreover,
-  standard data structures need significant re-engineering to be
-  considered CRDTs (e.g., functions need to return \emph{effects} all
-  of which need to commute), and programmers receive little or no tool
-  support in this process. Moreover, CRDTs famously do not compose (in
-  the sense that the invariants over the composition cannot be
-  preserved), requiring programmers to resort to extraneous
-  mechanisms with system-specific properties, such as transactions.
-
-  \item In this paper we describe an OCaml library called \name that
-  adresses the aforementioned problems. \name lets programmers add
-  persistence and fully-decentralized replication to their
-  applications without ever having to leave the comforts of high-level
-  reasoning in OCaml. Thus, in keeping with the long tradition of
-  Functional Programming, programmers are \emph{completely} shielded
-  from the complexities of the underlying system model. This elevation
-  from the low-level reasoning to the high-level reasoning concretely
-  manifests as reasoning in terms of \emph{mergeable} data types
-  instead of \emph{replicated} data types; replication being a
-  system-level concern. A mergeable data type library is a standard
-  OCaml data type library equipped with a \C{merge} function that
-  describes how to merge two concurrent versions of the data type that
-  originated from a single common ancestor. Thus, any OCaml data type
-  for which a meaningful merge function can be written is a mergeable
-  type. We give multiple examples of mergeable types useful in
-  practice, present a simple theory that guides programmers in writing
-  merge functions, and describe the tool support available to them in
-  this process. \name also comes with a novel programming model that
-  realizes a monadic functional version control system centered around
-  data, rather than file coherence. The \name monad lets programmers
-  write and compose concurrent computations around multiple versions
-  of a mergeable data type. The computation makes progress by forking
-  concurrent versions of the existing versions, creating later
-  versions of the existing versions along a \emph{branch}, or by
-  merging existing versions across the branches. However, as we shall
-  see, unconstrained branching may yield a branching structure that
-  becomes unmergeable, thus leading to \emph{stuck} states. An
-  important property of the \name library is that it suitably
-  constrains the branching structure to avoid stuck states without
-  introducing additional coordination that compromises the
-  decentralized nature of the computation. Futhermore, \name
-  profitably exploits the provenance information available via the
-  branching structure to make the application resilient to network
-  partitions. As a result, OCaml programmers get the benefits of
-  persistence and highly available replication, while they continue to
-  enjoy the comforts of high-level reasoning and the familiarity of
-  the standard library data types.
-
-  Our contributions are summarized below:
-  \begin{itemize}
-    \item We formally introduce the concept of a mergeable data type,
-    as an alternative to a replicated data type, to admit high-level
-    reasoning about replicated data in functional programs.
+    \item We formally introduce the concept of a \emph{mergeable} datatype
+      to admit high-level declarative reasoning about distributed
+      computation and replicated state in functional programs.
 
     \item We describe the \name library that transparently adds
-    persistence and replication features to a mergeable type. \name
-    comes with a programming model that brings to bear the power and
-    flexibility of a version control system on administration of the
-    replicated data. \name however hides the complexity of version
-    control behind a monad, and exposes its functionality via a simple
-    API that lets programmers define and compose concurrent OCaml
-    computations around replicated data. 
+      persistence and replication features to a mergeable type. \name
+      comes with a programming model that brings to bear the power and
+      flexibility of a version control system to the administration of
+      replicated data. \name hides the complexity of version control
+      behind a monad, and exposes its functionality via a simple API
+      that lets programmers define and compose concurrent OCaml
+      computations around such data.  Issues related to replication
+      only manifest implicitly in the definition of a merge operation
+      that defines coherence among different instances of replicated
+      state.
 
     \item We present a formalization of the \name programming model,
-    and prove results that guarantee eventual convergence of
-    concurrent versions, and progress (stuck-freeness) guarantees.
+      and establish the comditions under which eventual convergence of
+      concurrent version state can be guaranteed.
 
-    \item We describe an implementation of \name atop the Irmin store,
-    and describe multiple examples, and two case studies that
-    attest to the practical utility of \name.
-  \end{itemize}
-
+    \item We describe an implementation of \name atop the Irmin
+      persistent store~\cite{...}, a content-addressable storage
+      library for OCaml, along with case studies and experimental
+      results to its practical utility.
 \end{itemize}
+
+
+
+%% Persistence adds yet another dimension to the problem. Functional data
+%% structures are often large in-memory linked structures that admit
+%% functional updates by creating newer versions that share most of their
+%% structure with previous versions. Sharing is the key to efficiency,
+%% without which every functional update takes time that is at least
+%% linear in the size of the data structure. Unfortunately, the
+%% straightforward way to persist a data structure on disk in a
+%% machine-agnostic format (e.g., JSON) requires serialization, which is
+%% linear in the size of the data structure. An alternative is to
+%% maintain a separate on-disk copy of the data and administer it via a
+%% database system. The downside is that the programmer is now required
+%% to reason in terms of a lower-level abstraction (e.g., a relational
+%% data model) in order to maintain coherence between in-memory and
+%% on-disk representations. Safety guarantees over the in-memory data do
+%% not carry over to the disk, which introduces additional complications
+%% and the possibility of new bugs. Thus, adding persistence to
+%% applications while preserving high-level safety gurantees offered by
+%% the language abstraction is a non-trivial problem.
+
+
+
+%% However, as we shall see,
+%% unconstrained branching may yield a branching structure that becomes
+%% unmergeable, thus leading to \emph{stuck} states. An important
+%% property of the \name library is that it guarantees progress even in
+%% the presence of arbitrary merges provided the merge operation is
+%% commutative with respect to its version state arguments.  Furthermore,
+%% \name profitably exploits provenance information available via
+%% branches to make application resilient to network partitions.  
+%% In this paper, we define a semantics of mergeable datatypes that lets
+%% any OCaml program be seamlessly deployed in a distributed environment
+%% with implicit support for replicated and decentralized operation.  The
+%% underlying foundation for merge actions has a natural category
+%% theoretic interpretation that enables us to construct useful mergeable
+%% variants for \emph{any} OCaml type whose states are commutative wtih
+%% respect to the merge operation defie
