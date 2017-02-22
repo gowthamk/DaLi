@@ -10,7 +10,7 @@
     val get_current_version: unit -> 'a 'a t
     val with_init_version_do: 'a -> 'a 'b t -> 'b
     val fork_version : 'a 'b t -> 'a unit t
-    val sync ()_next_version: unit -> ?v:'a -> 'a 'a t
+    val sync_next_version: unit -> ?v:'a -> 'a 'a t
   end
   \end{ocaml}
 
@@ -36,14 +36,14 @@
   end
   \end{ocaml}
 
-\label{fig:canvas-sig}
 \caption{\drawsome: a sample \name application}
+\label{fig:canvas-sig}
 \end{figure}
 
 In this section, we describe the \name programming model through the
 example of a collaborative drawing application we call \drawsome.
 
-Fig.~\ref{canvas-sig} shows the signature of the \drawsome
+Fig.~\ref{fig:canvas-sig} shows the signature of the \drawsome
 application. \drawsome represents a free-hand drawing canvas as a tree
 of quadrants, where each quadrant is simply a leaf node unless it has
 pixels of different colors. Quadrants are expanded into a tree
@@ -113,17 +113,17 @@ monad's \C{get}; it returns the versioned state encapsulated by the
 monad. \C{with\_init\_version\_do} runs a monadic computation against
 a given initial version and returns the result. \C{fork\_version}
 returns a computation that forks a new concurrent version from the
-current version, and runs the given monadic computation async ()hronously
-against the forked version.  The semantics of \C{sync ()\_next\_version}
-(simply called \C{sync ()}) is somewhat involved: the function accepts a
-\emph{proposal} for the next version of the state, where \C{next} is
-defined w.r.t the current version, and returns (via a monad) the
-actual next version, which becomes the current version for rest of the
-computation.  The next version is created by merging the proposal with
-a subset of concurrent versions that became available since the last
-merge or fork. Thus, \C{sync ()} effectively lets a computation sync
-() with a subset of concurrent computations and obtain their latest
-updates.
+current version, and runs the given monadic computation asynchronously
+against the forked version.  The semantics of \C{sync\_next\_version}
+(simply called \C{sync}) is somewhat involved: the function accepts
+a \emph{proposal} for the next version of the
+state, where \C{next} is defined w.r.t the current version, and
+returns (via a monad) the actual next version, which becomes the
+current version for rest of the computation.  The next version is
+created by merging the proposal with a subset of concurrent versions
+that became available since the last merge or fork. Thus, \C{sync}
+effectively lets a computation sync with a subset of concurrent
+computations and obtain their latest updates.
 
 \begin{figure}
 \centering
@@ -133,13 +133,13 @@ let alice_f : C.t unit t =
   get () >>= fun c0 -> 
   fork bob_f >>= fun () ->
   let c0' = C.draw_line c0 
-    {x=10;y=20}
-    {x=40;y=20} in
+    {x=0;y=0}
+    {x=4;y=0} in
   sync () ~v:c0' >>= 
   fun c1 ->
   let c1' = C.draw_line c1 
-    {x=10;y=40} 
-    {x=40;y=40} in
+    {x=0;y=4} 
+    {x=4;y=4} in
   sync () ~v:c1' >>= 
   fun c2 -> return ()
 \end{ocaml}
@@ -150,8 +150,8 @@ let bob_f : C.t unit t =
   fork cheryl_f >>= 
   fun () ->
   let c0' = C.draw_line c0 
-    {x=10;y=20} 
-    {x=10;y=40} in
+    {x=0;y=0} 
+    {x=0;y=4} in
   sync () ~v:c0' >>= 
   fun c1 -> sync () >>= 
   fun c2 -> return ()
@@ -161,8 +161,8 @@ let bob_f : C.t unit t =
 let cheryl_f : C.t unit t = 
   get () >>= fun c0 -> 
   let c0' = C.draw_line c0 
-    {x=40;y=20} 
-    {x=40;y=20} in
+    {x=4;y=0} 
+    {x=4;y=0} in
   sync () ~v:c0' >>= 
   fun c1 -> sync () >>= 
   fun c2 -> return ()
@@ -174,9 +174,6 @@ Bob, and Cheryl}
 \label{fig:canvas-sessions-code}
 \end{figure}
 
-Fig.~\ref{fig:canvas-sessions} shows a collaborative editing session
-between Alice, Bob and Cheryl.
-
 \begin{figure}
 \centering
 \includegraphics[scale=0.6]{Figures/canvas-sessions}
@@ -185,5 +182,71 @@ between Alice, Bob and Cheryl.
 \label{fig:canvas-sessions}
 \end{figure}
 
+Fig.~\ref{fig:canvas-sessions-code} demonstrates how a collaborative
+drawing session between Alice, Bob and Cheryl can be composed using
+\name. A possible execution of the session is visualized in
+Fig.~\ref{fig:canvas-sessions}. Assume that the session starts with
+Alice on a $5\times 5$ blank canvas, as shown below:
+\begin{ocaml}
+  module C = Canvas;; open Dali;;
+  with_init_version_do (C.new_blank 5 5) alice_f 
+\end{ocaml}
+Alice starts by reading the current version of the canvas, which is
+blank. She then invites Bob for collaboration by forking a new
+concurrent version for Bob. Bob in turn invites Cheryl for
+collaboration. All three of them start working on the blank canvas.
+Alice draws a red horizontal line from $(0,0)$ (top-left) to $(4,0)$
+(top-right) using \C{C.draw\_line} (definition not shown; can be
+constructed using \C{set\_px}). Meanwhile, Bob draws a green vertical
+line from $(0,0)$ to $(0,4)$, and Cheryl draws a similar line from
+$(4,0)$ to $(4,4)$. All three of them call \C{sync} with their
+respective proposals ($C_0'$). While any partial ordering of
+concurrent \C{syncs} is valid, we consider a linear order where
+Cheryl's \C{sync} happens first, followed by Bob's and then Alice's.
+Cheryl's \C{sync} does not find any concurrent versions, hence
+installs the proposed version ($C_0'$) as the next version on Cheryl's
+branch. Bob's \C{sync} finds Cheryl's $C_0'$ as a concurrent version,
+and merges it with its proposal to produce the next version $C_1$,
+which is installed on Bob's branch.  and returned by \C{sync} (\C{c1}
+in second column of Fig.~\ref{fig:canvas-sessions-code}). The least common
+ancestor (LCA) for this merge is the initial version ($C_0$), and the two
+concurrent versions are Bob's $C_0'$ and Cheryl's $C_0'$. Next,
+Alice's \C{sync} finds Cheryl's $C_0'$ and Bob's $C_1$ as concurrent
+versions, and merges them successively with Alice's proposal. For the
+first merge, the two concurrent versions are Alice's $C_0'$ and
+Cheryl's $C_0'$, and the LCA is the initial version
+($C_0$). The result of this merge is installed as the next version
+($\C{C_0''}$) on Alice's branch. For the next merge, the two
+concurrent versions are Alice's $C_0''$ and Bob's $C_1$ and the LCA is
+Cheryl's $C_0'$\footnote{Thus, LCA of versions on two branches can lie
+outside both the branches.}. The result ($C_1$) becomes the next
+version on Alice's branch, and the return value of Alice's \C{sync}.
+Next, Alice draws a red horizontal line from $(0,4)$ to $(4,4)$,
+proposes this canvas (\C{c1'} in the first column of
+Fig.~\ref{fig:canvas-sessions-code}) as the next version to \C{sync}.
+Since there are no concurrent versions, $C_1'$ becomes the next
+version and the return value of \C{sync}. The subsequent \C{sync}
+operations from Bob and Cheryl propose no new versions, hence simply
+obtain Alice's $C_1'$ as next versions.
 
+The \drawsome example demonstrates the utility of mergeable data types
+and the \name programming model in building concurrent applications
+with conceptual sharing of state. This example, however, implicitly
+makes certain assumptions about the model and the underlying system,
+such as the existence of a single least common ancestor (LCA) for any
+pair of versions, the ability to access a previous version on any
+branch, and mergeability of any two concurrent versions. Enforcing
+these guarantees in a fully decentralized distributed setting requires
+addressing non-trivial theoretical challenges described in the next
+section. Unlike the canvas, the process of writing merge functions for
+data types with non-trivial invariants could be quite involved. The
+later sections describe a principled approach to derive a merge
+function for a data type given its invariants. Like \C{Canvas.merge},
+merge functions often need to compare multiple versions of a data type
+for structural equality, which, when performed naively, incurs cost
+linear in the size of versions. The representation of a versioned data
+type in \name is optimized for performing comparisons that allows
+structural equality to be determined in constant time. Such
+engineering details, which contribute to the practicality of our
+programming model are also discussed in subsequent sections.
 
