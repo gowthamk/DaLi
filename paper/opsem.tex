@@ -8,16 +8,16 @@
 \begin{array}{lclcl}
 \multicolumn{5}{c} {
   t \in \mathtt{Thread\; Ids} \qquad
-% v \in \mathtt{ML\; Values} \qquad
-  e,v \in \mathtt{ML\; Expressions,\; Values} \qquad
+  x,y \in \mathtt{Variables} \qquad
+  c \in \mathtt{\{()\}} \cup \mathbb{N} \qquad
 }\\
-s & \in & \mathtt{Expressions} & \coloneqq & e \ALT s \bind  s \ALT 
-  \return{s} \ALT \run{s}{s}\\
-   & & & & \ALT \fork{s} \ALT \pull \ALT \push{s} \\
+v & \in & \mathtt{Values} & \coloneqq & c \ALT \lambda x.\,s\\
+s & \in & \mathtt{Expressions} & \coloneqq & v \ALT s\;s \ALT \run{s}{s}
+   \ALT \fork{s} \ALT \pull \ALT \push{s}\\
+p & \in & \mathtt{Programs} & \coloneqq & s_t \ALT p\,||\,p \\
 f & \in & \mathtt{Tags} & \coloneqq & \C{INIT} \ALT \C{FORK} \;b 
   \ALT \C{PUSH} \ALT \C{MERGE} \;b\\
 b & \in & \mathtt{Branches} & \coloneqq & [(v,f)] \ALT (v,f)::b \\
-p & \in & \mathtt{Programs} & \coloneqq & s_t \ALT p\,||\,p \\
 \end{array}
 \end{smathpar}
 %
@@ -32,10 +32,12 @@ p & \in & \mathtt{Programs} & \coloneqq & s_t \ALT p\,||\,p \\
 %
 \begin{smathpar}
 \renewcommand{\arraystretch}{1.2}
-\begin{array}{lcl}
-E & \coloneqq & \bullet \ALT \bullet \bind s \ALT \return{\bullet}
-    \ALT \run{\bullet}{e}\\
-P & \coloneqq & E_t \ALT \bullet\,||\,p \ALT p\,||\,\bullet \\
+\begin{array}{lclcl}
+H & \in & \mathtt{Branch\; Histories} & \coloneqq & t \mapsto b\\
+E & \in & \mathtt{Eval.\; Contexts}(s) & \coloneqq & \bullet \ALT 
+  \bullet\;s \ALT v\;\bullet \ALT \run{\bullet}{s}\\
+P & \in & \mathtt{Eval.\; Contexts}(p) & \coloneqq & E_t \ALT 
+  \bullet\,||\,p \ALT p\,||\,\bullet \\
 \end{array}
 \end{smathpar}
 %
@@ -49,17 +51,40 @@ P & \coloneqq & E_t \ALT \bullet\,||\,p \ALT p\,||\,\bullet \\
 \begin{array}{lcll}
 (\run{v}{s})_t;\cdot & \stepsto & 
   s_t; \cdot[t_{\top} \mapsto [(v,\C{INIT})]]
-            [t\mapsto [(v,\C{FORK}\; [(v,\C{INIT})])]] & \\
-(\fork{s})_t;H & \stepsto & ()_t\,||\, s_{t'}; H[t'\mapsto [(v, \C{FORK} H(t))]] & 
-    \texttt{where}\; t'\not\in dom(H)\\
-(\push{v})_t;H & \stepsto & ()_t;H[t \mapsto (v,\C{PUSH})::H(t)] & \\
+            [t\mapsto [(v,\C{FORK}\; [(v,\C{INIT})])]] 
+            & [\rulelabel{E-Run}]\\
+(\fork{s})_t;H(t\mapsto (v,\_)::b) & \stepsto & 
+    ()_t\,||\, s_{t'}; H[t'\mapsto [(v, \C{FORK} H(t))]] 
+    \spc \texttt{where}\; t'\not\in dom(H)
+            & [\rulelabel{E-Fork}]\\
+(\push{v})_t;H & \stepsto & ()_t;H[t \mapsto (v,\C{PUSH})::H(t)]
+            & [\rulelabel{E-Push}]\\
 % & & & v\,=\,\C{merge}\,v\,v_1\,v_2 ~\texttt{and}~ \\
-(\pull)_t;H(t \mapsto (v,\_)::m) & \stepsto & v_t;H & \\
+((\lambda x.s)\;v)_t;H & \stepsto & ([v/x]\,s)_t;H
+            & [\rulelabel{E-App}]\\
+(\pull)_t;H(t \mapsto (v,\_)::m) & \stepsto & v_t;H
+            & [\rulelabel{E-Pull}]\\
 \end{array}
 \end{smathpar}
 %
 
+% %
+% \hspace*{\fill}[\rulelabel{E-Admin}]\hspace*{0.25in}
+% \begin{smathpar}
+% \begin{array}{c}
+% \RULE
+% {
+%   s_t; H ~\stepsto^{*}~ v_t; H
+% }
+% {
+%   E_t[s]; H ~\stepsto^{*}~ E_t[v]; H
+% }
+% \end{array}
+% \end{smathpar}
+% %
+
 %
+\hspace*{\fill}[\rulelabel{E-Pull-Wait}]
 \begin{smathpar}
 \begin{array}{c}
 \RULE
