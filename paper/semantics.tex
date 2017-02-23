@@ -179,11 +179,80 @@ this example there is a unique LCA for 4 and 7, in general this may
 not be the case. With unrestrained branching and merging, there is no
 bound on the number of LCAs a pair of versions can have.
 For example, in
-Fig.~\ref{fig:criss-cross-lcas}, the merge of 1 with 3 is preceded by
+Fig.~\ref{fig:criss-cross-lcas}, the merge of 0 with 3 is preceded by
 two ``criss-cross'' merges between their respective branches resulting
-in there being two LCAs (3 and 4) for 1 and 3. Multiple LCAs can
-occur even without criss-cross merges, as demonstrated by
-Fig.~\ref{fig:external-lcas}. 
+in there being two LCAs (5 and 4) for 0 and 3. Multiple LCAs can occur
+even without criss-cross merges, as demonstrated by
+Fig.~\ref{fig:external-lcas}. The problem with concurrent versions
+with multiple LCAs is that they do not lend themselves to three-way
+merging. This problem also arises in the context of source
+control systems, and often solved via ad-hoc mechanisms.
+GitHub~\cite{github}, for instance, recursively merges LCAs to compute
+a virtual ancestor, which then serves as the LCA for merging the
+concurrent versions. This method is demonstrated for the example in
+Fig.~\ref{fig:criss-cross-lcas}, where LCAs 5 and 4 of 0 and 3 are
+merged (with LCA of 10) to generate -1 as the virtual LCA to merge 5
+and 4. A major downside with this method is that it makes no
+guarantees of the relationship between the virtual ancestor and the
+concurrent versions; the former may not even be a legal ancestor of
+the latter as per the semantics of the data type. For instance, the
+integer type in Fig.~\ref{fig:criss-cross-lcas} may in fact represent
+a bank account, which disallows any activity on the account if balance
+is ever known to be less than zero. Thus, from the perspective of a
+bank account, it doesn't make sense how concurrent versions 3 and 0
+emerged from -1, since the only transition allowed by the semantics
+from -1 is to itself. Clearly, ad hoc mechanisms, which work for the
+text, may not work for more sophisticated data types.
+
+Fortunately, unlike the source control systems where branching
+structure is entirely dictated by the user, \name abstracts away the
+branching structure from the programmer, hence retains the ability to
+constrain it in a way that it deems fit. In particular, \name solves
+the problem of multiple LCAs by suitably constraining the branching
+structure such that the problem never arises. The constraints are
+imposed either implicitly, as a result of how operational semantics
+defines an atomic step, or explicitly, by insisting that certain
+conditions be met before merging a pair of versions
+(\rulelabel{E-Pull-Wait}). Firstly, the operational semantics already
+disables criss-cross merges since it only ever merges versions that
+are latest on their respective branches. For instance let $v_{11}$ and
+$v_{21}$ be the latest versions on branches $b_1$ and $b_2$,
+respectively. Meging $b_2$ into $b_1$ requires entails $v_{21}$ into
+$v_{11}$ to generate version $v_{12}$ on $b_1$. Now, merging $b_1$
+into $b_2$ translates to merging $v_{12}$ into $v_{21}$ (a
+\emph{fast-forward} merge, in Git parlance), but not $v_{11}$ into
+$v_{21}$, thus preventing a criss-cross branching structure. In other
+words, a criss-cross branching structure is prevented due to the
+order among merges between conflicting branches introduced as a result
+of \rulelabel{E-Pull-Wait} being an atomic step. 
+
+Secondly, we impose certain pre-conditions on the merging branches to
+preempt the structure shown in Fig.~\ref{fig:external-lcas}. The
+intuition is as follows: consider the branch $b_1$ at the instance of
+merging $b_3$. Since it has already merged $b_2$, a version on $b_2$
+($v_{22}$) could be a common ancestor for a version on $b_1$
+($v_{12}$) and some other version (call it $v$). Now, if $b_1$ merges
+$b_3$, same could be true of $b_3$ and $b_1$: a version on $b_3$
+($v_{32}$) could be a common ancestor for the new version on $b_1$
+($v_{13}$), and the other version $v$. Since $v_{22}$ is also an
+ancestor of $v_{13}$, and both ancestors are not ordered by the
+ancestor relation, $v_{13}$ and $v$ end up with two LCAs. In
+Fig.~\ref{fig:external-lcas}, the role of $v$ is played by the version
+$v_{44}$. We observe that this scenario can be prevented if, when
+merging $b_3$, $b_1$ insists on an ancestor relation between the
+merged version ($v_{22}$) of the $b_2$, the previously merged branch,
+and the latest version of $b_3$, the current merging branch. We call
+the last merged version the \emph{external locus} of the branch. By
+requiring that, for every branch $b$, the external locii of $b$ at
+various points in time (i.e., external locus of every prefix of $b$)
+be totally ordered, we effectively enforce the total order among
+versions that have more than one common ancestor, thereby preventing
+the possibility of multiple LCAs.
+
+%% Multiple versions that merge any pair of versions are totally
+%% ordered. That is, if $v_1$ and $v_2$ are ancestors of $v_3$ and
+%% $v_4$, then $v_3$ and $v_4$ are ordered by the ancestor relation.
+
 
 \begin{definition} [\bfseries Internal and External Ancestors]
 Given a branch $b$ and a version $v\in b$, an internal ancestor of $v$
