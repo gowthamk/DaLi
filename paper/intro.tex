@@ -1,26 +1,28 @@
 \section{Introduction}
 
 Real-world distributed programs are challenging to write and maintain
-because they inevitably juggle and conflate two distinct mechanisms.
-The first concerns the expression of application logic - how do we
-define computations that are robust in the presence of distributed
+because they often conflate two distinct mechanisms.  The first
+concerns the expression of application logic - how do we define
+computations that are robust in the presence of distributed
 communication among concurrently executing threads of control?  The
 second deals with system concerns - how do we express notions of
 visibility, replication, and consistency when the nodes participating
 in such computations may be geographically distributed and the
 networks that connect them unreliable?  To simplify reasoning in such
-complicated environments, models often make strong assumptions on the
-guarantees provided by an implementation (such as
-serializablity~\cite{...} or strong consistency~\cite{...}) that may
-inadvertently mask important albeit unpleasant realities related to
-network partitions~\cite{...}, or which may ignore important system
-architectural features that assume replicated program state~\cite{...}
-to provide high availability and fault tolerance.  On the other hand,
-when these properties are explicitly exposed to the programmer, e.g.,
-by requiring that applications be written in terms of specialized
-distributed data structures~\cite{...} or control
-primitives~\cite{...}, simplicity, composability, and
-ease-of-reasoning suffers.
+complicated environments, programming models often make strong
+assumptions on the guarantees provided by an implementation (such as
+serializability~\cite{Serializability} or strong
+consistency~\cite{CDE+12,DNN+15}) that may inadvertently mask,
+restrict, or ignore important albeit unpleasant realities (e.g.,
+network partitions~\cite{Brewer2000,Gilbert2002}), or which may ignore
+important system architectural features (e.g., replicated underlying
+state~\cite{Walter}).  Given these unwarranted assumptions, program
+behavior is often difficult to predict and verify.  On the other hand,
+when these features are explicitly exposed to the programmer, e.g., by
+requiring that applications be written in terms of specialized
+distributed data structures~\cite{Burckhardt2014,,BFL+12,SPB+11} or
+control primitives~\cite{Calm,Armstrong07}, simplicity, composability,
+and ease-of-reasoning can suffer.
 
 To illustrate how these kinds of problems manifest in practice,
 consider how we might write a simple counter library (see
@@ -28,24 +30,29 @@ Fig.~\ref{fig:counter-adt}).  A \C{Counter} supports two (update)
 operations - \C{add} and \C{mult} - that lets a non-negative integer
 value be added or multiplied to the counter, resp.  Observe that the
 library is written in an idiomatic style in OCaml, with no special
-reasoning principles needed to realize desired functionality.  As long
-as applications use the library on a single machine, this
-implementation suffices well.  If the library is used in the context
-of a more sophisticated application, say one whose computation is
-distributed among a collection of machines, its state may need to be
-replicated.  Unfortunately, replication doesn't come for free.  Global
-synchronous coordination among all nodes is problematic in distributed
-systems.  Thus, applying an \C{Add} operation on one node may not be
-instanteously witnessed on another, which may in turn be
-simultaneously attempting to perform its own \C{Add} or \C{Mult}
-action.  While synchronizing the activities of all nodes to ensure at
-most one such operation is performed at a time is impractical,
-designating a single node to hold the counter state eschewing
-replicating altogether (as in a client-server configuration), is also
-an undesirable solution, given its sensitivity to network partitions
-and server failures.  But, simply replicating counter state among
-nodes, without having any coordination protocol, is an equally
-infeasible approach.
+reasoning principles needed to realize our desired functionality.  As
+long as applications use the library on a single machine, this
+implementation behaves as expected.  However, if the library is used
+in the context of a more sophisticated application, say one whose
+computation is distributed among a collection of machines, its
+behavior becomes significantly harder to understand.  For example, a
+distributed implementation might wish to \emph{replicate} the counter
+state on each node to improve latency (often referred to as
+availability) or fault tolerance.  Unfortunately, replication doesn't
+come for free.  Attempting to update every replicated copy atomically
+is problematic in the absence of sophisticated transaction support,
+which impose sigificant performance and availability penalties.  But,
+without such heavyweight mechanisms, applying an \C{Add} operation on
+one node may not be instanteously witnessed on another, which may in
+turn be simultaneously attempting to perform its own \C{Add} or
+\C{Mult} action.  While synchronizing the activities of all nodes to
+ensure at most one such operation is performed at a time is
+impractical, designating a single node to hold the counter state
+eschewing replication altogether (as in a client-server
+configuration), is also an undesirable solution, given its sensitivity
+to network partitions and server failures.  Removig coordination
+altogether by simply replicating counter state without having any
+supporting consistency protocol is an equally infeasible approach.
 
 A method often adopted~\cite{crdts, pldi15, gotsman-popl16} to address
 this tension is to re-define a datatype's operations to return
@@ -56,16 +63,24 @@ operaton. Fig.~\ref{fig:counter-rdt} shows the \C{Counter} library
 with operations re-defined to returns effects.  Observe that the
 \C{Counter.add x v} operation now returns an \C{Add x} effect, which,
 when applied at a replica (see \C{apply} in the figure), adds \C{x} to
-the local counter value.  Assuming effects are commutative, they can
-be processed asynchronously using a log local to each replica.  This
-implementation produces an eventually consistent global state in which
-all replicas will eventually contain the same counter value.  While
-effects provide a low-level operational basis for handling replicated
-state, the \emph{ad hoc} nature of the solution confounds desirable
-high-level reasoning principles.  Indeed, the semantic gap between the
-two versions of the counter, one cognizant of replication and the
-other not, breaks backward compatibility.  More significantly, its
-non-trivial construction must be developed in different guises for
+the local counter value.  Note, however, that \C{add} and \C{mult} are
+not commutative operations - assuming two replicas have the same
+initial counter value of 0, applying the effect of adding 3 and then
+multiplying 5 on one replica yields 15, while applying the effecting
+of first multiplying 5 and then adding 3 yields 3 on the other.  Thus,
+implementations must be carefully written to take the lack of
+commutativity into account when defining how effects are applied at a
+replica; in the figure, multiplication is expressed in terms of
+addition to avoid the kind of undesirable behavior described above.
+
+This implementation produces an eventually consistent global state in
+which all replicas will eventually contain the same counter value.
+While effects provide a low-level operational basis for handling
+replicated state, the \emph{ad hoc} nature of the solution confounds
+desirable high-level reasoning principles.  Indeed, the semantic gap
+between the two versions of the counter, one cognizant of replication
+and the other not, breaks backward compatibility.  More significantly,
+its non-trivial construction must be developed in different guises for
 every distributed data structure used by the application.
 \begin{figure}
 \begin{subfigure}[b]{0.4\textwidth}
@@ -107,12 +122,12 @@ every distributed data structure used by the application.
 \label{fig:counter-rdt}
 \end{subfigure}
 \end{figure}
-Lack of composability is another important downside of this approach.
-Consider an application that uses two replicated counters, $c_1$ and
-$c_2$, bound by the invariant $c_2 \ge c_1$, duly enforced by the
-application when updating $c_2$ or $c_1$.  An execution may
+The lack of composability is another important downside of this
+approach.  Consider an application that uses two replicated counters,
+$c_1$ and $c_2$, bound by the invariant $c_2 \ge c_1$, duly enforced
+by the application when updating $c_2$ or $c_1$.  An execution may
 nonetheless witness anamolous states that violate the invariant
-because updates to $c_1$ and $c_2$ are applied independently in any
+because updates to $c_1$ and $c_2$ may be applied independently in any
 order on any replica.  For example, if a replica increments both
 counters, a \C{read} operation performed at another replica may
 witness the increment to $c_1$, but not $c_2$, thus violating the
@@ -120,19 +135,19 @@ invariant. The intention to atomically apply both effects cannot be
 captured in the absence of external mechanisms to compose effects
 (such as effect-based transactions~\cite{pldi15}).
 
-On the other hand, a functional programmer is likely to approach the
-problems very differently.  Rather than thinking about a low-level
+On the other hand, a functional programmer is likely to approach this
+problem very differently.  Rather than thinking about a low-level
 operational variant of distributed state given in terms of explicit
 effects as described above, a declarative interpretation of a
 decentralized computation could be naturally described in terms of a
 version tree whose root contains the initial counter value, and whose
-branches represent different versions maintained by different nodes,
-with the state produced by a counter's operations on a node recorded
-along the node's local branch.  Now, a globally consistent view of a
-counter can be explained simply in terms of \emph{merge} operations of
-different branch tips.  Treating replication as merging yields a
-counter implementation that bears strong similarity to the original
-sequential one:
+branches represent different (immutable) versions maintained by
+different nodes, with the state produced by a counter's operations on
+a node recorded along the node's local branch.  Now, a globally
+consistent view of a counter can be explained simply in terms of
+\emph{merge} operations of different branch tips.  Treating
+replication as merging yields a counter implementation that bears
+strong similarity to the original sequential one:
   \begin{ocaml}
     module Counter = struct
       include Counter
@@ -144,11 +159,10 @@ The role of \C{lca} (least common ancestor) here captures salient
 history - the state resulting from the merge of two versions derived
 from the same ancestor state should not unwittingly duplicate the
 contributions of the ancestor.  This interpretation of a replicated
-datatype is thus given in terms of multi-versions of a program state
+datatype is thus given in terms of the evolution of a program state
 impicitly associated with the different nodes that comprise a
-distributed application and a logical notion of a \emph{master}
-representing some consistent, but not necessarily current, view of
-global state.
+distributed application with merge operations serving to communicate
+and reconcile different local states.
 \begin{figure}
   \begin{center}
     \includegraphics[scale=0.35]{Figures/dali-counter}
@@ -167,32 +181,37 @@ global state.
     and blue circles represent local counter state produced by
     applying counter operations on a node-local version.  }
 \end{figure}
+The \name programming model realizes a monadic version control system
+in OCaml centered around data, rather than file, coherence.  The \name
+monad lets programmers write and compose concurrent computations
+around multiple (implicit) versions of a mergeable datatype, an
+ordinary datatype additionally equipped with a \emph{merge} function
+responsible for deriving a consistent global state from a collection
+of local versions of that state.  A computation makes progress by
+forking concurrent versions of existing versions, creating later
+versions along a \emph{branch}, or by merging branch tips.
 
-The \name programming model realizes a monadic functional version
-control system centered around data, rather than file coherence.  The
-\name monad lets programmers write and compose concurrent computations
-around multiple (implicit) versions of a mergeable datatype.  A
-computation makes progress by forking concurrent versions of existing
-versions, creating later versions along a \emph{branch}, or by merging
-branch tips.  An important soundness property of the model is that
-instances of a replicated datatype whose merge operation is
-commutative with respect to its local version arguments is guaranteed
-to eventually converge to the same value on all replicas.  As a
-result, OCaml programmers get the benefits of highly available
-(low-latency) distributed computation, while continuing to enjoy the
-comforts of high-level reasoning and familiarity of standard library
-datatypes.  Notably, while \name's programming model makes no explitic
-reference to any specific operational manifestation of a distributed
-system (e.g., programmers do not need to worry about replicas and
-their management), it can be nonetheless efficiently realized on
+While any OCaml datatype can be equipped with a merge operator, and
+thus seamlessly participate in a distributed computation, instances of
+datatypes whose merge operations are commutative with respect to their
+local version state arguments (i.e., \C{v1} and \C{v2} in the counter
+example above) are guaranteed to eventually converge to the same state
+on all replicas.  For such types, OCaml programmers get the benefits
+of realizing highly available (low-latency) distributed computation,
+while continuing to enjoy the comforts of high-level reasoning and
+the familiarity of using standard libraries.  Notably, while \name's
+programming model makes no explicit reference to any specific
+operational manifestation of a distributed system (e.g., programmers
+do not need to worry about replicas and their management), we
+demonstrate that it can be nonetheless efficiently realized on
 existing geo-replicated distributed systems.
 
 Our contributions are summarized below:
 
 \begin{itemize}
-    \item We formally introduce the concept of a \emph{mergeable} datatype
-      to admit high-level declarative reasoning about distributed
-      computation and replicated state in functional programs.
+    \item We formally introduce the concept of a \emph{mergeable}
+      datatype to admit high-level declarative reasoning about
+      distributed computation and replicated state in ML programs.
 
     \item We describe the \name library that transparently adds
       persistence and replication features to a mergeable type. \name
@@ -200,7 +219,7 @@ Our contributions are summarized below:
       flexibility of a version control system to the administration of
       replicated data. \name hides the complexity of version control
       behind a monad, and exposes its functionality via a simple API
-      that lets programmers define and compose concurrent OCaml
+      that lets programmers define and compose concurrent ML
       computations around such data.  Issues related to replication
       only manifest implicitly in the definition of a merge operation
       that defines coherence among different instances of replicated
@@ -211,9 +230,9 @@ Our contributions are summarized below:
       concurrent version state can be guaranteed.
 
     \item We describe an implementation of \name atop the Irmin
-      persistent store~\cite{...}, a content-addressable storage
+      persistent store~\cite{irmin}, a content-addressable storage
       library for OCaml, along with case studies and experimental
-      results to its practical utility.
+      results that justify its practical utility.
 \end{itemize}
 
 
