@@ -159,8 +159,9 @@ ancestor (since $0 \preceq 2$). The result (v) of merging 4 and 7 is
 }
 \hfill
 \subcaptionbox[] {\small
-  In this example, 3 and 6 have two LCAs (2 and 1) despite there not
-  being any previous merges between their respective branches.
+  In this example, versions $v_{13}$ and $v_{44}$ have two LCAs
+  ($v_{22}$ and $v_{32}$)  despite there not being any previous merges
+  between their respective branches.
   \label{fig:external-lcas}
 } [0.47\columnwidth] {
   \includegraphics[scale=0.7]{Figures/2-external-LCAs}
@@ -183,13 +184,13 @@ Fig.~\ref{fig:criss-cross-lcas}, the merge of 0 with 3 is preceded by
 two ``criss-cross'' merges between their respective branches resulting
 in there being two LCAs (5 and 4) for 0 and 3. Multiple LCAs can occur
 even without criss-cross merges, as demonstrated by
-Fig.~\ref{fig:external-lcas}. The problem with concurrent versions
-with multiple LCAs is that they do not lend themselves to three-way
-merging. This problem also arises in the context of source
-control systems, and often solved via ad-hoc mechanisms.
-GitHub~\cite{github}, for instance, recursively merges LCAs to compute
-a virtual ancestor, which then serves as the LCA for merging the
-concurrent versions. This method is demonstrated for the example in
+Fig.~\ref{fig:external-lcas}. Concurrent versions with multiple LCAs
+do not lend themselves to three-way merging. This problem also arises
+in the context of source control systems, which employ ad hoc
+mechanisms to pave way for three-way merging.  GitHub~\cite{github},
+for instance, recursively merges LCAs to compute a virtual ancestor,
+which then serves as the LCA for merging the concurrent versions. This
+method is demonstrated for the example in
 Fig.~\ref{fig:criss-cross-lcas}, where LCAs 5 and 4 of 0 and 3 are
 merged (with LCA of 10) to generate -1 as the virtual LCA to merge 5
 and 4. A major downside with this method is that it makes no
@@ -263,6 +264,16 @@ LCAs.
 %% If I follow one of your locii, or you follow one of my locii, then
 %% we both have same set of external common ancestors.
 
+\begin{figure}
+\centering
+\includegraphics[scale=0.75]{Figures/legal-merge}
+
+\caption{A legal branch history for the example in
+Fig.~\ref{fig:external-lcas}}
+\label{fig:legal-merge}
+\end{figure}
+
+
 Let us see how the aforementioned restriction allows us to merge the
 branches in Fig.~\ref{fig:external-lcas} without ever creating
 multiple LCAs. The legal branching history is shown in
@@ -278,9 +289,13 @@ and $b_3$ can merge among themselves. Let us say they indeed merge to
 to create a version $v_{23}$ on $b_2$. The branch $b_2$ is now
 eligible to be merged into $b_1$ and also $b_4$. These merges do occur
 in Fig.~\ref{fig:legal-merge} to create versions $v_{13}$ and
-$v_{43}$, and making $v_{23}$ the external locus for both $b_1$ and
-$b_4$. Thus, $b_1$ can now merge into $b_4$ to create version $v_{44}$
-on $b_4$.
+$v_{44}$, and making $v_{23}$ the external locus for both $b_1$ and
+$b_4$. Thus, $b_1$ can now merge into $b_4$ to create version $v_{45}$
+on $b_4$. Note that alternative legal histories are also possible. For
+instance, $b_4$ could have skipped the merge with $v_{23}$ (hence, the
+version $v_{44}$), and directly merged $v_{13}$ in the last step.
+This is legal because $b_4$'s locus before the merge, $v_32$, is an
+ancestor of the merging version $v_{13}$.
 
 We now formalize the intuitions described above to precisely define
 the notion of mergeability:
