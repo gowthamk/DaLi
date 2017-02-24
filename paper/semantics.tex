@@ -80,17 +80,15 @@ updates the branching structure by merging (the latest version of) a
 concurrent branch ($H(t')$) into (the latest version of) the current
 branch ($H(t)$), and extending the current branch with the merged
 version ($v_m$). The new version is tagged with a \C{MERGE} tag that,
-like a \C{FORK} tag, records its origin. The premises of the
-\rulelabel{E-Pull-Wait} serve the important purpose of contraining the
-branching structure by allowing only the legal merges, and
-consequently preserving certain desirable properties of the system;
-we will go into the details shortly. The \rulelabel{E-Pull-Wait} and
-\rulelabel{E-Pull} rules thus let a thread sync with a subset of
-concurrent threads in multiple steps before returning the result of
-the \C{pull}. Since \C{sync} is a composition of \C{push} and
-\C{pull}, its behavior can be explained thus: \C{sync} pushes the
-given value onto the current (local) branch, merges a (possibly empty)
-subset of concurrent branches into the local branch, and returns the
-result.
+like a \C{FORK} tag, records its origin. The rule assumes a function
+\C{lca} that computes the \emph{least common ancestor} (LCA) for the
+latest versions on the given pair of branches. The semantics of LCA is
+discussed below. The \rulelabel{E-Pull-Wait} and \rulelabel{E-Pull}
+rules thus let a thread sync with a subset of concurrent threads in
+multiple steps before returning the result of the \C{pull}. Since
+\C{sync} is a composition of \C{push} and \C{pull}, its behavior can
+be explained thus: \C{sync} pushes the given value onto the current
+(local) branch, merges a (possibly empty) subset of concurrent
+branches into the local branch, and returns the result.
 
 \input{meta.tex}
