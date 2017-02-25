@@ -180,7 +180,7 @@ conditions hold:
   $P'$ and $Q'$, such that for any object $A:t$, $(Q' \circ
   \denot{P^*})(A) = (P' \circ \denot{Q^*})(A)$.  
 \end{itemize}
-Commutativity diagram of Fig.~\ref{fig:pushouts-2} visualizes this
+The Commutativity diagram of Fig.~\ref{fig:pushouts-2} visualizes this
 definition. 
 \end{definition}
 
@@ -192,6 +192,11 @@ The sequence of primitive morphisms it returns ($P^*$) is called an
 (i.e., $\denot{P^*}(A) = B$). Second, the definition asserts the
 existence of a function $M$, which performs an \emph{operational
 transformation} of the primitive morphisms in an edit script. An
+operational transformation of a primitive morphism $P$ w.r.t a
+morphism $Q$ is another primitive morphism $P'$ such that for any
+object $A:t$, $P'$ has the same \emph{effect} on $Q(A)$ as $P$ has on
+$A$. We will now consider examples of mergeable types that reify the
+notions of edit scripts and operational transformations.
 \begin{wrapfigure}{l}{.4\textwidth}
 \centering
 \includegraphics[scale=0.4]{Figures/string-eg}
@@ -199,11 +204,6 @@ transformation} of the primitive morphisms in an edit script. An
 transformations}
 \label{fig:string-eg}
 \end{wrapfigure}
-operational transformation of a primitive morphism $P$ w.r.t a
-morphism $Q$ is another primitive morphism $P'$ such that for any
-object $A:t$, $P'$ has the same \emph{effect} on $Q(A)$ as $P$ has on
-$A$. We will now consider examples of mergeable types that reify the
-notions of edit scripts and operational transformations.
 \paragraph{Strings} Strings are mergeable. Given a string ($s$) and
 its semantic successor ($s'$), an edit script ($P^*$ or $Q^*$) is the
 shortest sequence of \C{insert}, \C{delete}, and \C{substitute}
