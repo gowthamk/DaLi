@@ -55,7 +55,7 @@ to network partitions and server failures.  Removig coordination
 altogether by simply replicating counter state without having any
 supporting consistency protocol is an equally infeasible approach.
 
-A method often adopted~\cite{crdts, pldi15, gotsman-popl16} to address
+A method often adopted~\cite{SPB+11,Burckhardt2014} to address
 this tension is to re-define a datatype's operations to return
 \emph{effects} instead of values.  An \emph{effect} is a tag that
 identifies the operation to be applied uniformly at all replicas to
