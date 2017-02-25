@@ -107,7 +107,9 @@ consistency property (Theorem~\ref{thm:branch-consistency}). For
 instance, consider the counter data type from Sec.~\ref{sec:intro}. A
 three-way merge function can be defined to return a constant
 regardless of its arguments:
-\begin{ocaml} let merge lca a b = 0 \end{ocaml}
+\begin{ocaml}
+  let merge lca a b = 0
+\end{ocaml}
 Such a merge function allows the client to
 witness the violation of the branch-local consistency property. For
 example, the client may \C{sync} the counter, whose current local
