@@ -26,9 +26,10 @@ through \C{push} or \C{merge}.}
 \centering
 \includegraphics[scale=0.4]{Figures/pushouts}
 
-\caption{Commutative diagram representing the merge operation.}
+\caption{Commutative diagram for Def.~\ref{def:mergeable-type}.}
 \label{fig:pushouts}
 \end{figure}
+
 
 We now formally define what we mean by a mergeable type. The
 definition serves as a guide to write merge functions for functional
@@ -104,6 +105,14 @@ along a branch $b$ in $H$, if $\under{H}{v_1 \preceq v_2}$, then there
 exists a morphism $P:t\rightarrow t$ such that $v_2 = P(v_1)$.
 \end{theorem}
 
+\begin{figure}
+\centering
+\includegraphics[scale=0.4]{Figures/pushouts-2}
+
+\caption{Commutative diagram for Def.~\ref{def:mergeable-type-2}.}
+\label{fig:pushouts-2}
+\end{figure}
+
 Def.~\ref{def:mergeable-type} specifies the merge function ($M$)
 slightly differently; instead of returning a merged value like the
 three-way merge function (\C{merge}), $M$ returns a pair of morphisms.
@@ -150,13 +159,22 @@ alternative definition of a mergeable type that is stronger than
 Def.~\ref{def:mergeable-type}, but also serves as a recipe to build
 non-trivial merge functions.
 
+\paragraph{Notation} As mentioned earlier, we distinguish between the
+named functions defined by a data type library (primitive morphisms),
+and their compositions (morphisms). A sequence (list) of primitive
+morphisms is written $P^*$ or $Q^*$. The composition of a sequence of
+primitive morphisms (written $\denot{P^*}$) is their right-to-left
+composition, i.e., $\C{fold\_left}\;(\lambda f.\lambda g. f \circ
+g)\; id\; P^*$, where $\C{fold\_left}$ has its usual OCaml type. The
+length of a sequence $S$ is written $\length{S}$.
+
 \begin{definition} [\bfseries Mergeable Type]
 \label{def:mergeable-type-2}
 A type $t$ is said to be mergeable if and only if the following
 conditions hold:
 \begin{itemize}
   \item There exists a function $W: t \times t \rightarrow (t
-  \rightarrow t)\; \C{list}$ that accepts an object $A:t$ and its
+  \rightarrow t)^*$ that accepts an object $A:t$ and its
   semantic successor $B:t$, and returns a minimal sequence of
   primitive morphisms $P^*$, whose composition maps $A$ to $B$. That
   is, $W(A,B) = P^*$, where $\denot{P^*}(A) = B$, and there does not
@@ -167,10 +185,36 @@ conditions hold:
   \rightarrow t)^* \;\rightarrow\; (t \rightarrow t)\!\times\!(t
   \rightarrow t)$ that accepts a pair of minimal sequences of
   primitive morphisms, $P^*$ and $Q^*$, and returns a pair of morphisms,
-  $Q'$ and $P'$, such that for any object $A:t$, $(Q' \circ
+  $P'$ and $Q'$, such that for any object $A:t$, $(Q' \circ
   \denot{P^*})(A) = (P' \circ \denot{Q^*})(A)$.  
 \end{itemize}
+Commutativity diagram of Fig.~\ref{fig:pushouts-2} visualizes this
+definition. 
 \end{definition}
+
+The definition asserts the existence of two functions for a mergeable
+type $t$. First, the function $W$, which computes the \emph{edit
+distance} between an object $A:t$ and its semantic successor $B:t$.
+The sequence of primitive morphisms it returns ($P^*$) is called an
+\emph{edit script}. Replaying the edit script on $A$ produces $B$
+(i.e., $\denot{P^*}(A) = B$). Second, the definition asserts the
+existence of a function $M$, which performs an \emph{operational
+transformation} of the primitive morphisms in an edit script. An
+operational transformation of a primitive morphism $P$ w.r.t a
+morphism $Q$ is another primitive morphism $P'$ such that for any
+object $A:t$, $P'$ has the same \emph{effect} on $Q(A)$ as $P$ has on
+$A$. We will now consider examples of mergeable types that reify the
+notions of edit scripts and operational transformations.
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.4]{Figures/string-eg}
+
+\caption{Merging strings with edit scripts and operational
+transformations}
+\label{fig:string-eg}
+\end{figure}
+
 
 \paragraph{Strings} Strings are mergeable. Given a string ($s$) and
 its semantic successor ($s'$), an edit script ($P^*$ or $Q^*$) is the
@@ -180,7 +224,7 @@ to $s'$. The length of the sequence is in fact the Levenshtein
 distance~\cite{levenstein} between $s$ and $s'$, which can be computed
 in polynomial time via Wagner-Fischer algorithm~\cite{wagner-fischer}.
 A slight modification of Wagner-Fischer also lets us compute the edit
-script. Fig.~\ref{fig:mergeable-string-eg} shows the edit script ...
+script. Fig.~\ref{fig:string-eg} illustrates.
 
 Next, we apply operational transformation to compute $P^*$ given $Q^*$
 ($P^* <+ Q^*$), \emph{or} $Q^*$ given $P^*$ ($Q^* <+ P^*$); there is
