@@ -9,7 +9,7 @@ For brevity, we use short names for \name primitives: \C{run} for
 \C{with\_init\_version\_do}, and \C{fork} for \C{fork\_version}. To
 simplify the technical development, \name's \C{sync\_next\_version}
 operation is broken down into two primitives - \C{push} and \C{pull},
-which can be lambda-composed get the desired effect:
+which can be composed to get the desired effect of the original:
 \begin{smathpar}
   \C{sync}\;x \;=\; (\lambda y.\pull)\; (\push\,x)
 \end{smathpar}
@@ -20,40 +20,44 @@ is an expression ($s$) indexed by the corresponding thread identifier
 ($t$). 
 
 Fig.~\ref{fig:opsem} also shows the syntax of \emph{branches}, which
-are the artifacts of evaluation and only appear during the run-time. A
-branch is a non-empty sequence of tagged values, where the tag
-captures the abstract run-time operation that led to the creation of
-the value. It is implicitly assumed that each value added to a branch
-is uniquely identifiably, hence no two values on a branch are equal.
-The uniqueness assumption is later extended to a collection of
-branches that constitute a branching structure. A real implementation
-meets this assumption by versioning values across the branches. Thus,
-in reality, branches contain \emph{versions} which denote values. The
-semantics, however, doesn't make this distinction, and uses values and
-versions interchangeably.
+are artifacts of evaluation and only appear during run-time. A branch
+is a non-empty sequence of tagged values, where the tag captures the
+abstract run-time operation that led to the creation of the value. It
+is implicitly assumed that each value added to a branch is uniquely
+identifiable, and hence no two values on a branch are equal.  The
+uniqueness assumption is later extended to a collection of branches
+that constitute a branching structure. A real implementation meets
+this assumption by versioning values across the branches. Thus, in
+reality, branches contain \emph{versions} which denote values.  To
+simplify the presentation, the semantics, does not make this
+distinction, and uses values and versions interchangeably.
 
-Small-step operational semantics of $\lang$ is defined via reduction
-relation ($\stepsto$) that relates \emph{program states}. A program
-state ($p;\,H$) consists of a program $p$ and a \emph{branch history}
-$H$ that maps thread Ids to corresponding branches; each thread is
-associated with a branch during the evaluation. Evaluation contexts
-have been defined separately for expressions ($E$) and programs ($P$),
-with the latter subsuming the former. $E$ is defined to evaluate the
-first argument of a \C{run} expression to a value that constitutes the
-initial version (recall that \C{run} models \name's
-\C{with\_init\_version\_do}). Program evaluation context
-non-deterministically picks one of the threads to evaluate. The admin
-rule that relates transitions of holes to transitions of expressions
-and programs is straightforward, hence elided. Rest of the reduction
-rules are presented in Fig.~\ref{fig:opsem}. For brevity, we write
-$H(t\mapsto (v,f))$ to denote the proposition that $H$ maps $t$ to
-$(v,f)$. The notation $H[t \mapsto (v,f)]$ as usual denotes
-the extension of $H$ with the binding $t \mapsto (v,f)$.
+The small-step operational semantics of $\lang$ is defined via a
+reduction relation ($\stepsto$) that relates \emph{program states}. A
+program state ($p;\,H$) consists of a program $p$ and a \emph{branch
+  history} $H$ that maps thread identifiers to corresponding branches;
+each thread is associated with a branch during evaluation. Evaluation
+contexts have been defined separately for expressions ($E$) and
+programs ($P$), with the latter subsuming the former.
+
+$E$ is defined to evaluate the first argument of a \C{run} expression
+to a value that constitutes an initial version (recall that \C{run}
+models \name's \C{with\_init\_version\_do}). A program evaluation
+context non-deterministically picks an extant thread to evaluate. The
+administrative rule that relates transitions of holes to transitions
+of expressions and programs is straightforward, and hence elided. The
+remaining core reduction rules are presented in
+Fig.~\ref{fig:opsem}. For brevity, we write $H(t\mapsto (v,f))$ to
+denote the proposition that $H$ maps $t$ to $(v,f)$. The notation $H[t
+  \mapsto (v,f)]$ denotes the extension of $H$ with the binding $t
+\mapsto (v,f)$, as usual.
 
 Reduction rules let expression evaluation take a step by rewriting the
-expression and suitably updating the branch history ($H$). The
+expression and suitably updating the branch history ($H$).
+\rulelabel{E-App} is the standard beta reduction rule.  The
 \rulelabel{E-Run} rule is applicable only when $H$ is empty, i.e.,
-when no prior branching structure exists. The rule rewrites the
+when no prior branching structure exists, and commences a distributed
+computation with a corresponding version tree. The rule rewrites the
 $\C{run}\;v\;s$ expression to $s$, while creating a new branching
 structure with two branches: a \emph{top} branch that has just the
 initial version (tagged with \C{INIT}), and a branch for the current
@@ -65,11 +69,14 @@ record of its orgin, namely the \C{fork} operation and the branch from
 which the current branch is forked. The \rulelabel{E-Fork} rule forks
 a new thread with a fresh id ($t'$) and adds it to the thread pool.
 The corresponding branch ($H(t')$) is forked from the parent thread's
-branch ($H(t)$). The semantics of branch forking is same as described
-above. The \C{fork} expression in the parent thread evaluates to
-\C{()}. The \rulelabel{E-Push} rule creates a new version on the
-current branch ($H(t)$) using the pushed value ($v$).
-\rulelabel{E-App} is the standard beta reduction rule.
+branch ($H(t)$). The semantics of branch forking is the same as
+described above. The \C{fork} expression in the parent thread
+evaluates to \C{()}. The \rulelabel{E-Push} rule creates a new version
+on the current branch ($H(t)$) using the pushed value ($v$).  Although
+our semantics does not directly expose heap-allocated values, the
+intention is that $v$ is a replicated object, manipulated on the local
+heap that, after push, now becomes subject to merging and coordination
+with other replicas.
 
 The semantics non-deterministically chooses \rulelabel{E-Pull} or
 \rulelabel{E-Pull-Wait} rules to reduce a \C{pull} expression. The
@@ -84,12 +91,15 @@ like a \C{FORK} tag, records its origin. The rule assumes a function
 \C{lca} that computes the \emph{least common ancestor} (LCA) for the
 latest versions on the given pair of branches. The semantics of LCA is
 discussed below. The \rulelabel{E-Pull-Wait} and \rulelabel{E-Pull}
-rules thus let a thread sync with a subset of concurrent threads in
-multiple steps before returning the result of the \C{pull}. Since
-\C{sync} is a composition of \C{push} and \C{pull}, its behavior can
-be explained thus: \C{sync} pushes the given value onto the current
-(local) branch, merges a (possibly empty) subset of concurrent
-branches into the local branch, and returns the result.
+rules thus let a thread synchronize with other distributed threads
+manipulating versions of replicas in multiple steps before returning
+the result of the \C{pull}. Since \C{sync} is a composition of
+\C{push} and \C{pull}, its behavior can be explained thus: \C{sync}
+pushes the given value onto the current (local) branch, merges a
+(possibly empty) subset of concurrent branches into the local branch,
+and returns the result.  (The operation is not guaranteed to
+synchronize with all concurrent branches because not all such branches
+may be available.)
 
 \input{meta.tex}
 

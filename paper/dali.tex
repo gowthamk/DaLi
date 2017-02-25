@@ -11,6 +11,7 @@
 
 
 %% Some recommended packages.
+\usepackage{wrapfig}
 \usepackage{mathtools}
 \usepackage{mathpartir}
 \usepackage{fullpage}
@@ -80,7 +81,7 @@
 \newcommand{\lstml}{
 \lstset{ %
 language=ML, % choose the language of the code
-basicstyle=\small\ttfamily,       % the size of the fonts that are used for the code
+basicstyle=\footnotesize\ttfamily,       % the size of the fonts that are used for the code
 keywordstyle=\color{Bittersweet},
 % numbers=left,                   % where to put the line-numbers
 numberstyle=\tiny,      % the size of the fonts that are used for the line-numbers
@@ -152,7 +153,7 @@ morekeywords={module, @@deriving, not, : , /\\}
 \begin{document}
 
 %% Title information
-\title[]{Mergeable Types for Highly-Available Replicated Data}         %% [Short Title] is optional;
+\title[]{Mergeable Types}         %% [Short Title] is optional;
                                         %% when present, will be used in
                                         %% header instead of Full Title.
 %\titlenote{with title note}             %% \titlenote is optional;
@@ -234,7 +235,36 @@ morekeywords={module, @@deriving, not, : , /\\}
 %% Note: \begin{abstract}...\end{abstract} environment must come
 %% before \maketitle command
 \begin{abstract}
-Text of abstract \ldots.
+  Distributed applications often replicate data to improve
+  availability and fault tolerance.  But, the use of replication leads
+  to a significantly more complex programming model.  To ensure a
+  sensible measure of consistency among different replicas of an
+  object, applications are typically structured so that the operations
+  applied to a replicated object on one node are subsequently
+  communicated to other nodes where they can be re-applied locally.
+  As a result, the degree of restructuring and care necessary to
+  transform a sequential or shared-memory concurrent application to a
+  meaningful (replicated) distributed one can be substantial.
+
+  In this paper, we present a new interpretation of replicated types
+  that overcome these concerns.  Our declarative programming model
+  called \name\ treats replication as a form of versioning, in which
+  consistency is enforced through programmer-supplied \emph{merge}
+  functions.  Distributed state is now viewed in terms of a tree of
+  immutable object versions, with merge functions used implicitly by
+  the underlying runtime system to periodically reconcile local
+  versions to yield a consistent global state.  Thus, our model frees
+  the programmer from having to think of low-level operational notions
+  related to distribution and replication, and therefore does not
+  entail any restructuring of application logic.
+    
+  We show how any ML datatype can be enriched with mergeable
+  semantics, formalize a rich concurrency model based on such types ,
+  and describe an instantiation of OCaml equipped with these features.
+  Our implementation is integrated with a content-addressable
+  distributed storage layer that allows any OCaml program to be easily
+  transformed into an efficient, highly available, distributed
+  application.
 \end{abstract}
 
 

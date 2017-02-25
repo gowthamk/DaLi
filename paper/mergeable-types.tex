@@ -22,40 +22,31 @@ through \C{push} or \C{merge}.}
 \label{fig:syntactic-ancestors}
 \end{figure}
 
-\begin{figure}
-\centering
-\includegraphics[scale=0.4]{Figures/pushouts}
-
-\caption{Commutative diagram representing the merge operation.}
-\label{fig:pushouts}
-\end{figure}
-
 We now formally define what we mean by a mergeable type. The
 definition serves as a guide to write merge functions for functional
-data types, and elevate them to the level of replicated data types.
+data types, elevating them to the level of replicated data types.
 
-A functional data type library is as a tuple consisting of a type
-($t$), and a (possibly infinite) collection of functions ($f$, $g$,
-etc.) of type $t \rightarrow t$. We call the functions \emph{primitive
-morphisms}\footnote{We borrow terminology from category theory for
-convenience}. A morphism ($P$, $Q$, etc.) is either a primitive
-morphism, or an associative composition of morphisms ($P \circ Q \circ
-R$). An object $B:t$ is called a \emph{semantic successor} of $A:t$
-(conversely, $A$ is called a \emph{semantic ancestor} of $B$) if and
-only if there exists a morphism $P$ such that $P(A) = B$.  
+A functional data type library is a tuple consisting of a type ($t$),
+and a collection of functions ($f$, $g$, etc.) of type $t \rightarrow
+t$ that are \emph{primitive morphisms}. A morphism ($P$, $Q$, etc.) is
+either a primitive morphism, or an associative composition of
+morphisms ($P \circ Q \circ R$). An object $B:t$ is called a
+\emph{semantic successor} of $A:t$ (conversely, $A$ is called a
+\emph{semantic ancestor} of $B$) if and only if there exists a
+morphism $P$ such that $P(A) = B$.
 
 The aim of a three-way merge function over a type $t$ is to merge a
 pair of semantic successors, $B:t$ and $C:t$, of an object $A:t$, into
 another object $D:t$ such that the relationship between the semantic
 successors and $D$ satisfies certain conditions. These conditions can
-be understood by observing the \rulelabel{E-Pull-Wait} rule of of
+be understood by observing the \rulelabel{E-Pull-Wait} rule of
 Fig.~\ref{fig:opsem}, which applies the \C{merge} function to a pair
 of concurrent versions ($v_1$ and $v_2$) and their least common
 ancestor ($v$). Thus, the only relationship that exists between $v$
 and $v_1$, and $v$ and $v_2$ is the syntactic ancestor relationship
-that follows from the branching structure. The merge function, as
-described above, however assumes that the concurrent versions are
-semantic successors of their LCA. It is therefore essential to
+that follows from the computation's branching structure. The merge
+function, as described above, however assumes that concurrent versions
+are semantic successors of their LCA.  It is therefore essential to
 maintain coherence between the syntactic and semantic ancestor
 relations.
 
@@ -68,12 +59,18 @@ pushed by the thread after reading $v_1$ into the heap, it is
 reasonable to assume that $v_2$ is a result of applying a morphism $P$
 to $v_1$ (i.e., $\exists P.~v_2 = P(v_1)$).  Hence, $v_1$ is a
 semantic ancestor of $v_2$.  Fig.~\ref{fig:syntactic-ancestor-2}
-captures another way of establishing ancestor relationship, namely by
+captures another way of establishing an ancestor relationship, namely by
 merging branches. Version $v_{21}$ on branch $b_2$ is merged into
 $v_{11}$ on $b_1$ to create $v_{12}$ on $b_1$. Versions $v_{11}$ and
+\begin{wrapfigure}{l}{.4\textwidth}
+\centering
+\includegraphics[scale=0.35]{Figures/pushouts}
+\caption{Commutative diagram representing the merge operation.}
+\label{fig:pushouts}
+\end{wrapfigure}
 $v_{21}$ are now syntactic ancestors of $v_{12}$, but for them to be
-semantic ancestors, merge function has to enforce the relationship
-explicitly. In other words, the result of merging of a pair of
+semantic ancestors, the merge function has to enforce the relationship
+explicitly. In other words, the result of merging  a pair of
 semantic successors, $B$ and $C$, of an $A$, has to be an object $D$
 that is a semantic successor of both $B$ and $C$. We now formalize
 this intuition to define a mergeable type.
@@ -88,13 +85,11 @@ t).~M(A,B,C) = (P',Q') \conj  Q'(B) = P'(C))$
 \end{definition}
 Intuitively, a type $t$ is a mergeable type if, whenever there exist
 two morphisms $P$ and $Q$ that map $A:t$ to $B:t$ and $C:t$, there
-must also exist morphisms $P'$ and $Q'$, the map both $B$ and $C$ to
-$D:t$. This intuition is expressed visusally in
-Fig.~\ref{fig:pushouts}.
-
-For a mergeable type $t$, we have the guarantee that a sequence of
-values read by a thread from its branch ``makes sense'' as per the
-data type semantics: 
+also exists morphisms $P'$ and $Q'$, that map both $B$ and $C$ to
+$D:t$. This intuition is expressed visually in
+Fig.~\ref{fig:pushouts}.  For a mergeable type $t$, we have the
+guarantee that a sequence of values read by a thread from its branch
+is sensible, as per the data type semantics:
 
 \begin{theorem} [\bfseries Branch-local consistency]
 \label{thm:branch-consistency}
@@ -104,18 +99,16 @@ along a branch $b$ in $H$, if $\under{H}{v_1 \preceq v_2}$, then there
 exists a morphism $P:t\rightarrow t$ such that $v_2 = P(v_1)$.
 \end{theorem}
 
-Def.~\ref{def:mergeable-type} specifies the merge function ($M$)
-slightly differently; instead of returning a merged value like the
-three-way merge function (\C{merge}), $M$ returns a pair of morphisms.
-This specification is useful to preempt certain non-sensical merge
-functions, and thus enforce the branch-local consistency property
-(Theorem~\ref{thm:branch-consistency}). For instance, consider the
-counter data type from Sec.~\ref{sec:intro}. A three-way merge
-function can be defined to return a constant regardless of its
-arguments:
-\begin{ocaml}
-  let merge lca a b = 0
-\end{ocaml} Such a merge function allows the client (a thread) to
+Rather than specifying merge ($M$) in terms of an LCA,
+Definition~\ref{def:mergeable-type} specifies $M$ in terms of a pair
+of morphisms.  This specification is useful to avoid the expression of certain
+nonsensical merge functions, and thus enforce a useful branch-local
+consistency property (Theorem~\ref{thm:branch-consistency}). For
+instance, consider the counter data type from Sec.~\ref{sec:intro}. A
+three-way merge function can be defined to return a constant
+regardless of its arguments:
+\begin{ocaml} let merge lca a b = 0 \end{ocaml}
+Such a merge function allows the client to
 witness the violation of the branch-local consistency property. For
 example, the client may \C{sync} the counter, whose current local
 value is $10$, and obtain $0$ as a result, thus witnessing a violation
@@ -127,10 +120,10 @@ violates the invariant. In general, the specification of $M$
 guarantees that the merge operation for a type $t$ preserves any
 invariants (e.g., balancedness of a tree, sortedness of a list,
 non-negativeness of an integer etc) that are preserved by all of $t$'s
-morphisms. On the hand, the commutativity of the diagram in
-Fig.~\ref{fig:pushouts} may not be enforced statically. It can however
-be verified at run-time by checking that the morphisms returned by $M$
-map the respective concurrent versions to the same value. The
+morphisms.  The commutativity of the diagram in
+Fig.~\ref{fig:pushouts} need not be enforced statically. It can
+equally be verified at run-time by checking that the morphisms returned by $M$
+map respective concurrent versions to the same value. The
 operational semantics (Fig.~\ref{fig:opsem}) can be extended to this
 effect.
 
@@ -140,11 +133,11 @@ effect.
 % flexibility. 
 
 Merge functions for simple data types are easy to write. For instance,
-the merge logic for counter is simple enough that it doesn't require
-explicit efforts to identify $P$ and $Q$ that led to the
+the merge logic for counter is simple enough that it does not require
+great effort to identify the $P$ and $Q$ that leda to the
 concurrent counter versions, and transform them into $P'$ and $Q'$
 such that the diagram in Fig.~\ref{fig:pushouts} commutes. For more
-sophisticated data types, this process is more involved, and requires
+sophisticated data types, this process is more involved, and may require
 the programmer to perform non-trivial reasoning. We now present an
 alternative definition of a mergeable type that is stronger than
 Def.~\ref{def:mergeable-type}, but also serves as a recipe to build
@@ -175,10 +168,10 @@ conditions hold:
 \paragraph{Strings} Strings are mergeable. Given a string ($s$) and
 its semantic successor ($s'$), an edit script ($P^*$ or $Q^*$) is the
 shortest sequence of \C{insert}, \C{delete}, and \C{substitute}
-operations (string's primitive morphisms), whose composition takes $s$
+operations (a string's primitive morphisms), whose composition takes $s$
 to $s'$. The length of the sequence is in fact the Levenshtein
 distance~\cite{levenstein} between $s$ and $s'$, which can be computed
-in polynomial time via Wagner-Fischer algorithm~\cite{wagner-fischer}.
+in polynomial time~\cite{wagner-fischer}.
 A slight modification of Wagner-Fischer also lets us compute the edit
 script. Fig.~\ref{fig:mergeable-string-eg} shows the edit script ...
 

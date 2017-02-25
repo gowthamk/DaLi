@@ -48,7 +48,9 @@ P & \in & \mathtt{Eval.\; Contexts}(p) & \coloneqq & E_t \ALT
 %
 %
 \begin{smathpar}
-\begin{array}{lcll}
+  \begin{array}{lcll}
+((\lambda x.s)\;v)_t;H & \stepsto & ([v/x]\,s)_t;H
+            & [\rulelabel{E-App}]\\
 (\run{v}{s})_t;\cdot & \stepsto & 
   s_t; \cdot[t_{\top} \mapsto [(v,\C{INIT})]]
             [t\mapsto [(v,\C{FORK}\; [(v,\C{INIT})])]] 
@@ -60,8 +62,6 @@ P & \in & \mathtt{Eval.\; Contexts}(p) & \coloneqq & E_t \ALT
 (\push{v})_t;H & \stepsto & ()_t;H[t \mapsto (v,\C{PUSH})::H(t)]
             & [\rulelabel{E-Push}]\\
 % & & & v\,=\,\C{merge}\,v\,v_1\,v_2 ~\texttt{and}~ \\
-((\lambda x.s)\;v)_t;H & \stepsto & ([v/x]\,s)_t;H
-            & [\rulelabel{E-App}]\\
 (\pull)_t;H(t \mapsto (v,\_)::m) & \stepsto & v_t;H
             & [\rulelabel{E-Pull}]\\
 \end{array}
