@@ -78,6 +78,7 @@ semantic successors, $B$ and $C$, of an $A$, has to be an object $D$
 that is a semantic successor of both $B$ and $C$. We now formalize
 this intuition to define a mergeable type.
 \begin{definition} [\bfseries Mergeable Type]
+\label{def:mergeable-type}
 A type $t$ is said to be mergeable, if and only if there exists a
 function $M$ of type $t \times t \times t \rightarrow (t \rightarrow
 t)\times(t \rightarrow t)$ that satisfies the following property:
@@ -91,16 +92,102 @@ must also exist morphisms $P'$ and $Q'$, the map both $B$ and $C$ to
 $D:t$. This intuition is expressed visusally in
 Fig.~\ref{fig:pushouts}.
 
-The three-way merge function \C{merge} can be defined
-straightforwardly in terms of the function $M$ described above. Thus,
-for a mergeable type $t$, we have the guarantee that a sequence of
+For a mergeable type $t$, we have the guarantee that a sequence of
 values read by a thread from its branch ``makes sense'' as per the
 data type semantics: 
 
 \begin{theorem} [\bfseries Branch-local consistency]
+\label{thm:branch-consistency}
 Let $t$ be a mergeable type, and let $H$ be a legal branching history
 over values of type $t$. For every pair of values $v_1:t$ and $v_2:t$
 along a branch $b$ in $H$, if $\under{H}{v_1 \preceq v_2}$, then there
 exists a morphism $P:t\rightarrow t$ such that $v_2 = P(v_1)$.
 \end{theorem}
+
+Def.~\ref{def:mergeable-type} specifies the merge function ($M$)
+slightly differently; instead of returning a merged value like the
+three-way merge function (\C{merge}), $M$ returns a pair of morphisms.
+This specification is useful to preempt certain non-sensical merge
+functions, and thus enforce the branch-local consistency property
+(Theorem~\ref{thm:branch-consistency}). For instance, consider the
+counter data type from Sec.~\ref{sec:intro}. A three-way merge
+function can be defined to return a constant regardless of its
+arguments:
+\begin{ocaml}
+  let merge lca a b = 0
+\end{ocaml} Such a merge function allows the client (a thread) to
+witness the violation of the branch-local consistency property. For
+example, the client may \C{sync} the counter, whose current local
+value is $10$, and obtain $0$ as a result, thus witnessing a violation
+of counter's monotonicity property. Fortunately,
+Def.~\ref{def:mergeable-type} disallows this semantics. It is
+impossible to define the function $M$ for the counter data type that
+violates the monotonicity invariant, because no counter morphism
+violates the invariant. In general, the specification of $M$
+guarantees that the merge operation for a type $t$ preserves any
+invariants (e.g., balancedness of a tree, sortedness of a list,
+non-negativeness of an integer etc) that are preserved by all of $t$'s
+morphisms. On the hand, the commutativity of the diagram in
+Fig.~\ref{fig:pushouts} may not be enforced statically. It can however
+be verified at run-time by checking that the morphisms returned by $M$
+map the respective concurrent versions to the same value. The
+operational semantics (Fig.~\ref{fig:opsem}) can be extended to this
+effect.
+
+% While the merge function $M$ as specified by
+% Def.~\ref{def:mergeable-type} has more verification value, we continue
+% to use the three-way merge function \C{merge} in our examples for
+% flexibility. 
+
+Merge functions for simple data types are easy to write. For instance,
+the merge logic for counter is simple enough that it doesn't require
+explicit efforts to identify $P$ and $Q$ that led to the
+concurrent counter versions, and transform them into $P'$ and $Q'$
+such that the diagram in Fig.~\ref{fig:pushouts} commutes. For more
+sophisticated data types, this process is more involved, and requires
+the programmer to perform non-trivial reasoning. We now present an
+alternative definition of a mergeable type that is stronger than
+Def.~\ref{def:mergeable-type}, but also serves as a recipe to build
+non-trivial merge functions.
+
+\begin{definition} [\bfseries Mergeable Type]
+\label{def:mergeable-type-2}
+A type $t$ is said to be mergeable if and only if the following
+conditions hold:
+\begin{itemize}
+  \item There exists a function $W: t \times t \rightarrow (t
+  \rightarrow t)\; \C{list}$ that accepts an object $A:t$ and its
+  semantic successor $B:t$, and returns a minimal sequence of
+  primitive morphisms $P^*$, whose composition maps $A$ to $B$. That
+  is, $W(A,B) = P^*$, where $\denot{P^*}(A) = B$, and there does not
+  exist an $R^*$ such that $\denot{R^*}(A) = B$ and $\length{R^*} <
+  \length{P^*}$
+
+  \item There exists a function $M: (t \rightarrow t)^*\!\times\!(t
+  \rightarrow t)^* \;\rightarrow\; (t \rightarrow t)\!\times\!(t
+  \rightarrow t)$ that accepts a pair of minimal sequences of
+  primitive morphisms, $P^*$ and $Q^*$, and returns a pair of morphisms,
+  $Q'$ and $P'$, such that for any object $A:t$, $(Q' \circ
+  \denot{P^*})(A) = (P' \circ \denot{Q^*})(A)$.  
+\end{itemize}
+\end{definition}
+
+\paragraph{Strings} Strings are mergeable. Given a string ($s$) and
+its semantic successor ($s'$), an edit script ($P^*$ or $Q^*$) is the
+shortest sequence of \C{insert}, \C{delete}, and \C{substitute}
+operations (string's primitive morphisms), whose composition takes $s$
+to $s'$. The length of the sequence is in fact the Levenshtein
+distance~\cite{levenstein} between $s$ and $s'$, which can be computed
+in polynomial time via Wagner-Fischer algorithm~\cite{wagner-fischer}.
+A slight modification of Wagner-Fischer also lets us compute the edit
+script. Fig.~\ref{fig:mergeable-string-eg} shows the edit script ...
+
+Next, we apply operational transformation to compute $P^*$ given $Q^*$
+($P^* <+ Q^*$), \emph{or} $Q^*$ given $P^*$ ($Q^* <+ P^*$); there is
+no need to compute both unless verification is one of the aims. 
+
+
+\paragraph{}
+
+
 
