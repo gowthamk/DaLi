@@ -22,27 +22,30 @@
 \label{fig:canvas-sig}
 \end{figure}
 
-In this section, we describe the \name programming model using a
-collaborative drawing application we call \drawsome as a motivating
-example.
+In this section, we describe the \name programming model through the
+example of a collaborative drawing application we call \drawsome.
 
 Fig.~\ref{fig:canvas-sig} shows the signature of the \drawsome
 application. \drawsome represents a free-hand drawing canvas in terms
 of a tree of quadrants.  Each quadrant is simply a leaf node
 containing a single pixel (\C{r},\C{g}, or \C{b}) or a tree, if the
-\begin{wrapfigure}{l}{.4\textwidth}
-\centering
-\includegraphics[scale=0.4]{Figures/canvas-merging}
-\caption{Merging concurrent versions (\C{v1} and \C{v2}) of a drawing
-canvas. \C{lca} is their common ancestor.}
-\label{fig:canvas-merging}
-\end{wrapfigure}
 quadrant contains multiple pixels of different colors. Quadrants are
-expanded into tree structures lazily as and when pixels are colored.
-The representation is thus optimized for sparse canvases, such as
+expanded into a tree structures as and when pixels are colored.  The
+representation is thus optimized for sparse canvases, such as
 whiteboards. The application supports three simple operations:
 creating a new canvas, setting the pixel at a specified coordinate,
-and returning the pixel at a given coordinate. 
+and returning the pixel at a given coordinate. The \C{merge} function
+and \C{deriving versioned} directive are explained below.
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{Figures/canvas-merging}
+
+\caption{Merging concurrent versions (\C{v1} and \C{v2} ) of a drawing
+canvas. \C{lca} is their common ancestor.}
+\label{fig:canvas-merging}
+\end{figure}
+
 \drawsome lets multiple users collaborate on a canvas that is
 conceptually shared among them. Under a shared-memory abstraction,
 there would be a single copy of the canvas that is updated
@@ -73,20 +76,14 @@ and their least common ancestor (\C{lca}) - the version from which the
 two concurrent versions evolved independently. The merge function can
 make use of the pixel values of the common ancestor to merge the pixel
 values on both the canvases. For instance, if the color of a pixel in
-\C{v1} is white, and the same pixel in \C{v2} is green, and its color
-in \C{lca} is white, then it means that only \C{v2} modified the
-color. Hence the pixel is colored green in the merged canvas. On the
-other hand, if the pixel is red in \C{v1}, then it means that both
-\C{v1} and \C{v2} have modified the color. In such case, an
-appropriate color-mixing algorithm can be used to determine the color
-of pixel.  For instance, the pixel can be colored yellow - an additive
-combination of red and green. The logic is illustrated in
-Fig.~\ref{fig:canvas-merging}.  While the \drawsome\ merge operation
-necessarily reflects domain-specific knowledge about the application,
-it makes no reference to distribution or replication, and does not
-impact the definition of any other operation, whose algorithms can be
-developed for a sequential execution environment and seamlessly
-transplanted to a distributed one.
+\C{v1} is white, and in \C{v2} it is green, and its color in \C{lca}
+is white, then it means that only \C{v2} modified the color. Hence the
+pixel is colored green in the merged canvas. On the other hand, if the
+pixel is red in \C{v1}, then it means that both \C{v1} and \C{v2} have
+modified the color. In such case, an appopriate color-mixing algorithm
+can be used to determine the color of pixel.  For instance, the pixel
+can be colored yellow - an additive combination of red and green. The
+logic is illustrated in Fig.~\ref{fig:canvas-merging}.
 \begin{figure}
 \begin{center}
   \begin{ocaml}
@@ -104,6 +101,9 @@ let rec merge lca v1 v2 =
   else if v1=lca then v2
   else if v2=lca then v1
   else match (lca,v1,v2) with
+    (*
+     * The first three rules isomorphize lca, v1 and v2.
+     *)
     | (_, B _, N px2) -> merge lca v1 @@ b_of_n px2
     | (_, N px1, B _) -> merge lca (b_of_n px1) v2
     | (N px, B _, B _) -> merge (b_of_n px) v1 v2
@@ -121,6 +121,9 @@ let rec merge lca v1 v2 =
 \label{fig:merge-canvas}
 \end{center}
 \end{figure}
+
+The \name programming model lets programmers define and compose
+concurrent computations around versioned data structures.
 Fig.~\ref{fig:dali-monad} shows the signature of the \name module that
 implements the programming model along the lines of the well-known
 \C{State} monad~\cite{wadler-monad}. The monad encapsulates a
@@ -140,8 +143,8 @@ Functions \C{return} and \C{bind} have their usual monadic
     val sync_next_version: unit -> ?v:'a -> ('a, 'a) t
   end
   \end{ocaml}
-  \caption{Signature of the \name monad}
-  \label{fig:dali-monad}
+\label{fig:dali-monad}
+\caption{Signature of the \name monad}
 \end{center}
 \end{figure}
 interpretation. \C{get\_current\_version} is like the \C{State}
@@ -156,14 +159,12 @@ this proposal is the current local version of the state that reflects
 local modifications not yet witnessed by any other concurrently
 executing computation.  The operation returns (via a monad) the actual
 next version, which becomes the current version for the rest of the
-computation.  This version is created by merging the proposal (the
-local state) with a subset of concurrent versions that have become
-available since the last merge or fork.  Thus, \C{sync} effectively
-lets a computation sync with all computations operating over replicas
-of the same state that are available (i.e., reachable in the
-network)\footnote{The implementation implicitly triggers a sync
-  whenever a detected network partition is repaired.}  to obtain their
-latest updates.
+computation.  This version is created by merging the proposal with a
+subset of concurrent versions that have become available since the
+last merge or fork. Thus, \C{sync} effectively lets a computation sync
+with a subset of concurrent computations to obtain their latest
+updates.
+
 \begin{figure}
 \centering
 \begin{tabular}{l||l||l}
@@ -224,16 +225,16 @@ Alice on a $5\times 5$ blank canvas, as shown below:
 \end{ocaml}
 Alice starts by reading the current version of the canvas, which is
 blank. She then invites Bob for collaboration by forking a new
-concurrent version for Bob. Bob, in turn, invites Cheryl.
+concurrent version for Bob. Bob, in turn, invites Cheryl for
 \begin{figure}
 \centering
 \includegraphics[scale=0.6]{Figures/canvas-sessions}
 \caption{\drawsome: Collaborative drawing session visualized}
 \label{fig:canvas-sessions}
 \end{figure}
-All three start working on the blank canvas on different replicas.
+collaboration. All three of them start working on the blank canvas.
 Alice draws a red horizontal line from $(0,0)$ (top-left) to $(4,0)$
-(top-right) using \C{C.draw\_line}.\footnote{Its definition is not
+(top-right) using \C{C.draw\_line}.\footnote{Its definitionis not
   shown, but can be constructed using \C{set\_px}} Meanwhile, Bob
 draws a green vertical line from $(0,0)$ to $(0,4)$, and Cheryl draws
 a similar line from $(4,0)$ to $(4,4)$. All three of them call
@@ -331,8 +332,16 @@ The merge operation for lists is composed of two separate functions,
   transformed w.r.t the sequence $s_2 = \C{[I(c,0);S(3,c,s)]}$.  The
   function \C{op\_transform} of Fig.~\ref{fig:mlist-xform} computes
   such \emph{operational transformation} for the sequence \C{mine}
-  w.r.t the sequence \C{others}, and returns \C{mine'} as the
-  transformed sequence.  
+  w.r.t the sequence \C{others}, and returns \C{mine'}, the
+  transformed sequence. To do so, it first pulls the \C{S} edits in
+  \C{mine} to the beginning of the sequence, transforming them w.r.t
+  the \C{I} and \C{D} edits in \C{mine}. Having all the \C{S} edits at
+  the beginning of the \C{mine} sequence makes their transformation
+  easier since the offset of the transformed substitution depends only
+  on the edits in the \C{other} sequence. Furthermore, it facilitates
+  an easy comparison with \C{S} edits at the end of \C{other}. Next,
+  \C{op\_transform} transforms edits in \C{mine} w.r.t \C{other} by
+  comparing their offsets; the rules are straightforward.
 \end{itemize}
 
 
@@ -342,17 +351,16 @@ single least common ancestor (LCA) for any pair of versions, the
 ability to access a previous version on any branch, and mergeability
 of any two concurrent versions. Enforcing these guarantees in a fully
 decentralized distributed setting requires addressing non-trivial
-theoretical challenges described in
-Section~\ref{sec:semantics}. Unlike the canvas, the process of writing
-merge functions for data types with non-trivial invariants could be
-quite involved. The following section describes a principled approach
-to deriving merge functions for any data type given its
-invariants. Like \C{Canvas.merge}, merge functions often need to
-compare multiple versions of a data type for structural equality,
-which, when performed naively, incurs cost linear in the size of
-versions. The representation of a versioned data type in \name is
-optimized for performing comparisons that allows structural equality
-to be determined in constant time. Such engineering details, which
-contribute to the practicality of our programming model, are discussed
-in Sec.~\ref{sec:impl}.
+theoretical challenges described in the next section. Unlike the
+canvas, the process of writing merge functions for data types with
+non-trivial invariants could be quite involved. The following sections
+describe a principled approach to deriving merge functions for any
+data type given its invariants. Like \C{Canvas.merge}, merge functions
+often need to compare multiple versions of a data type for structural
+equality, which, when performed naively, incurs cost linear in the
+size of versions. The representation of a versioned data type in \name
+is optimized for performing comparisons that allows structural
+equality to be determined in constant time. Such engineering details,
+which contribute to the practicality of our programming model are also
+discussed in subsequent sections.
 
