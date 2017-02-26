@@ -1,0 +1,65 @@
+\begin{figure}
+
+\begin{subfigure}[b]{0.7\textwidth}
+\begin{ocaml}
+module type MList = sig
+  module A: MERGEABLE
+  include MERGEABLE
+  type t = A.t list [@@deriving versioned]
+  type edit = I of A.t * int
+    | D of int
+    | S of int * A.t * A.t
+    | Nop
+  ... (* All the standard list functions *)
+  val insert: A.t -> int -> t -> t
+  val delete: int -> t -> t
+  val subst: int -> A.t -> t
+  val edit_seq: t -> t -> edit list option
+  val op_transform: edit list -> edit list -> edit list
+  val merge: t -> t -> t -> t
+end
+\end{ocaml}
+\caption{Signature of Mergeable Lists}
+\label{fig:mlist-sig}
+\end{subfigure}
+
+\begin{subfigure}{0.7\textwidth}
+\begin{ocaml}
+(*
+ * Assumption: subst edits are at the end of the edit seq.
+ *)
+let pull_substs edits = 
+  let (substs,others) = List.partition 
+                          (function | S (_,_,_) -> true
+                             | _ -> false) edits in
+  let xform other subst = match (other, subst)  with 
+    | (I (_,i), S (j,x,y)) when (j>i) -> S (j-1,x,y)
+    | (D i, S (j,x,y)) when (j>=i) ->  S (j+1,x,y)
+    | _ -> subst in
+  let substs' = List.map 
+                  (List.fold_right xform others) substs in
+    substs'@others
+
+let op_transform mine others = 
+  let xform my other = match (my,other)  with 
+    | (I (x,j), I (_,i)) when (j>=i) -> I (x,j+1)
+    | (D j, I (_,i)) when (j>=i) -> D (j+1)
+    | (S (j,x,y), I (_,i)) when (j>=i) -> S (j+1,x,y)
+    | (I (x,j), D i) when (j>i) ->  I (x,j-1)
+    | (D j, D i) when (j=i) ->  Nop
+    | (D j, D i) when (j>i) ->  D (j-1)
+    | (S (j,x,y), D i) when (j=i) -> Nop
+    | (S (j,x,y), D i) when (j>i) -> S (j-1,x,y)
+    | (S (j,x,y), S (i,_,z)) when (j=i) -> S (j,x,A.merge x y z) 
+    | _ -> my in
+  let mine' = List.map (fun my -> List.fold_left 
+                            xform my others) @@ pull_substs mine in
+    mine'
+\end{ocaml}
+\caption{Operational transformation of list operations}
+\label{fig:mlist-xform}
+\end{subfigure}
+
+\caption{Mergeable List Implementation}
+\label{fig:mlist}
+\end{figure}

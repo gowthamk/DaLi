@@ -267,8 +267,77 @@ propose no new versions, hence simply obtain Alice's $C_1'$ as next
 versions.
 
 The \drawsome example demonstrates the utility of mergeable data types
-in building concurrent applications with conceptual sharing of
-state. This example, however, implicitly makes certain assumptions
+and \name programming model in building concurrent applications with
+conceptual sharing of state. The model lets concurrent computations be
+composed around any mergeable type. As exemplified by \drawsome,
+writing a three-way \C{merge} function is the only creative process in
+lifting an OCaml data type to a mergeable type. We now present few
+more examples of mergeable types, and isolate a recurring pattern in
+their merge functions that serves as a guide to write merge functions
+for more sophisticated types.
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.4]{Figures/list-eg}
+
+  \caption{Lists of mergeable values are mergeable. }
+  \label{fig:list-eg}
+\end{figure}
+
+\input{list-code}
+
+{\bf Lists}. List, as an abstract data type, supports three
+operations: \C{insert x i l}, that inserts an element \C{x} at
+position \C{i} in the list \C{l}, \C{delete i l}, that deletes the
+element at \C{i}'th position, and \C{subst i x l}, that substitutes
+the element at \C{i}'th position with \C{x}. Lists of mergeable items
+are mergeable. The signature of a mergeable list library is shown in
+Fig.~\ref{fig:mlist-sig}. Note that the type of items in the list
+(\C{A.t}) is also required to be mergeable. The signature
+\C{MERGEABLE} will be discussed shortly. 
+
+The merge operation for lists is composed of two separate functions,
+\C{edit\_seq} and \C{op\_transform}.
+\begin{itemize}
+  \item \C{edit\_seq} takes a pair of lists, \C{v} and $\C{v'}$, and
+  computes the shortest sequence of list operations that need to be
+  applied on \C{v} to obtain \C{v'}. Such a sequence is called an
+  \emph{edit sequence}. The length of the sequence corresponds to the
+  standard notion of the \emph{edit distance} between the two lists,
+  which can be computed in polynomial time, for e.g., using the
+  Wagner-Fisher algorithm~\cite{wagner-fischer}. A slight modification
+  of Wagner-Fischer also lets us compute the edit sequence. The
+  implementation in Fig.~\ref{fig:mlist} represents edits using the
+  type \C{edit}. Constructors \C{I}, \C{D}, and \C{S} stand for
+  \C{insert}, \C{delete}, and \C{subst}, respectively; \C{Nop} is
+  there for technical reasons. The subst constructor also carries the
+  \C{A.t} element that was substituted. Our implementation of
+  Wagner-Fischer is more-or-less standard (hence, not shown), except
+  that the edit sequence it returns orders \C{I}'s and \C{D}'s before
+  \C{S}'s.  Fig.~\ref{fig:list-eg} illustrates edit sequences for a
+  sample list. The sequence \C{[I(c,0); S(3,c,s)]} maps the list
+  \C{[a;b;c]} to \C{[c;a;b;s]} because \C{subst 3 s (insert c 0
+  [a;b;c]) = [c;a;b;s]}.
+  \item  \C{op\_transform} takes a pair of edit sequences, $s_1$ and
+  $s_2$, that map a list $v$ to two different lists, $v_1$ and $v_2$
+  (e.g., Fig.~\ref{fig:list-eg}), and transforms $s_1$ to $s_1'$ such
+  that $s_1'$ has the same effect on $v_2$ as $s_1$ had on $v$.  For
+  instance, in Fig.~\ref{list-eg}, let $s_1$ be the edit sequence
+  \C{[D(1); S(d,1)]}, which maps the list \C{[a;b;c]} ($v$) to
+  \C{[a;d]} ($v_1$). The \C{D} edit deletes the first element of $v$.
+  However, if $s_1$ is to be applied on the list \C{[c;a;b;s]}
+  ($v_2$), which has a new element at position 0, the \C{D} edit must
+  delete the the second element from $v_2$, if it were to have the
+  same effect as it did on $v$. We say \C{D(1)} in $s_1$ has to be
+  transformed w.r.t the sequence $s_2 = \C{[I(c,0);S(3,c,s)]}$.  The
+  function \C{op\_transform} of Fig.~\ref{fig:mlist-xform} computes
+  such \emph{operational transformation} for the sequence \C{mine}
+  w.r.t the sequence \C{others}, and returns \C{mine'} as the
+  transformed sequence.  
+\end{itemize}
+
+
+This example, however, implicitly makes certain assumptions
 about the model and the underlying system, such as the existence of a
 single least common ancestor (LCA) for any pair of versions, the
 ability to access a previous version on any branch, and mergeability

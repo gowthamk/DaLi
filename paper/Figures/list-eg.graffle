@@ -46,14 +46,115 @@
 	<key>Creator</key>
 	<string>Gowtham Kaki</string>
 	<key>DisplayScale</key>
-	<string>1 0/72 in = 1 0/72 in</string>
+	<string>1 0/72 in = 1.0000 in</string>
 	<key>GraphDocumentVersion</key>
 	<integer>8</integer>
 	<key>GraphicsList</key>
 	<array>
 		<dict>
 			<key>Bounds</key>
-			<string>{{400, 190}, {87, 87}}</string>
+			<string>{{195, 226}, {197, 34}}</string>
+			<key>Class</key>
+			<string>ShapedGraphic</string>
+			<key>FitText</key>
+			<string>YES</string>
+			<key>Flow</key>
+			<string>Resize</string>
+			<key>ID</key>
+			<integer>707</integer>
+			<key>Shape</key>
+			<string>Rectangle</string>
+			<key>Style</key>
+			<dict>
+				<key>fill</key>
+				<dict>
+					<key>Draws</key>
+					<string>NO</string>
+				</dict>
+				<key>shadow</key>
+				<dict>
+					<key>Draws</key>
+					<string>NO</string>
+				</dict>
+				<key>stroke</key>
+				<dict>
+					<key>Draws</key>
+					<string>NO</string>
+				</dict>
+			</dict>
+			<key>Text</key>
+			<dict>
+				<key>Align</key>
+				<integer>0</integer>
+				<key>Pad</key>
+				<integer>0</integer>
+				<key>Text</key>
+				<string>{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf210
+\cocoascreenfonts1{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
+
+\f0\fs56 \cf0 merge(c,d,s) = f}</string>
+				<key>VerticalPad</key>
+				<integer>0</integer>
+			</dict>
+			<key>Wrap</key>
+			<string>NO</string>
+		</dict>
+		<dict>
+			<key>Bounds</key>
+			<string>{{106, 204.5}, {66, 58}}</string>
+			<key>Class</key>
+			<string>ShapedGraphic</string>
+			<key>FitText</key>
+			<string>YES</string>
+			<key>Flow</key>
+			<string>Resize</string>
+			<key>ID</key>
+			<integer>706</integer>
+			<key>Shape</key>
+			<string>Rectangle</string>
+			<key>Style</key>
+			<dict>
+				<key>fill</key>
+				<dict>
+					<key>Draws</key>
+					<string>NO</string>
+				</dict>
+				<key>shadow</key>
+				<dict>
+					<key>Draws</key>
+					<string>NO</string>
+				</dict>
+				<key>stroke</key>
+				<dict>
+					<key>Draws</key>
+					<string>NO</string>
+				</dict>
+			</dict>
+			<key>Text</key>
+			<dict>
+				<key>Align</key>
+				<integer>2</integer>
+				<key>Pad</key>
+				<integer>0</integer>
+				<key>Text</key>
+				<string>{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf210
+\cocoascreenfonts1{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue255;}
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qr
+
+\f0\fs48 \cf2 D(1); \
+S(d,1) }</string>
+				<key>VerticalPad</key>
+				<integer>0</integer>
+			</dict>
+			<key>Wrap</key>
+			<string>NO</string>
+		</dict>
+		<dict>
+			<key>Bounds</key>
+			<string>{{212, 331}, {147, 29}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>FitText</key>
@@ -94,9 +195,7 @@
 {\colortbl;\red255\green255\blue255;\red0\green0\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\f0\fs48 \cf2 I('3',0); \
-I('7',2); \
-D(3)      }</string>
+\f0\fs48 \cf2 S(1,d,f); I(c,0)}</string>
 				<key>VerticalPad</key>
 				<integer>0</integer>
 			</dict>
@@ -105,7 +204,7 @@ D(3)      }</string>
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{243.5, 330}, {72, 29}}</string>
+			<string>{{427, 204.5}, {78, 58}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>FitText</key>
@@ -136,15 +235,18 @@ D(3)      }</string>
 			</dict>
 			<key>Text</key>
 			<dict>
+				<key>Align</key>
+				<integer>0</integer>
 				<key>Pad</key>
 				<integer>0</integer>
 				<key>Text</key>
 				<string>{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf210
 \cocoascreenfonts1{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
 {\colortbl;\red255\green255\blue255;\red0\green0\blue255;}
-\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\f0\fs48 \cf2 I('8',2) }</string>
+\f0\fs48 \cf2 S(3,s,f)\
+D(2); }</string>
 				<key>VerticalPad</key>
 				<integer>0</integer>
 			</dict>
@@ -153,7 +255,7 @@ D(3)      }</string>
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{79, 197}, {82, 87}}</string>
+			<string>{{211, 126}, {151, 29}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>FitText</key>
@@ -194,57 +296,7 @@ D(3)      }</string>
 {\colortbl;\red255\green255\blue255;\red0\green0\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qr
 
-\f0\fs48 \cf2 I('3',0); \
-S('7',2); \
-D(3)      }</string>
-				<key>VerticalPad</key>
-				<integer>0</integer>
-			</dict>
-			<key>Wrap</key>
-			<string>NO</string>
-		</dict>
-		<dict>
-			<key>Bounds</key>
-			<string>{{213.5, 127}, {132, 29}}</string>
-			<key>Class</key>
-			<string>ShapedGraphic</string>
-			<key>FitText</key>
-			<string>YES</string>
-			<key>Flow</key>
-			<string>Resize</string>
-			<key>ID</key>
-			<integer>701</integer>
-			<key>Shape</key>
-			<string>Rectangle</string>
-			<key>Style</key>
-			<dict>
-				<key>fill</key>
-				<dict>
-					<key>Draws</key>
-					<string>NO</string>
-				</dict>
-				<key>shadow</key>
-				<dict>
-					<key>Draws</key>
-					<string>NO</string>
-				</dict>
-				<key>stroke</key>
-				<dict>
-					<key>Draws</key>
-					<string>NO</string>
-				</dict>
-			</dict>
-			<key>Text</key>
-			<dict>
-				<key>Pad</key>
-				<integer>0</integer>
-				<key>Text</key>
-				<string>{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf210
-\cocoascreenfonts1{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;\red0\green0\blue255;}
-\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
-
-\f0\fs48 \cf2 D(1); I('8',2) }</string>
+\f0\fs48 \cf2 I(c,0); S(3,c,s) }</string>
 				<key>VerticalPad</key>
 				<integer>0</integer>
 			</dict>
@@ -263,8 +315,8 @@ D(3)      }</string>
 			<integer>699</integer>
 			<key>Points</key>
 			<array>
-				<string>{209, 324.00001129987879}</string>
-				<string>{349, 324.00001129987879}</string>
+				<string>{203, 324.00001129987879}</string>
+				<string>{380, 324.00001129987879}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -296,8 +348,8 @@ D(3)      }</string>
 			<integer>698</integer>
 			<key>Points</key>
 			<array>
-				<string>{175.4999953704795, 179}</string>
-				<string>{175.4999953704795, 307}</string>
+				<string>{175.4999959101651, 179}</string>
+				<string>{175.4999959101651, 307}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -329,8 +381,8 @@ D(3)      }</string>
 			<integer>697</integer>
 			<key>Points</key>
 			<array>
-				<string>{390.5000083737209, 179}</string>
-				<string>{390.5000083737209, 307}</string>
+				<string>{414.49836599356621, 179}</string>
+				<string>{414.48606288629992, 307}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -362,8 +414,8 @@ D(3)      }</string>
 			<integer>696</integer>
 			<key>Points</key>
 			<array>
-				<string>{209, 162.00000062980536}</string>
-				<string>{357, 162.00000062980536}</string>
+				<string>{214, 162.00000062980536}</string>
+				<string>{365, 162.00000062980536}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -385,7 +437,7 @@ D(3)      }</string>
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{349, 307}, {83, 34}}</string>
+			<string>{{380, 307}, {69, 34}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>FitText</key>
@@ -424,7 +476,7 @@ D(3)      }</string>
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
-\f0\fs56 \cf0 "3178"}</string>
+\f0\fs56 \cf0 [c;a;f]}</string>
 				<key>VerticalPad</key>
 				<integer>0</integer>
 			</dict>
@@ -433,7 +485,7 @@ D(3)      }</string>
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{142, 307}, {67, 34}}</string>
+			<string>{{148, 307}, {55, 34}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>FitText</key>
@@ -472,7 +524,7 @@ D(3)      }</string>
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
-\f0\fs56 \cf0 "317"}</string>
+\f0\fs56 \cf0 [a;d]}</string>
 				<key>VerticalPad</key>
 				<integer>0</integer>
 			</dict>
@@ -481,7 +533,7 @@ D(3)      }</string>
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{357, 145}, {67, 34}}</string>
+			<string>{{365, 145}, {99, 34}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>FitText</key>
@@ -520,7 +572,7 @@ D(3)      }</string>
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
-\f0\fs56 \cf0 "138"}</string>
+\f0\fs56 \cf0 [c;a;b;s]}</string>
 				<key>VerticalPad</key>
 				<integer>0</integer>
 			</dict>
@@ -529,7 +581,7 @@ D(3)      }</string>
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{142, 145}, {67, 34}}</string>
+			<string>{{137, 145}, {77, 34}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
 			<key>FitText</key>
@@ -568,7 +620,7 @@ D(3)      }</string>
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
-\f0\fs56 \cf0 "123"}</string>
+\f0\fs56 \cf0 [a;b;c]}</string>
 				<key>VerticalPad</key>
 				<integer>0</integer>
 			</dict>
@@ -623,7 +675,7 @@ D(3)      }</string>
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2017-02-25 17:20:38 +0000</string>
+	<string>2017-02-26 15:01:59 +0000</string>
 	<key>Modifier</key>
 	<string>Gowtham Kaki</string>
 	<key>NotesVisible</key>
