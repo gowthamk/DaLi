@@ -1,0 +1,28 @@
+\begin{figure}
+
+\begin{subfigure}[b]{0.7\textwidth}
+\begin{ocaml}
+module type MList = sig
+  module A: sig
+    type t
+    val merge: t -> t -> t -> t
+  end
+  type t = A.t list
+  ... (* All the standard list functions *)
+  val merge: t -> t -> t -> t (* and the merge function *)
+  (* The following are exposed only for this presentation *)
+  type edit = I of A.t * int
+    | D of int
+    | S of int * A.t * A.t
+  val edit_seq: t -> t -> edit list option
+  val op_transform: edit list -> edit list -> edit list
+end
+\end{ocaml}
+\caption{Signature of Mergeable Lists}
+\label{fig:mlist-sig}
+\end{subfigure}
+
+
+\caption{Mergeable List Implementation}
+\label{fig:mlist}
+\end{figure}

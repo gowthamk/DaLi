@@ -1,28 +1,4 @@
 \begin{figure}
-
-\begin{subfigure}[b]{0.7\textwidth}
-\begin{ocaml}
-module type MList = sig
-  module A: MERGEABLE
-  include MERGEABLE
-  type t = A.t list [@@deriving versioned]
-  type edit = I of A.t * int
-    | D of int
-    | S of int * A.t * A.t
-    | Nop
-  ... (* All the standard list functions *)
-  val insert: A.t -> int -> t -> t
-  val delete: int -> t -> t
-  val subst: int -> A.t -> t
-  val edit_seq: t -> t -> edit list option
-  val op_transform: edit list -> edit list -> edit list
-  val merge: t -> t -> t -> t
-end
-\end{ocaml}
-\caption{Signature of Mergeable Lists}
-\label{fig:mlist-sig}
-\end{subfigure}
-
 \begin{subfigure}{0.75\textwidth}
 \begin{ocaml}
 (*
@@ -39,6 +15,11 @@ let op_transform mine others =
     let f my' = (my',other) in
     let g other' = (my,other') in
       match (my,other)  with 
+        (*
+         * If my edit intends to insert at offset j, but other edit 
+         * has already inserted at offset i, where j>=i, then my edit 
+         * must now insert at offset j+1. 
+         *)
       | (I (x,j), I (_,i)) when (j>=i) -> f @@ I (x,j+1)
       | (D j, I (_,i)) when (j>=i) -> f @@ D (j+1)
       | (S (j,x,y), I (_,i)) when (j>=i) -> f @@ S (j+1,x,y)
@@ -69,7 +50,4 @@ let op_transform mine others =
 \caption{Operational transformation of list operations}
 \label{fig:mlist-xform}
 \end{subfigure}
-
-\caption{Mergeable List Implementation}
-\label{fig:mlist}
 \end{figure}
