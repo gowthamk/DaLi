@@ -1,0 +1,16 @@
+# Scalability test
+# ----------------
+# Total ops = 4000
+# Total ops / node = 4000 / num_nodes
+# initial string length = 1576 (to be or not to be soliloqy)
+# 2 Nodes each in us-central, eu-west, asia-northeast, asia-east
+# ================
+# num_nodes tp_ops_per_sec err lat_sec err
+1	39.46			25
+2	74.1848		25.5
+3	111.2772	25.7
+4	153.1048	26
+5	189.408		26.3
+6	222.5544	26.5
+7	256.8846	26.8
+8	303.0528	27.1
