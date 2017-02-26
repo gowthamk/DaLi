@@ -1,0 +1,98 @@
+\section{Related Work}
+\label{sec:related}
+
+Our idea of versioning state bears resemblance to Concurrent
+Revisions~\cite{BBL+10}, a programming abstraction that provides
+deterministic concurrent execution by forking and merging
+\emph{versions}, portions of state shared among concurrent threads.
+The idea of using revisions as a means to programming eventually
+consistent distributed systems was further developed
+in~\cite{BFL+12,Burckhardt2012}.  The \name\ programming model,
+however, differs substantially from a concurrent revisions model
+because it imposes no distinction between \emph{servers}, machines
+that hold global state, and \emph{clients}, devices that operate on
+local, potentially stale, data - any computation executing in a
+distributed environment is free to fork new versions, and synchronize
+against other replicated state.  Our model, furthermore, supports
+fully decentralized operation and is robust to network partitions and
+failures. Just as significantly, \name\ allows applications to
+customize join semantics with programmable merge operations.  Indeed,
+the integration of a version-based mechanism within OCaml allows a
+degree of type safety, composability, and polymorphism not available
+in related systems.
+
+\cite{Burckhardt2015} also presents an operational model of a
+replicated data store that is based on the abstract system model
+presented in ~\cite{Burckhardt2014}; their design is similar to the
+model described in~\cite{pldi15}.  In both approaches, coordination
+among replicas involves transmitting operations on replicated objects
+that are performed locally on each replica.  In contrast,
+\name\ allows programmers to use familiar state-based and functional
+abstractions when developing distributed applications.  As we
+illustrated in Fig.~\ref{fig:counter-rdt}, using effects and
+operations to coordinate the activities of replicas may involve
+addressing subtleties that do not manifest otherwise.  Our case
+studies and experimental results support our contention that using
+well-understood state (heap)-based abstractions to build distributed
+applications greatly simplifies program reasoning and eases
+development, without compromising efficiency.
+
+Modern distributed systems are often equipped with only parsimonious
+data models (e.g., key-value model) and poorly understood low-level
+consistency guarantees\footnote{Cassandra~\cite{Cassandra}, a popular
+  NoSQL data store, comes with various consistency enforcement
+  mechanisms, such as anti-entropy protocols, {\sc QUORUM} and {\sc
+    LOCAL\_QUORUM} reads and writes, and light-weight transactions,
+  each of which can be controlled via configuration knobs or runtime
+  parameters.}  that complicate program reasoning, and make it hard to
+enforce application integrity. Some authors~\cite{bailis-bolton} have
+demonstrated that it is possible to\emph{bolt on} high-level
+consistency guarantees (e.g., causal consistency)~\cite{COPS,BEG+17}
+as a \emph{shim layer} service over existing stores.
+
+A number of verification techniques, programming abstractions, and
+tools have been proposed to reason about program behavior in a
+geo-replicated weakly consistent environment.  These techniques treat
+replicated storage as a black box with a fixed pre-defined consistency
+model~\cite{bailis-vldb, alvaro-calm, gotsman-popl16,redblue-atc,
+  redblue-osdi, ecinec}.  On the other hand, compositional proof
+techniques and mechanized verification frameworks have been developed
+to rigorously reason about various components of a distributed data
+store~\cite{verdi,lbc16}. \name seeks to provide a rich high-level
+programming model, built on rigorous foundations, that can facilitate
+program reasoning and verification.  An important by-product of the
+programming model is that it does not require algorithmic
+restructuring to transplant a sequential or concurrent program to a
+distributed, replicated setting; the only additional burden imposed on
+the developer is the need to provide a merge operator, a function that
+can be often easily written for many common datatypes.
+
+Several conditions have been proposed to judge whether an operation on
+a replicated data object needs coordination or not. ~\cite{Calm}
+defines \emph{logical monotonicity} as a sufficient condition for
+coordination freedom, and proposes a consistency analysis that marks
+code regions performing non-monotonic reasoning (eg: aggregations,
+such as \C{COUNT}) as potential coordination
+points. ~\cite{IConfluence} and ~\cite{Sieve} define \emph{invariant
+  confluence} and \emph{invariant safety}, respectively, as conditions
+for safely executing an operation without coordination.
+~\cite{indigo} requires programmers to declare application semantics,
+and the desired application-specific invariants as formulas in
+first-order logic. It performs static analysis on these formulas to
+determine $I$-offender sets - sets of operations, which, when
+performed concurrently, result in violation of one or more of the
+stated invariants. For each offending set of operations, if the
+programmer chooses invariant-violation avoidance over violation
+repair, the system employs various techniques, such as escrow
+reservation, to ensure that the offending set is effectively
+serialized.  All of these approaches differ significantly from the
+core goals of \name, which is to enable seamless application-driven
+techniques for programming geo-replicated systems.  The
+\name\ programmer is not concerned with different system-specific
+consistency or isolation levels, or invariants that are sensitive to
+these levels.  Instead, the only requirements demanded of the
+developer is the need to reason about a sensible merge semantics for
+data structures.  Such reasoning can be applied without consideration
+of system- or architecture-specific details.  This reasoning phase
+implicitly expresses salient semantic invariants without having to be
+exposed to low-level operational details.
