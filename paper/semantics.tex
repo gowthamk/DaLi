@@ -142,11 +142,17 @@ and $\under{H}{v \preceq v'}$.
 \end{definition}
 
 The function \C{lca} used in the premise of \rulelabel{E-Pull-Wait}
-computes the LCA of two branches. The function is in fact a partial
-function because the definition of LCA doesn't guarantee its
-uniqueness for a pair of branches. Such nuances of LCA, and the
-guarantees provided by the system notwithstanding these nuances, are
-discussed in the subsection~\ref{sec:meta}. 
+computes the LCA of two branches, and assumes it to be unique.  But,
+observe that the definition of LCA doesn't guarantee its uniqueness;
+it has to be enforced explicitly.  The semantics enforces the
+uniqueness of LCA by constraining the branching structure via the
+\rulelabel{E-Pull-Wait} rule. The rule merges version $v'$ into
+version $v$ only if they are \emph{safely mergeable} (denoted
+$\under{H}{v' \mbleto t}$), i.e., they have a single LCA, and merging
+both versions does not lead to a case where a branch has multiple LCAs
+with rest of the branches, hence gets \emph{stuck}. Such nuances of
+LCA, and the guarantees provided by the system notwithstanding these
+nuances, are discussed in the subsection~\ref{sec:meta}. 
 
 \input{mergeable-types}
 
