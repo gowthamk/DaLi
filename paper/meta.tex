@@ -12,9 +12,9 @@ not be the case. With unrestrained branching and merging, there is no
 bound on the number of LCAs a pair of versions can have.  For example,
 in Fig.~\ref{fig:criss-cross-lcas}, the merge of 0 with 3 is preceded
 by two ``criss-cross'' merges between their respective branches
-resulting in there being two LCAs (5 and 4) for 0 and 3. 
+resulting in there being two LCAs (5 and 4) for 0 and 3.
 % Multiple LCAs can occur even without criss-cross merges, as
-% demonstrated by Fig.~\ref{fig:external-lcas}. 
+% demonstrated by Fig.~\ref{fig:external-lcas}.
 Concurrent versions with multiple LCAs do not lend themselves to
 three-way merging. If such versions represent the tips of their respective
 branches, they render the branches unmergeable (since  \C{lca} is no
@@ -22,7 +22,7 @@ longer a function). This problem also arises in the context of source
 control systems, which employ \emph{ad hoc} mechanisms to pave the way
 for three-way merging.  GitHub~\cite{github}, for instance,
 recursively merges LCAs to compute a virtual ancestor, which then
-\begin{wrapfigure}{l}{.4\textwidth}
+\begin{wrapfigure}{L}{.4\textwidth}
 \centering
 \includegraphics[scale=0.45]{Figures/merge-needs-lca}
 \caption{This example of a grow-only counter illustrate why \C{merge}
@@ -90,7 +90,7 @@ into $v_{21}$, but not $v_{11}$ into $v_{21}$, thus preempting a
 criss-cross branching structure.
 % In other words, a criss-cross branching structure is prevented due
 % to the order among merges between conflicting branches introduced as
-% a result of \rulelabel{E-Pull-Wait} being an atomic step. 
+% a result of \rulelabel{E-Pull-Wait} being an atomic step.
 
 % Next, for branching structures where a pair of branches (i.e., their
 % respective latest versions) have multiple externally-located LCAs, we

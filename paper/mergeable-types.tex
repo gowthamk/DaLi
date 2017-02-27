@@ -59,7 +59,7 @@ semantic ancestor of $v_2$.  Fig.~\ref{fig:syntactic-ancestor-2}
 captures another way of establishing an ancestor relationship, namely by
 merging branches. Version $v_{21}$ on branch $b_2$ is merged into
 $v_{11}$ on $b_1$ to create $v_{12}$ on $b_1$. Versions $v_{11}$ and
-\begin{wrapfigure}{l}{.4\textwidth}
+\begin{wrapfigure}{L}{.4\textwidth}
 \centering
 \includegraphics[scale=0.35]{Figures/pushouts}
 \caption{Commutative diagram representing the merge operation.}
@@ -108,7 +108,7 @@ function can be defined to return a constant regardless of its
 arguments:
 \begin{ocaml}
   let merge lca a b = 0
-\end{ocaml}  
+\end{ocaml}
 Such a merge function allows the client to witness a violation of
 branch-local consistency. For example, the client may
 \C{sync} the counter, whose current local value is $10$, and obtain
@@ -132,7 +132,7 @@ value. The \rulelabel{E-Pull-Wait} rule of the operational semantics
 {
   t\neq t' \spc
   \under{H}{v' \mbleto v} \spc
-% \C{world}(H,t') \semsucceq \C{world}(H,t)\spc 
+% \C{world}(H,t') \semsucceq \C{world}(H,t)\spc
   v' \not\preceq v \spc
   (P',Q') = M(\C{lca}(H(t),H(t')), v, v') \spc
   Q'(v) = P'(v')
@@ -147,7 +147,7 @@ value. The \rulelabel{E-Pull-Wait} rule of the operational semantics
 % While the merge function $M$ as specified by
 % Def.~\ref{def:mergeable-type} has more verification value, we continue
 % to use the three-way merge function \C{merge} in our examples for
-% flexibility. 
+% flexibility.
 
 Def.~\ref{def:mergeable-type} is immediately applicable to simple data
 types like counter to explain why they are mergeable. The merge logic
@@ -188,10 +188,10 @@ conditions hold:
   \rightarrow t)$ that accepts a pair of minimal sequences of
   primitive morphisms, $P^*$ and $Q^*$, and returns a pair of morphisms,
   $P'$ and $Q'$, such that for any object $A:t$, $(Q' \circ
-  \denot{P^*})(A) = (P' \circ \denot{Q^*})(A)$.  
+  \denot{P^*})(A) = (P' \circ \denot{Q^*})(A)$.
 \end{itemize}
 The commutativity diagram of Fig.~\ref{fig:pushouts-2} visualizes this
-definition. 
+definition.
 \end{definition}
 
 The definition asserts the existence of two functions for a mergeable
@@ -199,7 +199,7 @@ type $t$. First, the function $W$, which (implicitly) computes the
 edit distance between an object $A:t$ and its semantic successor
 $B:t$.  The sequence of primitive morphisms it returns ($P^*$) is
 called an edit sequence. Applying the edit sequence on $A$ produces
-\begin{wrapfigure}{l}{.4\textwidth}
+\begin{wrapfigure}{L}{.4\textwidth}
 \centering
 \includegraphics[scale=0.35]{Figures/pushouts-2}
 \caption{Commutative diagram for Def.~\ref{def:mergeable-type-2}.}
@@ -217,5 +217,5 @@ Def.~\ref{def:mergeable-type-2} is immediately applicable to the list
 type, and lets us explain why it is a mergeable type.  \C{MList.edit\_seq}
 and \C{MList.op\_transform}, respectively, are the evidences for the
 existence of $W$ and $M$ functions.
-  
+
 
