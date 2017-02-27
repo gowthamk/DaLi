@@ -151,10 +151,10 @@ uniqueness of LCA by constraining the branching structure via the
 \rulelabel{E-Pull-Wait} rule. The rule merges version $v'$ into
 version $v$ only if they are safely mergeable ($\under{H}{v' \mbleto
 v}$), i.e., they have a single LCA, and merging both versions does not
-lead to a case where a branch has multiple LCAs with rest of the
-branches, hence gets \emph{stuck}. Such nuances of LCA, and the
-guarantees provided by the system notwithstanding these nuances, are
-discussed in the Sec.~\ref{sec:meta}. 
+lead to a case where a branch (i.e., its latest version) has multiple
+LCAs with rest of the branches, hence gets \emph{stuck}. Such nuances
+of LCA, and the guarantees provided by the system notwithstanding
+these nuances, are discussed in the Sec.~\ref{sec:meta}. 
 
 \input{mergeable-types}
 
