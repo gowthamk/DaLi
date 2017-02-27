@@ -16,23 +16,24 @@ def main ():
     if line == "\n" or line.startswith ("#"):
       continue
     d = line.split ()
-    merge.append ((int(d[0]), float(d[1])/1000.0, float(d[2])/1000.0, float(d[3])/1000.0))
+    merge.append ((int(d[0]), float(d[2]) * 100.0 / float(d[1]), float(d[3]) * 100.0/float(d[1])))
 
   font = {'family' : 'normal', 'weight' : 'normal', 'size' : 12}
   matplotlib.rc('font', **font)
 
   fig, ax1 = plt.subplots()
 
-  (dist,merge,comp,nw) = zip(*merge)
+  (dist,comp,nw) = zip(*merge)
 
-  fig, ax = plt.subplots()
-  ax.stackplot (dist, [comp, nw], colors=['#55BA87','#7E1137'])
-  ax.set_xlabel("Time (s)")
-  ax.set_ylabel("Distance (ops)")
-  ax.set_xlim([0,256])
-  plt.legend([mpatches.Patch(color='#55BA87'),
-              mpatches.Patch(color='#7E1137')],
-             ['computation','network'], loc='upper left')
+  ind = np.arange(len(dist))
+  width = 0.35
+  p1 = plt.bar (ind, comp, width, color='#FFCE00')
+  p2 = plt.bar (ind, nw, width, color='#0375B4', bottom=comp)
+
+  plt.xlabel("Distance (ops)")
+  plt.ylabel("Time share (%)")
+  plt.xticks(ind, dist)
+  plt.legend((p1[0],p2[0]),('computation','network'))
   fig.tight_layout()
   plt.savefig ("merge.pdf")
   plt.close ()

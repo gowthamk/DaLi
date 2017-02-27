@@ -21,15 +21,12 @@ end) = struct
     else merge_rec old l r
 
   and merge_rec old l r =
-    match (l,r) with
-    | Leaf _, _
-    | _, Leaf _ -> fallback old l r
-    | Node (ll,lr), Node (rl,rr) ->
-        match old with
-        | Leaf _ -> fallback old l r
-        | Node (oldl, oldr) ->
-            let newl = merge oldl ll rl in
-            let newr = merge oldr lr rr in
-            Node (newl, newr)
-
+    match (old, l,r) with
+    | Leaf _, _, _
+    | _, Leaf _, _
+    | _, _, Leaf _ -> fallback old l r
+    | Node (oldl,oldr), Node (ll,lr), Node (rl,rr) ->
+      let newl = merge oldl ll rl in
+      let newr = merge oldr lr rr in
+      Node (newl, newr)
 end
