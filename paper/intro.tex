@@ -110,7 +110,7 @@ every distributed data structure used by the application.
   \begin{ocaml}
     module Counter: sig
       type t
-      type eff 
+      type eff
       val add: int -> t-> eff
       val mult: int -> t -> eff
       val apply: eff -> t -> t
@@ -154,7 +154,7 @@ counters, a \C{read} operation performed at another replica may
     produced through merging, and blue circles represent state
     produced by applying counter operations on a node-local version.
   }
-\vspace*{-.85in}  
+\vspace*{-.85in}
 \end{wrapfigure}
 witness the increment to $c_1$, but not $c_2$, thus violating the
 invariant. The intention to atomically apply both effects cannot be
@@ -179,7 +179,7 @@ bears strong similarity to the original sequential one:
   \begin{ocaml}
     module Replicated_Counter = struct
       include Counter
-      type mergeable_t = t 
+      type mergeable_t = t
       let merge lca v1 v2 =
          lca + (v1 - lca) + (v2 - lca)
     end
@@ -243,7 +243,7 @@ Our contributions are summarized below:
       transparently adds persistence and replication features to a
       mergeable type, and which sits atop the Irmin persistent
       store~\cite{irmin}, a content-addressable storage library for
-      OCaml.  We also present case studies and experimental results
+      OCaml. We also present case studies and experimental results
       that justify the practical utility of our approach.
 \end{itemize}
 
@@ -277,7 +277,7 @@ Our contributions are summarized below:
 %% the presence of arbitrary merges provided the merge operation is
 %% commutative with respect to its version state arguments.  Furthermore,
 %% \name profitably exploits provenance information available via
-%% branches to make application resilient to network partitions.  
+%% branches to make application resilient to network partitions.
 %% In this paper, we define a semantics of mergeable datatypes that lets
 %% any OCaml program be seamlessly deployed in a distributed environment
 %% with implicit support for replicated and decentralized operation.  The

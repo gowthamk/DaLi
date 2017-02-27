@@ -6,12 +6,12 @@
   \begin{ocaml}
   module type CANVAS = sig
     type pixel = {r:char; g:char; b:char}
-    type tree = 
+    type tree =
       | N of pixel
-      | B of {tl: tree; tr: tree; bl: tree; br: tree} 
-    type t = {max_x:int; max_y:int; canvas:tree} 
+      | B of {tl: tree; tr: tree; bl: tree; br: tree}
+    type t = {max_x:int; max_y:int; canvas:tree}
     type loc = {x:int; y:int}
-  
+
     val new_canvas: int -> int -> t
     val set_px: t -> loc -> pixel -> t
     val get_px: t -> loc -> pixel
@@ -84,7 +84,7 @@ logic is illustrated in Fig.~\ref{fig:canvas-merging}.
 \begin{figure}
 \begin{center}
   \begin{ocaml}
-let color_mix px1 px2 : pixel = 
+let color_mix px1 px2 : pixel =
 let f = Char.code in
 let h x y = Char.chr @@ (x + y)/ 2 in
 let (r1,g1,b1) = (f px1.r, f px1.g, f px1.b) in
@@ -93,7 +93,7 @@ let (r,g,b) = (h r1 r2, h g1 g2, h b1 b2) in {r=r; g=g; b=b}
 
 let b_of_n px = B {tl_t=N px; tr_t=N px; bl_t=N px; br_t=N px}
 
-let rec merge lca v1 v2 = 
+let rec merge lca v1 v2 =
   if v1=v2 then v1
   else if v1=lca then v2
   else if v2=lca then v1
@@ -110,7 +110,7 @@ let rec merge lca v1 v2 =
         let bl_t' = merge x.bl_t x1.bl_t x2.bl_t in
         let br_t' = merge x.br_t x1.br_t x2.br_t in
           B {tl_t=tl_t'; tr_t=tr_t'; bl_t=bl_t'; br_t=br_t'}
-    | (_, N px1, N px2) -> 
+    | (_, N px1, N px2) ->
         (* pixels are merged by mixing colors *)
         let px' = color_mix px1 px2 in N px'
  \end{ocaml}
@@ -166,42 +166,42 @@ updates.
 \centering
 \begin{tabular}{l||l||l}
 \begin{ocaml}
-let alice_f : C.t unit t = 
-  get () >>= fun c0 -> 
+let alice_f : C.t unit t =
+  get () >>= fun c0 ->
   fork bob_f >>= fun () ->
-  let c0' = C.draw_line c0 
+  let c0' = C.draw_line c0
     {x=0;y=0}
     {x=4;y=0} in
-  sync () ~v:c0' >>= 
+  sync () ~v:c0' >>=
   fun c1 ->
-  let c1' = C.draw_line c1 
-    {x=0;y=4} 
+  let c1' = C.draw_line c1
+    {x=0;y=4}
     {x=4;y=4} in
-  sync () ~v:c1' >>= 
+  sync () ~v:c1' >>=
   fun c2 -> return ()
 \end{ocaml}
 &
 \begin{ocaml}
-let bob_f : C.t unit t = 
-  get () >>= fun c0 -> 
-  fork cheryl_f >>= 
+let bob_f : C.t unit t =
+  get () >>= fun c0 ->
+  fork cheryl_f >>=
   fun () ->
-  let c0' = C.draw_line c0 
-    {x=0;y=0} 
+  let c0' = C.draw_line c0
+    {x=0;y=0}
     {x=0;y=4} in
-  sync () ~v:c0' >>= 
-  fun c1 -> sync () >>= 
+  sync () ~v:c0' >>=
+  fun c1 -> sync () >>=
   fun c2 -> return ()
 \end{ocaml}
 &
 \begin{ocaml}
-let cheryl_f : C.t unit t = 
-  get () >>= fun c0 -> 
-  let c0' = C.draw_line c0 
-    {x=4;y=0} 
+let cheryl_f : C.t unit t =
+  get () >>= fun c0 ->
+  let c0' = C.draw_line c0
+    {x=4;y=0}
     {x=4;y=0} in
-  sync () ~v:c0' >>= 
-  fun c1 -> sync () >>= 
+  sync () ~v:c0' >>=
+  fun c1 -> sync () >>=
   fun c2 -> return ()
 \end{ocaml}
 \\
@@ -217,8 +217,8 @@ drawing session between Alice, Bob and Cheryl can be composed using
 Fig.~\ref{fig:canvas-sessions}. Assume that the session starts with
 Alice on a $5\times 5$ blank canvas, as shown below:
 \begin{ocaml}
-  module C = Canvas;; 
-  with_init_version_do (C.new_blank 5 5) alice_f 
+  module C = Canvas;;
+  with_init_version_do (C.new_blank 5 5) alice_f
 \end{ocaml}
 Alice starts by reading the current version of the canvas, which is
 blank. She then invites Bob for collaboration by forking a new
