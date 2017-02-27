@@ -255,16 +255,17 @@ morekeywords={module, match, when, @@deriving, not, : , /\\}
 
   In this paper, we present a new interpretation of replicated types
   that overcome these concerns.  Our declarative programming model
-  called \name\ treats replication as a form of versioning, in which
-  consistency is enforced through programmer-supplied \emph{merge}
-  functions.  Distributed state is now viewed in terms of a tree of
-  immutable object versions, with merge actions used explicitly by the
-  application or implicitly by the underlying runtime system to
-  periodically reconcile local versions to yield a consistent global
-  state.  Our model frees the programmer from having to think of
-  low-level operational notions related to distribution and
-  replication, and therefore does not entail any restructuring of
-  application logic to enable distributed programming.
+  called \name\ treats replication as a compositional form of
+  versioning, in which consistency is enforced through
+  programmer-supplied \emph{merge} functions.  Distributed state is
+  now viewed in terms of a tree of immutable object versions, with
+  merge actions used explicitly by the application or implicitly by
+  the underlying runtime system to periodically reconcile local
+  versions to yield a consistent global state.  Our model frees the
+  programmer from having to think of low-level operational notions
+  related to distribution and replication, and therefore does not
+  entail any restructuring of application logic to enable distributed
+  programming.
 
   We show how any ML datatype can be enriched to support mergeability,
   formalize a concurrency semantics based on such types, and describe

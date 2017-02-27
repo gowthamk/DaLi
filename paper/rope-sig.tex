@@ -41,10 +41,10 @@ and merge_rec old l r = match (old,l,r) with
       let newr = merge oldr lr rr in
         Node (newl, create_index newl, newr)
 \end{ocaml}
-\caption{Signature of Mergeable Lists}
+\caption{Mergeable rope implementation}
 \label{fig:mrope-merge}
 \end{subfigure}
 
-\caption{Mergeable List Implementation}
+\caption{Signature and implementation for mergeable ropes}
 \label{fig:rope}
 \end{figure}
