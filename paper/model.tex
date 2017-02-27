@@ -59,13 +59,10 @@ by different clients.
 %%   t} and \C{t $\rightarrow$ Canvas.t}, respectively.
 
 \name requires a three-way \C{merge} function to merge concurrent
-versions of a drawing canvas (see Fig.~\ref{fig:merge-canvas}). The
-three arguments include two concurrent versions (\C{v1} and \C{v2}),
+versions of a drawing canvas (see Fig.~\ref{fig:merge-canvas}) that
+includes includes two concurrent versions (\C{v1} and \C{v2}),
 and their least common ancestor (\C{lca}) - the version from which the
 two concurrent versions evolved independently. The merge function can
-make use of the pixel values of the common ancestor to merge the pixel
-values on both the canvases. For instance, if the color of a pixel in
-\C{v1} is white, and in \C{v2} it is green, and its color in \C{lca}
 \begin{wrapfigure}{l}{.4\textwidth}
 \centering
 \includegraphics[scale=0.43]{Figures/canvas-merging}
@@ -73,6 +70,9 @@ values on both the canvases. For instance, if the color of a pixel in
 canvas. \C{lca} is their common ancestor.}
 \label{fig:canvas-merging}
 \end{wrapfigure}
+make use of the pixel values of the common ancestor to merge the pixel
+values on both the canvases. For instance, if the color of a pixel in
+\C{v1} is white, and in \C{v2} it is green, and its color in \C{lca}
 is white, then it means that only \C{v2} modified the color. Hence the
 pixel is colored green in the merged canvas. On the other hand, if the
 pixel is red in \C{v1}, then it means that both \C{v1} and \C{v2} have
@@ -97,9 +97,6 @@ let rec merge lca v1 v2 =
   else if v1=lca then v2
   else if v2=lca then v1
   else match (lca,v1,v2) with
-    (*
-     * The first three rules isomorphize lca, v1 and v2.
-     *)
     | (_, B _, N px2) -> merge lca v1 @@ b_of_n px2
     | (_, N px1, B _) -> merge lca (b_of_n px1) v2
     | (N px, B _, B _) -> merge (b_of_n px) v1 v2
@@ -136,7 +133,7 @@ Functions \C{return} and \C{bind} have their usual monadic
     val get_current_version: unit -> ('a, 'a) t
     val with_init_version_do: 'a -> ('a, 'b) t -> 'b
     val fork_version : ('a, 'b) t -> 'a unit t
-    val sync_next_version: unit -> ?v:'a -> ('a, 'a) t
+    val sync_next_version: unit -> 'a -> ('a, 'a) t
   end
   \end{ocaml}
   \caption{Signature of the \name monad}
@@ -145,21 +142,22 @@ Functions \C{return} and \C{bind} have their usual monadic
 \end{figure}
 interpretation. \C{get\_current\_version} is like the \C{State}
 monad's \C{get}; it returns the versioned state encapsulated by the
-monad. \C{with\_init\_version\_do} runs a monadic computation against
-a given initial version and returns the result. \C{fork\_version}
-returns a computation that forks a new concurrent version from the
-current version, and runs the given monadic computation asynchronously
-against the forked version.  \C{sync\_next\_version} (simply called
-\C{sync}) accepts a \emph{proposal} for the next version of the state;
-this proposal is the current local version of the state that reflects
-local modifications not yet witnessed by any other concurrently
-executing computation.  The operation returns (via a monad) the actual
-next version, which becomes the current version for the rest of the
+monad. To initiate a computation, we use \C{with\_init\_version\_do}
+which runs a monadic computation against a given initial version and
+returns the result. The \C{fork\_version} operation returns a
+computation that forks a new concurrent version from the current
+version, and runs the given monadic computation asynchronously against
+the forked version.  \C{sync\_next\_version} (simply called \C{sync})
+accepts a \emph{proposal} for the next version of the state; this
+proposal is the current local version of the state that reflects local
+modifications not yet witnessed by any other concurrently executing
+computation.  The operation returns (via a monad) the actual next
+version, which becomes the current version for the rest of the
 computation.  This version is created by merging the proposal with a
 subset of concurrent versions that have become available since the
-last merge or fork. Thus, \C{sync} effectively lets a computation sync
-with a subset of concurrent computations to obtain their latest
-updates.
+last merge or fork. Thus, \C{sync} effectively lets a computation
+synchronize with a subset of concurrent computations to obtain their
+latest updates.
 
 \begin{figure}
 \centering
@@ -230,8 +228,8 @@ concurrent version for Bob. Bob, in turn, invites Cheryl for
 \end{figure}
 collaboration. All three of them start working on the blank canvas.
 Alice draws a red horizontal line from $(0,0)$ (top-left) to $(4,0)$
-(top-right) using \C{C.draw\_line}.\footnote{Its definitionis not
-  shown, but can be constructed using \C{set\_px}} Meanwhile, Bob
+(top-right) using \C{C.draw\_line}.\footnote{Its definition is not
+  shown, but can be constructed using \C{set\_px}.} Meanwhile, Bob
 draws a green vertical line from $(0,0)$ to $(0,4)$, and Cheryl draws
 a similar line from $(4,0)$ to $(4,4)$. All three of them call
 \C{sync} with their respective proposals ($C_0'$). While any partial

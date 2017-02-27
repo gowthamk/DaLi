@@ -6,66 +6,66 @@
 The \drawsome example demonstrates the utility of the \name
 programming model in building concurrent applications with conceptual
 state sharing that make them suitable for transparent deployment in a
-distributed setting. The model lets concurrent computations to be
+distributed setting. The model allows concurrent computations to be
 composed around any mergeable type. We now present a series of
 examples that demonstrate how mergeable types are built: either by
-defining merge functions for OCaml data types, or by composing
-existing mergeable types.
+defining merge functions for ML data types, or by composing existing
+mergeable types.
 
 \subsection{Ropes}
 \label{sec:ropes}
 
-A rope is a data structure that faciliates efficient
-implementations of operations such as concatenation, splitting, lookup
-and insertion at a random position etc., for a list of values. The
-values are usually characters; their lists being strings. The data
-structure is a binary tree, whose leaf nodes store substrings of a
-larger string such that their left-to-right (in-order) concatenation
-yeilds the larger string. The idea is to facilitate efficient lookups
-and insertions at random positions in the string by storing
-position indexes in the internal nodes of the tree.
+A rope is a data structure that faciliates efficient implementations
+of operations such as concatenation, splitting, lookup and insertion
+at a random position etc., for a list of values in a distributed
+setting. The values are usually characters, with their lists being
+strings. The data structure is a binary tree, whose leaf nodes store
+substrings of a larger string such that their left-to-right (in-order)
+concatenation yeilds the larger string. The idea is to facilitate
+efficient lookups and insertions at random positions in the string by
+storing position indexes in the internal nodes of the tree.
 
 Fig.~\ref{fig:mrope-sig} shows a rope interface in OCaml. The type of
 the list of values is left abstract (\C{A.t}); it can be instantiated
 with any module that supports \C{concat} and \C{split} operations. The
 interface shown in Fig.~\ref{fig:mrope-sig} is that of a mergeable
-rope (\C{MRope}), whose \C{merge} implementation is shown
-in Fig.~\ref{fig:mrope-merge}. The function returns one of the
-versions (\C{l} or \C{r}), if the other one is same as the common
+rope (\C{MRope}), whose \C{merge} implementation is shown in
+Fig.~\ref{fig:mrope-merge}. The function returns one of its versions
+(\C{l} or \C{r}), if the other one is the same as the common
 ancestor. Otherwise, it calls \C{merge\_rec}, which recursively
 compares the structures of merging ropes, and their common ancestor.
 The function recurses until one of the ropes differs from the other
 two, or all of them are leaf nodes, at which point it relies on the
 (abstract) list merge function (\C{A.merge}) to merge the lists
-represented by the ropes. \C{merge\_rec} relies on auxiliary
-functions, \C{mk\_rope} and \C{create\_index}, whose definitions are
-not shown. The former constructs a rope given a list (\C{A.t}), and
-the latter computes the index at a node, given its left sub-tree.
+represented by the ropes. \C{merge\_rec} uses auxiliary functions,
+\C{mk\_rope} and \C{create\_index}, whose definitions are not shown to
+construct a rope given a list (\C{A.t}), and to compute the index at a
+node, given its left sub-tree, resp.
 
-One feature of the mergeable rope implementation in
-Fig.~\ref{fig:rope-sig}, that is characterisic of mergeable types in
-general, is compositionality; rope is a polymorphic mergeable data
-type that composes mergeability. The compositionality is concretized
-by the \C{MRope} signature , which requires the type of items in the
-list (\C{A.t}) to also be mergeable (\C{A.merge}).
+One feature of the mergeable rope implementation that is characterisic
+of mergeable types in general is compositionality; a rope is a
+polymorphic mergeable data type that composes mergeability over its
+polymorphic constituents.   Compositionality is concretized by the
+\C{MRope} signature , which requires the type of items in the list
+(\C{A.t}) to also be mergeable (\C{A.merge}).
 
 \subsection{Lists}
 \label{sec:lists}
 
 \input{list-sig}
 
-As an abstract data type, lists support three
-operations: \C{insert x i l}, to insert an element \C{x} at position
-\C{i} in the list \C{l}, \C{delete i l}, to delete the element at
-\C{i}'th position, and \C{subst i x l}, to substitute the element at
-the \C{i}'th position with \C{x}.  Lists of mergeable items are
-mergeable if they preserve the following properties:
+As an abstract data type, lists support three operations: \C{insert x
+  i l}, to insert an element \C{x} at position \C{i} in the list
+\C{l}, \C{delete i l}, to delete the element at \C{i}'th position, and
+\C{subst i x l}, to substitute the element at the \C{i}'th position
+with \C{x}.  Lists of mergeable items are mergeable if they preserve
+the following properties:
 \begin{itemize}
   \item Elements present in both the merging lists will be present in
   the final list. No element is deleted unless it is deleted in at
   least one list.
   \item An element deleted in one list will not reappear in the merged
-  list (unlike Amazon's replicated shopping cart~\cite{Dynamo}).
+  list (unlike, for example, Amazon's replicated shopping cart~\cite{Dynamo}).
   \item The order of elements is retained. That is, if $x$ occurs
   before $y$ in one of the lists, and if both elements are present in
   the merged list, then $x$ occurs before $y$ in the merged list.
@@ -79,7 +79,7 @@ mergeable if they preserve the following properties:
   per the merge semantics of the list element type.
 \end{itemize}
 
-The merge operation for lists is composed of two separate functions,
+\noindent The merge operation for lists is composed of two separate functions,
 \C{edit\_seq} and \C{op\_transform}. Both these functions have been
 implemented in less than 50 lines of OCaml included in the appendix.
 The functions are described below.
@@ -141,13 +141,14 @@ mergeable integers.  Concretely, it is a composition of \C{MList} and
 \C{Int} types (i.e., \C{MList(Int)}), where \C{Int.merge} is the same
 as \C{Counter.merge} (Sec.~\ref{sec:intro}).  An alternative
 instantiation of \C{MList} is for a quantity type
+(\C{Qty}) that supports \C{add} and \C{subtract} operations, but
 \begin{wrapfigure}{l}{.45\textwidth}
   \centering
   \includegraphics[scale=0.4]{Figures/list-eg}
   \caption{Lists of mergeable values are mergeable. }
   \label{fig:list-eg}
+  \vspace*{-.2in}
 \end{wrapfigure}
-(\C{Qty}) that supports \C{add} and \C{subtract} operations, but
 defines its \C{merge} opeation a little differently:
 \begin{ocaml}
 let merge lca v1 v2 = if v1 = lca then v2
@@ -204,35 +205,35 @@ let bob_f : L.t unit t =
 \label{fig:shopping-list-code}
 \end{figure}
 
-A non-trivial demonstration of composability of mergeable types is a
-shopping list application. The application allows its users to
-collaboratively build a grocery shopping list (listing items in the
-decreasing order of their priority), by adding new items with a
+A non-trivial demonstration illustrating the compositional power of
+mergeable types is shopping list application, that allows its users to
+collaboratively build a shopping list (listing items in the decreasing
+order of their priority), by adding new items with a
 specified quantity, deleting existing items, and increasing or
-decreasing their quantity. An item (\C{Item.t}) is represented as a
-tuple of its name (a string) and the quantity (A \C{Qty.t}). The merge
-function for
 \begin{wrapfigure}{l}{.5\textwidth}
   \centering
   \includegraphics[scale=0.3]{Figures/shopping-list}
   \caption{Merging concurrent shopping lists}
   \label{fig:shopping-list}
+  \vspace*{-.2in}
 \end{wrapfigure}
-\C{Item.t} merges the quantities of items (using \C{Qty.merge}) having
-the same names. Items with different names are considered distinct. A
-shopping list is a mergeable list of items, i.e., \C{MList(Item)} (a
-grocery shopping list may not be large enough to justify using ropes,
-but \C{MRope(MList(Item))} is definitely a possibility).
-\C{MList(Item).merge} automatically lifts the merge semantics for
-items to merge semantics for lists of items.
+decreasing their quantity. An item (\C{Item.t}) is represented as a
+tuple of its name (a string) and the quantity (A \C{Qty.t}). The merge
+function for \C{Item.t} merges the quantities of items (using
+\C{Qty.merge}) having the same names. Items with different names are
+considered distinct. A shopping list is a mergeable list of items,
+i.e., \C{MList(Item)} (a grocery shopping list may not be large enough
+to justify using ropes, but \C{MRope(MList(Item))} is definitely a
+possibility).  \C{MList(Item).merge} automatically lifts the merge
+semantics for items to merge semantics for lists of items.
 Fig.~\ref{fig:shopping-list} illustrates its behavior.  Here, two
 users, Alice and Bob, concurrently edit a shopping list whose initial
 contents are \C{milk} and \C{eggs}. While both simultaneously update
-the quantity of eggs, Bob also removes milk and inserts candy
-(Fig.~\ref{fig:shopping-list-code} shows the \name code for the
-concurrent sessions). The merged shopping list contains eggs and
-candy, where the quantity of eggs is obtained by merging Alice's and
-Bob's quantity as per the definition of \C{Qty.merge}.
+the quantity of eggs, Bob also removes \C{milk} and inserts \C{candy}.
+Fig.~\ref{fig:shopping-list-code} shows the \name code for two
+concurrent sessions. The merged shopping list contains \C{eggs} and
+\C{candy}, where the quantity of eggs is obtained by merging Alice's
+and Bob's quantity as per the definition of \C{Qty.merge}.
 
 The examples described above make certain assumptions about the model
 and the underlying system, such as the existence of a single least
