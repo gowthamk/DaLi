@@ -1,4 +1,4 @@
-\section{Mergeable Data Type}
+\subsection{Mergeable Data Type}
 
 \begin{figure}[!t]
 \centering
@@ -22,18 +22,15 @@ through \C{push} or \C{merge}.}
 \label{fig:syntactic-ancestors}
 \end{figure}
 
-We now formally define what we mean by a mergeable type. The
-definition serves as a guide to write merge functions for functional
-data types, elevating them to the level of replicated data types.
-
-A functional data type library is a tuple consisting of a type ($t$),
-and a collection of functions ($f$, $g$, etc.) of type $t \rightarrow
-t$ that are \emph{primitive morphisms}. A morphism ($P$, $Q$, etc.) is
-either a primitive morphism, or an associative composition of
-morphisms ($P \circ Q \circ R$). An object $B:t$ is called a
-\emph{semantic successor} of $A:t$ (conversely, $A$ is called a
-\emph{semantic ancestor} of $B$) if and only if there exists a
-morphism $P$ such that $P(A) = B$.
+We now formally define a mergeable type.  A functional data type
+library is a tuple consisting of a type ($t$), and a collection of
+functions ($f$, $g$, etc.) of type $t \rightarrow t$ that are
+\emph{primitive morphisms}. A morphism ($P$, $Q$, etc.) is either a
+primitive morphism, or an associative composition of morphisms ($P
+\circ Q \circ R$). An object $B:t$ is called a \emph{semantic
+successor} of $A:t$ (conversely, $A$ is called a \emph{semantic
+ancestor} of $B$) if and only if there exists a morphism $P$ such that
+$P(A) = B$.
 
 The aim of a three-way merge function over a type $t$ is to merge a
 pair of semantic successors, $B:t$ and $C:t$, of an object $A:t$, into
@@ -126,39 +123,57 @@ morphisms.  The commutativity of the diagram in
 Fig.~\ref{fig:pushouts} need not be enforced statically. It can
 equally be verified at run-time by checking that the morphisms returned by $M$
 map respective concurrent versions to the same value. The
-operational semantics (Fig.~\ref{fig:opsem}) can be extended to this
-effect.
+\rulelabel{E-Pull-Wait} rule of the operational semantics
+(Fig.~\ref{fig:opsem}) can be extended to this effect:
+\begin{smathpar}
+\begin{array}{c}
+\RULE
+{
+  t\neq t' \spc
+% \under{H}{v' \mbleto v} \spc
+% \C{world}(H,t') \semsucceq \C{world}(H,t)\spc 
+  v' \not\preceq v \spc
+  (P',Q') = M(\C{lca}(H(t),H(t')), v, v') \spc
+  Q'(v) = P'(v')
+}
+{
+  (\pull)_t;H(t \mapsto (v,f)::m)(t' \mapsto (v',\_)::\_) ~\stepsto~
+  (\pull)_t;H[t \mapsto (v_m,\C{MERGE}\; H(t'))::(v,f)::m]
+}
+\end{array}
+\end{smathpar}
 
 % While the merge function $M$ as specified by
 % Def.~\ref{def:mergeable-type} has more verification value, we continue
 % to use the three-way merge function \C{merge} in our examples for
 % flexibility. 
 
-Merge functions for simple data types are easy to write. For instance,
-the merge logic for counter is simple enough that it does not require
-great effort to identify the $P$ and $Q$ that leda to the
-concurrent counter versions, and transform them into $P'$ and $Q'$
-such that the diagram in Fig.~\ref{fig:pushouts} commutes. For more
+Def.~\ref{def:mergeable-type} is immediately applicable to simple data
+types like counter to explain why they are mergeable. The merge logic
+for counter is simple enough that it does not require great effort to
+identify the $P$ and $Q$ that lead to the concurrent counter versions,
+and transform them into $P'$ and $Q'$ such that the diagram in
+Fig.~\ref{fig:pushouts} commutes. For more
 \begin{wrapfigure}{l}{.4\textwidth}
 \centering
 \includegraphics[scale=0.35]{Figures/pushouts-2}
 \caption{Commutative diagram for Def.~\ref{def:mergeable-type-2}.}
 \label{fig:pushouts-2}
 \end{wrapfigure}
-sophisticated data types, this process is more involved, and may require
-the programmer to perform non-trivial reasoning. We now present an
-alternative definition of a mergeable type that is stronger than
-Def.~\ref{def:mergeable-type}, but also serves as a recipe to build
-non-trivial merge functions.
+sophisticated data types, such as list, this process is more involved,
+and may require the programmer to perform non-trivial reasoning. We
+now present an alternative definition of a mergeable type that is
+stronger than Def.~\ref{def:mergeable-type}, but also serves as a
+recipe to build non-trivial merge functions, like that of a list.
 
 \paragraph{Notation} As mentioned earlier, we distinguish between the
 named functions defined by a data type library (primitive morphisms),
-and their compositions (morphisms). A sequence (list) of primitive
-morphisms is written $P^*$ or $Q^*$. The composition of a sequence of
-primitive morphisms (written $\denot{P^*}$) is their right-to-left
-composition, i.e., $\C{fold\_left}\;(\lambda f.\lambda g. f \circ
-g)\; id\; P^*$, where $\C{fold\_left}$ has its usual OCaml type. The
-length of a sequence $S$ is written $\length{S}$.
+and their compositions (morphisms). A sequence of primitive morphisms
+is written $P^*$ or $Q^*$. The composition of a sequence of primitive
+morphisms (written $\denot{P^*}$) is their right-to-left composition,
+i.e., $\C{fold\_left}\;(\lambda f.\lambda g. f \circ g)\; id\; P^*$,
+where $\C{fold\_left}$ has its usual OCaml type. The length of a
+sequence $S$ is written $\length{S}$.
 
 \begin{definition} [\bfseries Mergeable Type]
 \label{def:mergeable-type-2}
@@ -185,18 +200,21 @@ definition.
 \end{definition}
 
 The definition asserts the existence of two functions for a mergeable
-type $t$. First, the function $W$, which computes the \emph{edit
-distance} between an object $A:t$ and its semantic successor $B:t$.
-The sequence of primitive morphisms it returns ($P^*$) is called an
-\emph{edit script}. Replaying the edit script on $A$ produces $B$
-(i.e., $\denot{P^*}(A) = B$). Second, the definition asserts the
-existence of a function $M$, which performs an \emph{operational
-transformation} of the primitive morphisms in an edit script. An
+type $t$. First, the function $W$, which (implicitly) computes the
+edit distance between an object $A:t$ and its semantic successor
+$B:t$.  The sequence of primitive morphisms it returns ($P^*$) is
+called an edit sequence. Applying the edit sequence on $A$ produces
+$B$ (i.e., $\denot{P^*}(A) = B$). Second, the definition asserts the
+existence of a function $M$, which performs an operational
+transformation of the primitive morphisms in an edit script. An
 operational transformation of a primitive morphism $P$ w.r.t a
 morphism $Q$ is another primitive morphism $P'$ such that for any
 object $A:t$, $P'$ has the same \emph{effect} on $Q(A)$ as $P$ has on
-$A$. We will now consider examples of mergeable types that reify the
-notions of edit scripts and operational transformations.
+$A$.
 
-
+Def.~\ref{def:mergeable-type-2} is immediately applicable to the list
+type, and lets us explain why it is a mergeable type.  \C{MList.edit\_seq}
+and \C{MList.op\_transform}, respectively, are the evidences for the
+existence of $W$ and $M$ functions.
+  
 

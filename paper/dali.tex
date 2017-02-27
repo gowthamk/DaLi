@@ -244,7 +244,7 @@ morekeywords={module, match, when, @@deriving, not, : , /\\}
   object, applications are typically structured so that the operations
   applied to a replicated object on one node are subsequently
   communicated to other nodes where they can be re-applied locally.
-  As a result, the degree of restructuring and care necessary to
+  Oftentimes, the degree of restructuring and care necessary to
   transform a sequential or shared-memory concurrent application to a
   meaningful (replicated) distributed one can be substantial.
 
@@ -253,15 +253,16 @@ morekeywords={module, match, when, @@deriving, not, : , /\\}
   called \name\ treats replication as a form of versioning, in which
   consistency is enforced through programmer-supplied \emph{merge}
   functions.  Distributed state is now viewed in terms of a tree of
-  immutable object versions, with merge functions used implicitly by
-  the underlying runtime system to periodically reconcile local
-  versions to yield a consistent global state.  Thus, our model frees
-  the programmer from having to think of low-level operational notions
-  related to distribution and replication, and therefore does not
-  entail any restructuring of application logic.
+  immutable object versions, with merge actions used explicitly by the
+  application or implicitly by the underlying runtime system to
+  periodically reconcile local versions to yield a consistent global
+  state.  Thus, our model frees the programmer from having to think of
+  low-level operational notions related to distribution and
+  replication, and therefore does not entail any restructuring of
+  application logic to enable distributed programming.
     
   We show how any ML datatype can be enriched with mergeable
-  semantics, formalize a rich concurrency model based on such types ,
+  semantics, formalize a rich concurrency model based on such types,
   and describe an instantiation of OCaml equipped with these features.
   Our implementation is integrated with a content-addressable
   distributed storage layer that allows any OCaml program to be easily
@@ -275,26 +276,39 @@ morekeywords={module, match, when, @@deriving, not, : , /\\}
 \begin{CCSXML}
 <ccs2012>
 <concept>
-<concept_id>10011007.10011006.10011008</concept_id>
-<concept_desc>Software and its engineering~General programming languages</concept_desc>
+<concept_id>10011007.10011006.10011008.10011009.10010177</concept_id>
+<concept_desc>Software and its engineering~Distributed programming languages</concept_desc>
 <concept_significance>500</concept_significance>
 </concept>
 <concept>
-<concept_id>10003456.10003457.10003521.10003525</concept_id>
-<concept_desc>Social and professional topics~History of programming languages</concept_desc>
+<concept_id>10011007.10011006.10011008.10011024.10011028</concept_id>
+<concept_desc>Software and its engineering~Data types and structures</concept_desc>
+<concept_significance>500</concept_significance>
+</concept>
+<concept>
+<concept_id>10011007.10011006.10011039.10011311</concept_id>
+<concept_desc>Software and its engineering~Semantics</concept_desc>
+<concept_significance>300</concept_significance>
+</concept>
+<concept>
+<concept_id>10003752.10010124.10010125.10010130</concept_id>
+<concept_desc>Theory of computation~Type structures</concept_desc>
 <concept_significance>300</concept_significance>
 </concept>
 </ccs2012>
 \end{CCSXML}
 
-\ccsdesc[500]{Software and its engineering~General programming languages}
-\ccsdesc[300]{Social and professional topics~History of programming languages}
+\ccsdesc[500]{Software and its engineering~Distributed programming languages}
+\ccsdesc[500]{Software and its engineering~Data types and structures}
+\ccsdesc[300]{Software and its engineering~Semantics}
+\ccsdesc[300]{Theory of computation~Type structures}
+
 %% End of generated code
 
 
 %% Keywords
 %% comma separated list
-\keywords{keyword1, keyword2, keyword3}  %% \keywords is optional
+\keywords{Replicated Datatypes, Eventual Consistency, Availability, CRDTs, Versions, ML}  %% \keywords is optional
 
 
 %% \maketitle
@@ -310,7 +324,7 @@ morekeywords={module, match, when, @@deriving, not, : , /\\}
 
 \input{semantics}
 
-\input{mergeable-types}
+\input{system-model}
 
 \input{related}
 %% Acknowledgments

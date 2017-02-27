@@ -33,11 +33,13 @@ b & \in & \mathtt{Branches} & \coloneqq & [(v,f)] \ALT (v,f)::b \\
 \begin{smathpar}
 \renewcommand{\arraystretch}{1.2}
 \begin{array}{lclcl}
-H & \in & \mathtt{Branch\; Histories} & \coloneqq & t \mapsto b\\
 E & \in & \mathtt{Eval.\; Contexts}(s) & \coloneqq & \bullet \ALT 
   \bullet\;s \ALT v\;\bullet \ALT \run{\bullet}{s}\\
 P & \in & \mathtt{Eval.\; Contexts}(p) & \coloneqq & E_t \ALT 
   \bullet\,||\,p \ALT p\,||\,\bullet \\
+H & \in & \mathtt{Branch\; Histories} & \coloneqq & t \mapsto b\\
+\C{lca} & \in & \mathtt{LCA\;function} & \coloneqq & b \times b
+\rightarrow v\\
 \end{array}
 \end{smathpar}
 %
@@ -92,6 +94,7 @@ P & \in & \mathtt{Eval.\; Contexts}(p) & \coloneqq & E_t \ALT
   t\neq t' \spc
 % \under{H}{v' \mbleto v} \spc
 % \C{world}(H,t') \semsucceq \C{world}(H,t)\spc 
+  v' \not\preceq v \spc
   v_m = \C{merge}(\C{lca}(H(t),H(t')), v, v') \spc
 }
 {

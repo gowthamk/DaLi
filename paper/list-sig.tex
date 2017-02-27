@@ -11,7 +11,8 @@ module type MList = sig
   ... (* All the standard list functions *)
   val merge: t -> t -> t -> t (* and the merge function *)
   (* The following are exposed only for this presentation *)
-  type edit = I of A.t * int
+  type edit =
+      I of A.t * int
     | D of int
     | S of int * A.t * A.t
   val edit_seq: t -> t -> edit list option
