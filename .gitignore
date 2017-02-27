@@ -7,7 +7,6 @@ irmin
 *.o
 *.cmx
 trash.ml
-*.pdf
 *.out
 *.bbl
 *.aux
