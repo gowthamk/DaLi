@@ -121,9 +121,9 @@ observe that we can improve the network performance by implementing a streaming
 protocol that eagerly transfers objects.
 
 More importantly, the cost of computation grows sub-linearly. This is because
-of efficient merge function on ropes~\ref{ropes} enabled by Irmin's
+of efficient merge function on ropes~\ref{sec:ropes} enabled by Irmin's
 content-addressed storage backend, and more expensive operational
-transformation of merging concurrent edits to leaf nodes~\ref{lists} is invoked
+transformation of merging concurrent edits to leaf nodes~\ref{sec:lists} is invoked
 rarely on small. On average, we measured that at a distance of 256, for merging
 the two documents with 1743 characters, 50 list merges were performed on
 strings of average length 13. A purely list based approach would require the
