@@ -132,7 +132,7 @@ Functions \C{return} and \C{bind} have their usual monadic
     val bind : ('a, 'b) t -> ('b -> ('a, 'c) t) -> ('a, 'c) t
     val get_current_version: unit -> ('a, 'a) t
     val with_init_version_do: 'a -> ('a, 'b) t -> 'b
-    val fork_version : ('a, 'b) t -> 'a unit t
+    val fork_version : ('a, 'b) t -> ('a, unit) t
     val sync_next_version: unit -> 'a -> ('a, 'a) t
   end
   \end{ocaml}
