@@ -281,83 +281,165 @@ for more sophisticated types.
   \label{fig:list-eg}
 \end{figure}
 
-\input{list-code}
+\input{list-sig}
 
 {\bf Lists}. List, as an abstract data type, supports three
-operations: \C{insert x i l}, that inserts an element \C{x} at
-position \C{i} in the list \C{l}, \C{delete i l}, that deletes the
-element at \C{i}'th position, and \C{subst i x l}, that substitutes
-the element at \C{i}'th position with \C{x}. Lists of mergeable items
-are mergeable. The signature of a mergeable list library is shown in
-Fig.~\ref{fig:mlist-sig}. Note that the type of items in the list
-(\C{A.t}) is also required to be mergeable. The signature
-\C{MERGEABLE} will be discussed shortly. 
+operations: \C{insert x i l}, to insert an element \C{x} at position
+\C{i} in the list \C{l}, \C{delete i l}, to delete the element at
+\C{i}'th position, and \C{subst i x l}, to substitute the element at
+\C{i}'th position with \C{x}. Lists of mergeable items are mergeable
+while preserving the following properties:
+\begin{itemize}
+  \item Elements present in both the merging lists will be present in
+  the final list. No element is deleted unless it is deleted in at
+  least one list.
+  \item An element deleted in one list will not reappear in the merged
+  list (unlike Amazon's replicated shopping cart~\cite{dynamo}).
+  \item The order of elements is retained. That is, if $x$ occurs
+  before $y$ in one of the lists, and if both elements are present in
+  the merged list, then $x$ occurs before $y$ also in the merged list.
+  \item If an element $y$ substitutes $x$ in one list, then $y$ also
+  substitutes $x$ in the merged list (i.e., $x$ is absent and $y$ is
+  present), unless $x$ is deleted or substituted in the other list. In
+  the former case, deletion wins, and neither $x$ nor $y$ occur in the
+  merged list. In the latter case, if $x$ is substituted by a
+  different element $z$ in the other list, then the merged list
+  substitutes $x$ by a merge of $y$ and $z$, defined as per the merge
+  semantics of the list element type.
+\end{itemize}
+Thus list is an example of a polymorphic mergeable data type that
+demonstrates how mergeability can be composed. The compositionality is
+reified in the the signature of a mergeable list library is shown in
+Fig.~\ref{fig:mlist-sig}; observe that the type of items in the list
+(\C{A.t}) is also required to be mergeable (\C{A.merge}). 
 
 The merge operation for lists is composed of two separate functions,
-\C{edit\_seq} and \C{op\_transform}.
+\C{edit\_seq} and \C{op\_transform}. Both these functions have been
+implemented in less than 50 lines of OCaml included in the appendix.
+The functions are described below.
 \begin{itemize}
   \item \C{edit\_seq} takes a pair of lists, \C{v} and $\C{v'}$, and
   computes the shortest sequence of list operations that need to be
   applied on \C{v} to obtain \C{v'}. Such a sequence is called an
   \emph{edit sequence}. The length of the sequence corresponds to the
   standard notion of the \emph{edit distance} between the two lists,
-  which can be computed in polynomial time, for e.g., using the
-  Wagner-Fisher algorithm~\cite{wagner-fischer}. A slight modification
-  of Wagner-Fischer also lets us compute the edit sequence. The
-  implementation in Fig.~\ref{fig:mlist} represents edits using the
-  type \C{edit}. Constructors \C{I}, \C{D}, and \C{S} stand for
-  \C{insert}, \C{delete}, and \C{subst}, respectively; \C{Nop} is
-  there for technical reasons. The subst constructor also carries the
-  \C{A.t} element that was substituted. Our implementation of
-  Wagner-Fischer is more-or-less standard (hence, not shown), except
-  that the edit sequence it returns orders \C{I}'s and \C{D}'s before
-  \C{S}'s.  Fig.~\ref{fig:list-eg} illustrates edit sequences for a
-  sample list. The sequence \C{[I(c,0); S(3,c,s)]} maps the list
-  \C{[a;b;c]} to \C{[c;a;b;s]} because \C{subst 3 s (insert c 0
-  [a;b;c]) = [c;a;b;s]}.
+  which can be computed in polynomial time~\cite{wagner-fischer}.
+  \C{edit\_seq} modifies one such algorithm to also compute the edit
+  sequence (an \C{edit list}). The implementation specified in
+  Fig.~\ref{fig:mlist-sig} represents edits using the type \C{edit}.
+  Constructors \C{I}, \C{D}, and \C{S} stand for \C{insert},
+  \C{delete}, and \C{subst}, respectively\footnote{
+    Note that \C{I}, \C{D} and \C{S} are \emph{not} effects; no list
+    function generates them, and they are not exchanged between
+    concurrent threads. They are simply tags used by the list merge
+    operation for convenience.
+  }. The subst constructor also carries the \C{A.t} element that was
+  substituted. The element serves as the \C{lca} argument to
+  \C{A.merge} in case of concurrent conflicting substitutions.
+  Fig.~\ref{fig:list-eg} illustrates edit sequences for a sample list.
+  The sequence \C{[I(c,0); S(3,c,s)]} maps the list \C{[a;b;c]} to
+  \C{[c;a;b;s]} because \C{subst 3 s (insert c 0 [a;b;c]) =
+  [c;a;b;s]}.
   \item  \C{op\_transform} takes a pair of edit sequences, $s_1$ and
   $s_2$, that map a list $v$ to two different lists, $v_1$ and $v_2$
   (e.g., Fig.~\ref{fig:list-eg}), and transforms $s_1$ to $s_1'$ such
   that $s_1'$ has the same effect on $v_2$ as $s_1$ had on $v$.  For
   instance, in Fig.~\ref{list-eg}, let $s_1$ be the edit sequence
-  \C{[D(1); S(d,1)]}, which maps the list \C{[a;b;c]} ($v$) to
+  \C{[D(1); S(1,c,d)]}, which maps the list \C{[a;b;c]} ($v$) to
   \C{[a;d]} ($v_1$). The \C{D} edit deletes the first element of $v$.
   However, if $s_1$ is to be applied on the list \C{[c;a;b;s]}
   ($v_2$), which has a new element at position 0, the \C{D} edit must
   delete the the second element from $v_2$, if it were to have the
   same effect as it did on $v$. We say \C{D(1)} in $s_1$ has to be
   transformed w.r.t the sequence $s_2 = \C{[I(c,0);S(3,c,s)]}$.  The
-  function \C{op\_transform} of Fig.~\ref{fig:mlist-xform} computes
-  such \emph{operational transformation} for the sequence \C{mine}
-  w.r.t the sequence \C{others}, and returns \C{mine'}, the
-  transformed sequence. To do so, it first pulls the \C{S} edits in
-  \C{mine} to the beginning of the sequence, transforming them w.r.t
-  the \C{I} and \C{D} edits in \C{mine}. Having all the \C{S} edits at
-  the beginning of the \C{mine} sequence makes their transformation
-  easier since the offset of the transformed substitution depends only
-  on the edits in the \C{other} sequence. Furthermore, it facilitates
-  an easy comparison with \C{S} edits at the end of \C{other}. Next,
-  \C{op\_transform} transforms edits in \C{mine} w.r.t \C{other} by
-  comparing their offsets; the rules are straightforward.
+  function \C{op\_transform} (Fig.~\ref{fig:mlist-sig}) computes such
+  \emph{operational transformations} for an edit sequence $s_1$ w.r.t
+  another edit sequence $s_2$. A notable transformation rule is for a
+  substitution w.r.t another substitution at the same position. Since
+  the substituting items could be different, the function relies on
+  the item merge function (\C{A.merge}) to merge them into a single
+  item. For instance, in Fig.~\ref{fig:list-eg}, there are
+  simultaneous substitutions to the item \C{c} in $s_1$ and $s_2$;
+  while $s_1$ substitutes it with \C{d}, $s_2$ does it with \C{s}. The
+  merged list therefore substitutes \C{c} with the merge of \C{d} and
+  \C{s}, defined as per the merge semantics of \C{A.t}.
 \end{itemize}
+The \C{MList.merge} can now be defined as a function that first
+computes edit sequences, $s_1$ and $s_2$, for the two concurrent
+lists, $v_1$ and $v_2$ w.r.t their common ancestor $v$, transforms one
+of them (say, $s_1$) w.r.t $s_2$ to obtain $s_1'$, and finally applies
+(the operations defined by) $s_1'$ to $v_2$ to obtain the merged list.
+
+\GK{Somewhere here, I want to say:} To better appreciate the virtues
+of mergeable types, we encourage the reader to think about how one
+might implement the mergeable list type with the explicit effect
+representation described in Sec.~\ref{sec:intro}.
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.4]{Figures/shopping-list}
+
+  \caption{Merging concurrent shopping lists}
+  \label{fig:shopping-list}
+\end{figure}
+
+A significant advantage of mergeable types is their composability. As
+demonstrated by \C{MList}, the merge semantics of a composed mergeable
+type is a composition of merge semantics of the individual types.  For
+instance, a mergeable list of integers can be obtained by
+instantiating \C{MList} for an \C{Int} type, where \C{Int.merge} is
+same as \C{Counter.merge} (Sec.~\ref{sec:intro}). 
+An alternative instantiation of \C{MList} is for a quantity type
+(\C{Qty}) that, like \C{Int}, supports \C{add} and \C{subtract}
+operations, but defines its \C{merge} semantics a little differently:
+\begin{ocaml}
+let merge lca v1 v2 = if v1 = lca then v2 else (if v2 = lca then v1 else max v1 v2)
+\end{ocaml}
+\C{MList(Qty)}, like \C{MList(Int)}, is a list of integers, and has
+the same semantics under a sequential execution. Their differences
+however manifest under a concurrent execution, where both adopt
+different methods to reconcile concurrent updates.  is given
+below.
+
+% The mergeable list data type demonstrates a common pattern of writing
+% \C{merge} functions applicable to a range of functional data
+% structures. For instance, a binary tree (with rotations) can be made
+% mergeable in the same way as list, i.e., by computing edit sequences
+% (\C{edit\_seq}) and then their transformations
+% (\C{op\_transform})\footnote{
+%   Like Wagner-Fischer, established algorithms exist for computing tree
+%   edit distances~\cite{tree-diff}. An alternative naive method to
+%   merge a pair of trees is by merging the lists obtained from their
+%   in-order traversal, followed by reconstructing the tree.
+% }.
 
 
-This example, however, implicitly makes certain assumptions
-about the model and the underlying system, such as the existence of a
-single least common ancestor (LCA) for any pair of versions, the
-ability to access a previous version on any branch, and mergeability
-of any two concurrent versions. Enforcing these guarantees in a fully
+{\bf Shopping List}. A non-trivial demonstration of composability of
+mergeable types is a shopping list application. The application
+allows its users to collaboratively build a grocery shopping
+list (listing items in decreasing ), by adding new items with a
+specified quantity, deleting existing items, and increasing or
+decreasing their quantity. An item (\C{Item.t}) is represented as a
+tuple of its name (a string) and the quantity (A \C{Qty.t}). Merge
+function for \C{Item.t} merges the quantities of items (using
+\C{Qty.merge}) with same names. Items with different names are
+considered distinct. A shopping list is a mergeable list of items
+(i.e., \C{MList(Item)}). \C{MList(Item).merge} automatically lifts the
+merge semantics for items to merge semantics for lists of items.
+Fig.~\ref{fig:shopping-list} illustrates. Here, two users, Alice and
+Bob, concurrently edit a shopping list whose initial contents are
+as milk and eggs. While both simultaneously update the quantity of
+eggs, Bob also removes milk and inserts candy. The merged shopping
+list contains eggs and candy, where the quantity of eggs is obtained
+by merging Alice's and Bob's quantity as per \C{Qty.merge} semantics.
+
+The examples described above make certain assumptions about the model
+and the underlying system, such as the existence of a single least
+common ancestor (LCA) for any pair of versions, the ability to access
+a previous version on any branch, and mergeability of any two
+concurrent versions. Enforcing these guarantees in a fully
 decentralized distributed setting requires addressing non-trivial
-theoretical challenges described in the next section. Unlike the
-canvas, the process of writing merge functions for data types with
-non-trivial invariants could be quite involved. The following sections
-describe a principled approach to deriving merge functions for any
-data type given its invariants. Like \C{Canvas.merge}, merge functions
-often need to compare multiple versions of a data type for structural
-equality, which, when performed naively, incurs cost linear in the
-size of versions. The representation of a versioned data type in \name
-is optimized for performing comparisons that allows structural
-equality to be determined in constant time. Such engineering details,
-which contribute to the practicality of our programming model are also
-discussed in subsequent sections.
+theoretical challenges. These, and other details that contribute to
+the practicality of our model, such as containing the complexity of
+merges, are discussed in subsequent sections.
 

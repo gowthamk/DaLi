@@ -13,3 +13,4 @@ trash.ml
 *.aux
 *.log
 experiments/[^\.]*
+*~

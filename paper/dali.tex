@@ -68,8 +68,10 @@
 \newcommand{\under}[2]{#1\,\vdash\,#2}
 \newcommand{\mbleto}{\rightsquigarrow_m}
 \newcommand{\drawsome}{{\sf Canvas}\xspace}
+\newcommand{\buylist}{{\sf ToBuy}\xspace}
 \newcommand{\lang}{\lambda_b}
 \newcommand{\length}[1]{\left|#1\right|}
+\newcommand{\GK}[1]{\textcolor{red}{GK: #1}}
 
 % New colors
 %------------
@@ -97,7 +99,7 @@ breaklines=true,                % sets automatic line breaking
 breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
 commentstyle=\itshape\color{MidnightBlue},
 %escapeinside={\%*}{*)},         % if you want to add a comment within your code
-morekeywords={module, when, @@deriving, not, : , /\\}
+morekeywords={module, match, when, @@deriving, not, : , /\\}
 }}
 \lstnewenvironment{ocaml}
     { % \centering
@@ -349,8 +351,6 @@ morekeywords={module, when, @@deriving, not, : , /\\}
 
 %% Appendix
 \appendix
-\section{Appendix}
-
-Text of appendix \ldots
+\input{appendix}
 
 \end{document}
