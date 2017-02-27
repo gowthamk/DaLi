@@ -6,12 +6,12 @@
   \begin{ocaml}
   module type CANVAS = sig
     type pixel = {r:char; g:char; b:char}
-    type tree = 
+    type tree =
       | N of pixel
-      | B of {tl: tree; tr: tree; bl: tree; br: tree} 
-    type t = {max_x:int; max_y:int; canvas:tree} 
+      | B of {tl: tree; tr: tree; bl: tree; br: tree}
+    type t = {max_x:int; max_y:int; canvas:tree}
     type loc = {x:int; y:int}
-  
+
     val new_canvas: int -> int -> t
     val set_px: t -> loc -> pixel -> t
     val get_px: t -> loc -> pixel
@@ -84,7 +84,7 @@ logic is illustrated in Fig.~\ref{fig:canvas-merging}.
 \begin{figure}
 \begin{center}
   \begin{ocaml}
-let color_mix px1 px2 : pixel = 
+let color_mix px1 px2 : pixel =
 let f = Char.code in
 let h x y = Char.chr @@ (x + y)/ 2 in
 let (r1,g1,b1) = (f px1.r, f px1.g, f px1.b) in
@@ -93,7 +93,7 @@ let (r,g,b) = (h r1 r2, h g1 g2, h b1 b2) in {r=r; g=g; b=b}
 
 let b_of_n px = B {tl_t=N px; tr_t=N px; bl_t=N px; br_t=N px}
 
-let rec merge lca v1 v2 = 
+let rec merge lca v1 v2 =
   if v1=v2 then v1
   else if v1=lca then v2
   else if v2=lca then v1
@@ -110,7 +110,7 @@ let rec merge lca v1 v2 =
         let bl_t' = merge x.bl_t x1.bl_t x2.bl_t in
         let br_t' = merge x.br_t x1.br_t x2.br_t in
           B {tl_t=tl_t'; tr_t=tr_t'; bl_t=bl_t'; br_t=br_t'}
-    | (_, N px1, N px2) -> 
+    | (_, N px1, N px2) ->
         (* pixels are merged by mixing colors *)
         let px' = color_mix px1 px2 in N px'
  \end{ocaml}
@@ -166,42 +166,42 @@ updates.
 \centering
 \begin{tabular}{l||l||l}
 \begin{ocaml}
-let alice_f : C.t unit t = 
-  get () >>= fun c0 -> 
+let alice_f : C.t unit t =
+  get () >>= fun c0 ->
   fork bob_f >>= fun () ->
-  let c0' = C.draw_line c0 
+  let c0' = C.draw_line c0
     {x=0;y=0}
     {x=4;y=0} in
-  sync () ~v:c0' >>= 
+  sync () ~v:c0' >>=
   fun c1 ->
-  let c1' = C.draw_line c1 
-    {x=0;y=4} 
+  let c1' = C.draw_line c1
+    {x=0;y=4}
     {x=4;y=4} in
-  sync () ~v:c1' >>= 
+  sync () ~v:c1' >>=
   fun c2 -> return ()
 \end{ocaml}
 &
 \begin{ocaml}
-let bob_f : C.t unit t = 
-  get () >>= fun c0 -> 
-  fork cheryl_f >>= 
+let bob_f : C.t unit t =
+  get () >>= fun c0 ->
+  fork cheryl_f >>=
   fun () ->
-  let c0' = C.draw_line c0 
-    {x=0;y=0} 
+  let c0' = C.draw_line c0
+    {x=0;y=0}
     {x=0;y=4} in
-  sync () ~v:c0' >>= 
-  fun c1 -> sync () >>= 
+  sync () ~v:c0' >>=
+  fun c1 -> sync () >>=
   fun c2 -> return ()
 \end{ocaml}
 &
 \begin{ocaml}
-let cheryl_f : C.t unit t = 
-  get () >>= fun c0 -> 
-  let c0' = C.draw_line c0 
-    {x=4;y=0} 
+let cheryl_f : C.t unit t =
+  get () >>= fun c0 ->
+  let c0' = C.draw_line c0
+    {x=4;y=0}
     {x=4;y=0} in
-  sync () ~v:c0' >>= 
-  fun c1 -> sync () >>= 
+  sync () ~v:c0' >>=
+  fun c1 -> sync () >>=
   fun c2 -> return ()
 \end{ocaml}
 \\
@@ -217,8 +217,8 @@ drawing session between Alice, Bob and Cheryl can be composed using
 Fig.~\ref{fig:canvas-sessions}. Assume that the session starts with
 Alice on a $5\times 5$ blank canvas, as shown below:
 \begin{ocaml}
-  module C = Canvas;; 
-  with_init_version_do (C.new_blank 5 5) alice_f 
+  module C = Canvas;;
+  with_init_version_do (C.new_blank 5 5) alice_f
 \end{ocaml}
 Alice starts by reading the current version of the canvas, which is
 blank. She then invites Bob for collaboration by forking a new
@@ -275,7 +275,7 @@ merge functions for more sophisticated types.
 
 \input{list-sig}
 
-{\bf Lists}.  As an abstract data type, lists support three
+{\bf Lists}.  \KC{Why don't we call these ropes?} As an abstract data type, lists support three
 operations: \C{insert x i l}, to insert an element \C{x} at position
 \C{i} in the list \C{l}, \C{delete i l}, to delete the element at
 \C{i}'th position, and \C{subst i x l}, to substitute the element at
@@ -303,62 +303,56 @@ Thus, lists serve as an example of a polymorphic mergeable data type that
 demonstrates how mergeability can be composed.  Compositionality is
 reified in the the signature of a mergeable list library as shown in
 Fig.~\ref{fig:mlist-sig}; observe that the type of items in the list
-(\C{A.t}) is also required to be mergeable (\C{A.merge}). 
+(\C{A.t}) is also required to be mergeable (\C{A.merge}).
 
 The merge operation for lists is composed of two separate functions,
 \C{edit\_seq} and \C{op\_transform}. Both these functions have been
 implemented in less than 50 lines of OCaml included in the appendix.
 The functions are described below.
 \begin{itemize}
-  \item \C{edit\_seq} takes a pair of lists, \C{v} and $\C{v'}$, and
-    computes the shortest sequence of list operations that need to be
-    applied on \C{v} to obtain \C{v'}. Such a sequence is called an
-    \emph{edit sequence}. The length of the sequence corresponds to
-    the standard notion of the \emph{edit distance} between the two
-    lists, which can be computed in polynomial
-    time~\cite{wagner-fischer}.  \C{edit\_seq} modifies one such
-    algorithm to also compute the edit sequence (an \C{edit
-      list}). The implementation specified in Fig.~\ref{fig:mlist-sig}
-    represents edits using the type \C{edit}.  Constructors \C{I},
-    \C{D}, and \C{S} stand for \C{insert}, \C{delete}, and \C{subst},
-    respectively.\footnote{ Note that \C{I}, \C{D} and \C{S} are
-      \emph{not} effects; no list function generates them, and they
-      are not exchanged between concurrent threads. They are simply
-      tags used by the list merge operation for convenience.  Indeed,
-      to better appreciate the virtues of mergeable types, we
-      encourage the reader to think about how one might implement a
-      replicated list with this functionality using an explicit effect
-      representation as described in Sec.~\ref{sec:intro}.}  The subst
-    constructor also carries the \C{A.t} element that was
-    substituted. The element serves as the \C{lca} argument to
-    \C{A.merge} in case of concurrent conflicting substitutions.
-    Fig.~\ref{fig:list-eg} illustrates edit sequences for a sample
-    list.  The sequence \C{[I(c,0); S(3,c,s)]} maps the list
-    \C{[a;b;c]} to \C{[c;a;b;s]} because \C{subst 3 s (insert c 0
-      [a;b;c]) = [c;a;b;s]}.
-  \item  \C{op\_transform} takes a pair of edit sequences, $s_1$ and
-  $s_2$, that map a list $v$ to two different lists, $v_1$ and $v_2$
-  (e.g., Fig.~\ref{fig:list-eg}), and transforms $s_1$ to $s_1'$ such
-  that $s_1'$ has the same effect on $v_2$ as $s_1$ had on $v$.  For
-  instance, in Fig.~\ref{list-eg}, let $s_1$ be the edit sequence
-  \C{[D(1); S(1,c,d)]}, which maps the list \C{[a;b;c]} ($v$) to
-  \C{[a;d]} ($v_1$). The \C{D} edit deletes the first element of $v$.
-  However, if $s_1$ is to be applied on the list \C{[c;a;b;s]}
-  ($v_2$), which has a new element at position 0, the \C{D} edit must
-  delete the the second element from $v_2$, if it were to have the
-  same effect as it did on $v$. We say \C{D(1)} in $s_1$ has to be
-  transformed w.r.t the sequence $s_2 = \C{[I(c,0);S(3,c,s)]}$.  The
-  function \C{op\_transform} (Fig.~\ref{fig:mlist-sig}) computes such
-  \emph{operational transformations} for an edit sequence $s_1$ w.r.t
-  another edit sequence $s_2$. A notable transformation rule is for a
-  substitution w.r.t another substitution at the same position. Since
-  the substituting items could be different, the function relies on
-  the item merge function (\C{A.merge}) to merge them into a single
-  item. For instance, in Fig.~\ref{fig:list-eg}, there are
-  simultaneous substitutions to the item \C{c} in $s_1$ and $s_2$;
-  while $s_1$ substitutes it with \C{d}, $s_2$ does it with \C{s}. The
-  merged list therefore substitutes \C{c} with the merge of \C{d} and
-  \C{s}, defined as per the merge semantics of \C{A.t}.
+	\item \C{edit\_seq} takes a pair of lists, \C{v} and $\C{v'}$, and computes
+		the shortest sequence of list operations that need to be applied on \C{v}
+		to obtain \C{v'}. Such a sequence is called an \emph{edit sequence}. The
+		length of the sequence corresponds to the standard notion of the \emph{edit
+		distance} between the two lists, which can be computed in polynomial
+		time~\cite{wagner-fischer}.  \C{edit\_seq} modifies one such algorithm to
+		also compute the edit sequence (an \C{edit list}). The implementation
+		specified in Fig.~\ref{fig:mlist-sig} represents edits using the type
+		\C{edit}.  Constructors \C{I}, \C{D}, and \C{S} stand for \C{insert},
+		\C{delete}, and \C{subst}, respectively.\footnote{ Note that \C{I}, \C{D}
+		and \C{S} are \emph{not} effects; no list function generates them, and
+		they are not exchanged between concurrent threads. They are simply tags
+		used by the list merge operation for convenience.  Indeed, to better
+		appreciate the virtues of mergeable types, we encourage the reader to
+		think about how one might implement a replicated list with this
+		functionality using an explicit effect representation as described in
+		Sec.~\ref{sec:intro}.}  The subst constructor also carries the \C{A.t}
+		element that was substituted. The element serves as the \C{lca} argument to
+		\C{A.merge} in case of concurrent conflicting substitutions.
+		Fig.~\ref{fig:list-eg} illustrates edit sequences for a sample list.  The
+		sequence \C{[I(c,0); S(3,c,s)]} maps the list \C{[a;b;c]} to \C{[c;a;b;s]}
+		because \C{subst 3 s (insert c 0 [a;b;c]) = [c;a;b;s]}.
+	\item  \C{op\_transform} takes a pair of edit sequences, $s_1$ and $s_2$,
+		that map a list $v$ to two different lists, $v_1$ and $v_2$ (e.g.,
+		Fig.~\ref{fig:list-eg}), and transforms $s_1$ to $s_1'$ such that $s_1'$
+		has the same effect on $v_2$ as $s_1$ had on $v$.  For instance, in
+		Fig.~\ref{list-eg}, let $s_1$ be the edit sequence \C{[D(1); S(1,c,d)]},
+		which maps the list \C{[a;b;c]} ($v$) to \C{[a;d]} ($v_1$). The \C{D} edit
+		deletes the first element of $v$. However, if $s_1$ is to be applied on the
+		list \C{[c;a;b;s]} ($v_2$), which has a new element at position 0, the
+		\C{D} edit must delete the the second element from $v_2$, if it were to
+		have the same effect as it did on $v$. We say \C{D(1)} in $s_1$ has to be
+		transformed w.r.t the sequence $s_2 = \C{[I(c,0);S(3,c,s)]}$.  The function
+		\C{op\_transform} (Fig.~\ref{fig:mlist-sig}) computes such
+		\emph{operational transformations} for an edit sequence $s_1$ w.r.t another
+		edit sequence $s_2$. A notable transformation rule is for a substitution
+		w.r.t another substitution at the same position. Since the substituting
+		items could be different, the function relies on the item merge function
+		(\C{A.merge}) to merge them into a single item. For instance, in
+		Fig.~\ref{fig:list-eg}, there are simultaneous substitutions to the item
+		\C{c} in $s_1$ and $s_2$; while $s_1$ substitutes it with \C{d}, $s_2$ does
+		it with \C{s}. The merged list therefore substitutes \C{c} with the merge
+		of \C{d} and \C{s}, defined as per the merge semantics of \C{A.t}.
 \end{itemize}
 The \C{MList.merge} can now be defined as a function that first
 computes edit sequences, $s_1$ and $s_2$, for the two concurrent
@@ -371,7 +365,7 @@ demonstrated by \C{MList}, the merge semantics of a composed mergeable
 type is a composition of the merge operations of its constituent types.  For
 instance, a mergeable list of integers can be obtained by
 instantiating \C{MList} for an \C{Int} type, where \C{Int.merge} is
-the same as \C{Counter.merge} (Sec.~\ref{sec:intro}). 
+the same as \C{Counter.merge} (Sec.~\ref{sec:intro}).
 An alternative instantiation of \C{MList} is for a quantity type
 \begin{wrapfigure}{l}{.45\textwidth}
   \centering
@@ -382,13 +376,13 @@ An alternative instantiation of \C{MList} is for a quantity type
 (\C{Qty}) that supports \C{add} and \C{subtract}
 operations, but defines its \C{merge} opeation a little differently:
 \begin{ocaml}
-let merge lca v1 v2 = if v1 = lca then v2 
+let merge lca v1 v2 = if v1 = lca then v2
     else (if v2 = lca then v1 else max v1 v2)
 \end{ocaml}
 \C{MList(Qty)}, like \C{MList(Int)}, is a list of integers, and has
 the same semantics under a sequential execution. Their differences
 however manifest under a concurrent execution, where both adopt
-different methods to reconcile concurrent updates.  
+different methods to reconcile concurrent updates.
 
 % The mergeable list data type demonstrates a common pattern of writing
 % \C{merge} functions applicable to a range of functional data

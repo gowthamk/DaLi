@@ -1,0 +1,18 @@
+\section{Evaluation}
+\label{sec:evaluation}
+
+In this section, we present an evaluation of \name programming model with the
+aim of assesing its practical utility for describing geo-distributed eventually
+consistent applications. In particular, we
+
+To this end, we have implemented a collaborative editing application that
+simulates concurrent editing of the same document by several authors. This
+application is not unlike Google Docs, but also differs from it by the fact
+that we do not need a central server that coordinates the edits. Instead, edits
+from each author is asynchronously sent to other authors. The shared document
+itself is represented by a mergeable lists of strings
+(Section~\ref{sec:model}), and hence, the remote edits can be correctly
+reconciled into the local document. We resolve conflicts on concurrent
+substitutions at the same position (such as two authors concurrently editing
+\C{abc} to \C{xbc} and \C{ybc}, respectively) by choosing the character with
+the smaller ASCII code.
