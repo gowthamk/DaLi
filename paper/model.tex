@@ -36,16 +36,6 @@ whiteboards. The application supports three simple operations:
 creating a new canvas, setting the pixel at a specified coordinate,
 and returning the pixel at a given coordinate. The \C{merge} function
 and \C{deriving versioned} directive are explained below.
-
-\begin{figure}
-\centering
-\includegraphics[scale=0.5]{Figures/canvas-merging}
-
-\caption{Merging concurrent versions (\C{v1} and \C{v2} ) of a drawing
-canvas. \C{lca} is their common ancestor.}
-\label{fig:canvas-merging}
-\end{figure}
-
 \drawsome lets multiple users collaborate on a canvas that is
 conceptually shared among them. Under a shared-memory abstraction,
 there would be a single copy of the canvas that is updated
@@ -77,6 +67,13 @@ two concurrent versions evolved independently. The merge function can
 make use of the pixel values of the common ancestor to merge the pixel
 values on both the canvases. For instance, if the color of a pixel in
 \C{v1} is white, and in \C{v2} it is green, and its color in \C{lca}
+\begin{wrapfigure}{l}{.5\textwidth}
+\centering
+\includegraphics[scale=0.5]{Figures/canvas-merging}
+\caption{Merging concurrent versions (\C{v1} and \C{v2} ) of a drawing
+canvas. \C{lca} is their common ancestor.}
+\label{fig:canvas-merging}
+\end{wrapfigure}
 is white, then it means that only \C{v2} modified the color. Hence the
 pixel is colored green in the merged canvas. On the other hand, if the
 pixel is red in \C{v1}, then it means that both \C{v1} and \C{v2} have

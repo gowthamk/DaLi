@@ -15,11 +15,11 @@ assumptions on the guarantees provided by an implementation (such as
 serializability~\cite{Serializability} or strong
 consistency~\cite{CDE+12,DNN+15}) that may inadvertently mask,
 restrict, or ignore important albeit unpleasant realities (e.g.,
-network partitions~\cite{Brewer2000,Gilbert2002}). Given these
-unwarranted assumptions, program behavior is often difficult to
-predict and verify.  On the other hand, when these features are
-explicitly exposed to the programmer, e.g., by requiring that
-applications be written in terms of specialized distributed data
+network partitions~\cite{Brewer2000,Gilbert2002}). When unwarranted
+assumptions are made, program behavior is often difficult to predict
+and verify.  On the other hand, when these features are explicitly
+exposed to the programmer, e.g., by requiring that applications be
+written in terms of specialized distributed data
 structures~\cite{Burckhardt2014,BFL+12,SPB+11} or control
 primitives~\cite{Calm}, simplicity, composability, and
 ease-of-reasoning can suffer.
@@ -43,22 +43,22 @@ come for free.  Attempting to update every replicated copy atomically
 is problematic in the absence of sophisticated transaction support,
 which impose significant performance penalties.  But, without such
 heavyweight mechanisms, applying an \C{Add} operation on one node may
-not be instanteously witnessed on another, which may in the process of
+not be instanteously witnessed on another, which may be in the process of
 simultaneously attempting to perform its own \C{Add} or \C{Mult}
 action.  While synchronizing the activities of all nodes to ensure at
 most one such operation is performed at a time is impractical,
 designating a single node to hold the counter state eschewing
 replication altogether (as in a client-server
 configuration~\cite{Armstrong}), is also an undesirable solution,
-given its sensitivity to network partitions and server failures, and
+given the sensitivity of such architectures to network partitions and server failures, and
 the negative performance impact it incurs in geo-distributed
-environments~\cite{Walter}.  Removig coordination altogether by
-simply replicating counter state without having any supporting
-consistency protocol is an equally infeasible approach.
+environments~\cite{Walter}.  Removig coordination altogether by simply
+replicating counter state without having any supporting consistency
+protocol is an equally infeasible approach.
 
-A method often adopted~\cite{SPB+11,Burckhardt2014} to address this
-tension is to re-define a datatype's operations to return
-\emph{effects} instead of values.  An \emph{effect} is a tag that
+A method often adopted to address these concerns is to re-define a
+datatype's operations to return \emph{effects} instead of
+values~\cite{SPB+11,Burckhardt2014}.  An \emph{effect} is a tag that
 identifies the operation to be applied uniformly at all replicas to
 incorporate the effects of the original
 operation. Fig.~\ref{fig:counter-rdt} shows the \C{Counter} library
@@ -69,22 +69,25 @@ the local counter value.  Note, however, that \C{add} and \C{mult} are
 not commutative operations - assuming two replicas have the same
 initial counter value of 0, applying the effect of adding 3 and then
 multiplying 5 on one replica yields 15, while applying the effect of
-first multiplying 5 and then adding 3 yields 3 on the other.  Thus,
-implementations must be carefully written to take the lack of
-commutativity into account when defining how effects are applied at a
-replica; in the figure, multiplication is expressed in terms of
-addition to avoid the kind of undesirable behavior described above.
+first multiplying 5 and then adding 3 yields 3 on the other.  Such
+scenarios are possible in a distributed system because there are no
+coherence guarantees on the order in which effects are received by
+different nodes.  Thus, implementations must be carefully written to
+take the lack of commutativity into account when defining how effects
+are applied at a replica; in the figure, multiplication is expressed
+in terms of addition to avoid the kind of undesirable behavior
+described above.
 
 In this implementation, all replicas will eventually contain the same
-counter value, assuming computation on the counter quiesces.  While
-transmitting effects provide a low-level operational basis for
+counter value, assuming updates to the counter eventually quiesces.
+While transmitting effects provide a low-level operational basis for
 handling replicated state, the \emph{ad hoc} nature of the solution
 confounds desirable high-level reasoning principles.  Indeed, the
 semantic gap between the two versions of the counter, one cognizant of
-replication and the other not, breaks backward compatibility.  Just as
-significantly, its non-trivial construction must be developed in
-different guises for every distributed data structure used by the
-application.
+replication and the other not, breaks backward compatibility with the
+original state-based implementation.  Just as significantly, its
+non-trivial construction must be developed in different guises for
+every distributed data structure used by the application.
 \begin{figure}
 \begin{subfigure}[b]{0.4\textwidth}
   \begin{ocaml}
@@ -145,11 +148,12 @@ counters, a \C{read} operation performed at another replica may
     local version of Node 1, whose counter state is 15 at the time, a
     new counter value is produced.  This value takes into account the
     previous merged state (10) from which the two versions were
-    derived to yield a new merged state of 25.  Observe that there is
-    no explicit synchronization or coordination among versions.  In
-    the figure, red circles represent counter state produced through
-    merging, and blue circles represent state produced by applying
-    counter operations on a node-local version.  }
+    derived to yield a new merged state of 25.  There is no other form
+    of synchronization or coordination among versions except through
+    merging.  In the figure, red circles represent counter state
+    produced through merging, and blue circles represent state
+    produced by applying counter operations on a node-local version.
+  }
 \vspace*{-.85in}  
 \end{wrapfigure}
 witness the increment to $c_1$, but not $c_2$, thus violating the
@@ -162,13 +166,13 @@ directly in terms of the counter value maintained by each node.  In
 doing so, we observe that each replica essentially operates over its
 own version of a counter.  Local operations on a replicated object can
 be thought of as yielding new versions, thus producing a version tree,
-with one branch for each replica.  Thus, each branch represents
+with one branch for each replica.  Thus, every branch represents
 different (immutable) versions maintained by different nodes, with the
-state produced by a counter's operations on a node recorded along the
-node's local branch.  Now, to generate a globally consistent view of a
-counter, we only need to define a merge operation that explains how to
-combine two local versions to produce a new version that reflects both
-their states.
+state produced by the computation performed over a counter on a node
+recorded along the node's local branch for the counter.  Now, to
+generate a globally consistent view of a counter, we only need to
+define a merge operation that explains how to combine two local
+versions to produce a new version that reflects both their states.
 
 Framing replication as merging leads to a counter implementation that
 bears strong similarity to the original sequential one:
@@ -197,19 +201,22 @@ concurrent computations around multiple (implicit) versions of a
 mergeable datatype, an ordinary ML datatype additionally equipped with
 a \emph{merge} function responsible for deriving a consistent global
 state from a collection of local versions of that state.  A
-computation progresses by forking replicating new versions of existing
-versions on geo-distributed nodes, creating new versions along a an
-existing \emph{branch}, or by merging branch tips.
+computation progresses by forking (i.e., replicating) new versions of
+existing versions on geo-distributed nodes, allowing
+synchronization-free local computation to proceed on those nodes,
+creating new versions along an existing \emph{branch} that represents
+updated local instances, and by merging branches to realize global
+consistency.
 
-Our model allows ML programmers to get the benefits of realizing
+Our model allows ML programmers to get the benefits of achieving
 highly available (low-latency) distributed computation, while
 continuing to enjoy the comforts of high-level reasoning and the
-familiarity of using standard libraries.  Notably, while \name's
-programming model makes no explicit reference to any specific
-operational manifestation of a distributed system (e.g., programmers
-do not need to explicitly manage replicas), we demonstrate that it can
-be nonetheless efficiently realized on existing geo-replicated
-distributed systems.
+familiarity of using standard libraries already provided by the
+language.  Notably, while \name's programming model makes no explicit
+reference to any specific operational manifestation of a distributed
+system (e.g., programmers do not need to explicitly manage replicas),
+we demonstrate that it can be nonetheless efficiently realized on
+existing geo-replicated distributed systems.
 
 Our contributions are summarized below:
 
@@ -218,26 +225,26 @@ Our contributions are summarized below:
       datatype to admit high-level declarative reasoning about
       distributed computation and replicated state in ML programs.
 
-    \item We describe the \name library that transparently adds
-      persistence and replication features to a mergeable type. \name
-      comes with a programming model that brings to bear the power and
-      flexibility of a version control system to the administration of
-      replicated data. \name hides the complexity of version control
-      behind a monad, and exposes its functionality via a simple API
-      that lets programmers define and compose distributed ML
-      computations around such data.  Issues related to replication
-      only manifest implicitly in the definition of a merge operation
-      that defines coherence among different instances of replicated
-      state.
+    \item We describe \name programming model that brings to bear the
+      power and flexibility of a version control system to the
+      administration of replicated data. \name hides the complexity of
+      version control behind a monad, and exposes its functionality
+      via a simple API that lets programmers define and compose
+      distributed ML computations around such data.  Issues related to
+      replication only manifest implicitly in the definition of a
+      merge operation that defines coherence among different instances
+      of replicated state.
 
     \item We present a formalization of the \name programming model,
       and establish the comditions under which eventual convergence of
       concurrent version state can be guaranteed.
 
-    \item We describe an implementation of \name atop the Irmin
-      persistent store~\cite{irmin}, a content-addressable storage
-      library for OCaml, along with case studies and experimental
-      results that justify its practical utility.
+    \item We describe an implementation of the \name library that
+      transparently adds persistence and replication features to a
+      mergeable type, and which sits atop the Irmin persistent
+      store~\cite{irmin}, a content-addressable storage library for
+      OCaml.  We also present case studies and experimental results
+      that justify the practical utility of our approach.
 \end{itemize}
 
 
