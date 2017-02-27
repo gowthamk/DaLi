@@ -1,4 +1,5 @@
 \section{Mergeable Types}
+\ref{sec:mergeable_types}
 
 \input{rope-sig}
 
@@ -11,6 +12,7 @@ functions for OCaml data types, or by composing existing mergeable
 types.
 
 \subsection{Ropes}
+\ref{sec:ropes}
 
 A rope is a data structure that faciliates efficient
 implementations of operations such as concatenation, splitting, lookup
@@ -20,7 +22,7 @@ structure is a binary tree, whose leaf nodes store substrings of a
 larger string such that their left-to-right (in-order) concatenation
 yeilds the larger string. The idea is to facilitate efficient lookups
 and insertions at random positions in the string by storing
-position indexes in the internal nodes of the tree. 
+position indexes in the internal nodes of the tree.
 
 Fig.~\ref{fig:mrope-sig} shows a rope interface in OCaml. The type of
 the list of values is left abstract (\C{A.t}); it can be instantiated
@@ -47,6 +49,7 @@ by the \C{MRope} signature , which requires the type of items in the
 list (\C{A.t}) to also be mergeable (\C{A.merge}).
 
 \subsection{Lists}
+\ref{sec:lists}
 
 \input{list-sig}
 
@@ -130,7 +133,7 @@ lists, $v_1$ and $v_2$ w.r.t their common ancestor $v$, transforms one
 of them (say, $s_1$) w.r.t $s_2$ to obtain $s_1'$, and finally applies
 (the operations defined by) $s_1'$ to $v_2$ to obtain the merged list.
 
-\subsection{Lists of Integers and Quantities}. 
+\subsection{Lists of Integers and Quantities}.
 
 A mergeable list of integers can be composed using mergeable lists and
 mergeable integers.  Concretely, it is a composition of \C{MList} and
@@ -189,7 +192,7 @@ let alice_f : L.t unit t =
 \begin{ocaml}
 let bob_f : L.t unit t =
   get () >>= fun c0 ->
-  let c0' = L.insert ("candy",Qty.of_int 1) 1 @@ 
+  let c0' = L.insert ("candy",Qty.of_int 1) 1 @@
             L.delete @@ L.lookup "eggs" in
   sync () ~v:c0' >>=
   fun c1 -> return ()

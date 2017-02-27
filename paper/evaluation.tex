@@ -99,7 +99,7 @@ understand the overhead of synchronization. The results are shown in
 Figure~\ref{grf:synchronization}. The result show that frequent blocking
 synchronization is prohibitively expensive with the throughput dropping to 3
 ops/s for synchronizing after every operation. \name uses Git transfer protocol
-for synchronization which involves multiple roundtrips between the nodes for
+for synchronization which involves multiple round trips between the nodes for
 synchronization. But as the synchronizations get less frequent, we can see that
 the throughput asymptotically approaches the asynchronous case
 (Figure~\ref{grf:scalability}).
@@ -111,14 +111,23 @@ without synchronization. After this, the nodes synchronize pushing the local
 edits and pulling the remote edits, and merge to produce the final document. In
 this case, we indicate the distance of synchronization as \C{2n}.
 Figure~\ref{grf:merge} presents the time share between network and computation
-for performing 3-way merge. We see that the merge time is dominated by the
-network overhead. This is because of the transfer protocol involving multiple
-roundtrips and the need to transfer objects not only for application objects
+for performing 3-way merge as we increase the operation distance between the
+remote branches. We see that the merge time is dominated by the network
+overhead. This is because of the transfer protocol involving multiple
+round trips and the need to transfer objects not only for application objects
 but also Git internal objects for history, directory structure and branches. We
 observe that we can improve the network performance by implementing a streaming
 protocol that eagerly transfers objects.
 
 More importantly, the cost of computation grows sub-linearly. This is because
-of efficient merge function on ropes enabled by Irmin's content-addressed
-storage backend, and more expensive operational transformation of merging
-concurrent edits to leaf nodes is invoked rarely on small strings.
+of efficient merge function on ropes~\ref{ropes} enabled by Irmin's
+content-addressed storage backend, and more expensive operational
+transformation of merging concurrent edits to leaf nodes~\ref{lists} is invoked
+rarely on small. On average, we measured that at a distance of 256, for merging
+the two documents with 1743 characters, 50 list merges were performed on
+strings of average length 13. A purely list based approach would require the
+polynomial time edit sequence algorithm to be applied on the entire document
+twice. Compare to this, the rope implementation has much better algorithmic
+complexity. We measured that by representing the entire document using
+mergeable list type, in addition to slowing down each edit operation, the merge
+at a distance of 256 was 2.3 times slower than the rope implementation.
