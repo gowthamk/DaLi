@@ -401,9 +401,7 @@ let merge lca v1 v2 = if v1 = lca then v2 else (if v2 = lca then v1 else max v1 
 \C{MList(Qty)}, like \C{MList(Int)}, is a list of integers, and has
 the same semantics under a sequential execution. Their differences
 however manifest under a concurrent execution, where both adopt
-different methods to reconcile concurrent updates.  is given
-below.
-
+different methods to reconcile concurrent updates. 
 % The mergeable list data type demonstrates a common pattern of writing
 % \C{merge} functions applicable to a range of functional data
 % structures. For instance, a binary tree (with rotations) can be made
@@ -418,9 +416,9 @@ below.
 
 
 {\bf Shopping List}. A non-trivial demonstration of composability of
-mergeable types is a shopping list application. The application
-allows its users to collaboratively build a grocery shopping
-list (listing items in decreasing ), by adding new items with a
+mergeable types is a shopping list application. The application allows
+its users to collaboratively build a grocery shopping list (listing
+items in the order of their priority), by adding new items with a
 specified quantity, deleting existing items, and increasing or
 decreasing their quantity. An item (\C{Item.t}) is represented as a
 tuple of its name (a string) and the quantity (A \C{Qty.t}). Merge
@@ -430,11 +428,11 @@ considered distinct. A shopping list is a mergeable list of items
 (i.e., \C{MList(Item)}). \C{MList(Item).merge} automatically lifts the
 merge semantics for items to merge semantics for lists of items.
 Fig.~\ref{fig:shopping-list} illustrates. Here, two users, Alice and
-Bob, concurrently edit a shopping list whose initial contents are
-as milk and eggs. While both simultaneously update the quantity of
-eggs, Bob also removes milk and inserts candy. The merged shopping
-list contains eggs and candy, where the quantity of eggs is obtained
-by merging Alice's and Bob's quantity as per \C{Qty.merge} semantics.
+Bob, concurrently edit a shopping list whose initial contents are as
+milk and eggs. While both simultaneously update the quantity of eggs,
+Bob also removes milk and inserts candy. The merged shopping list
+contains eggs and candy, where the quantity of eggs is obtained by
+merging Alice's and Bob's quantity as per \C{Qty.merge} semantics.
 
 The examples described above make certain assumptions about the model
 and the underlying system, such as the existence of a single least
