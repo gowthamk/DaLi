@@ -1,15 +1,16 @@
 \section{Evaluation}
 \label{sec:evaluation}
 
-In this section, we present an evaluation of \name programming model with the
-aim of assessing its practical utility for describing geo-distributed
-eventually consistent applications. In particular, we are interested in the
-horizontal scalability of applications built using \name. Typical distributed
-eventually consistent data stores use custom synchronization and dissemination
-protocols for transferring updates between replicas. Unlike this, \name is
-realized over Irmin which uses Git transfer protocol~\cite{..}, a protocol not designed
-with distributed data stores in mind. Hence, we also evaluate the performance
-of synchronization and merging.
+In this section, we present an evaluation of \name programming model
+with the aim of assessing its practical utility for describing
+geo-distributed eventually consistent applications. In particular, we
+are interested in the horizontal scalability of applications built
+using \name. Typical distributed eventually consistent data stores use
+custom synchronization and dissemination protocols for transferring
+updates between replicas. Unlike this, \name is realized over Irmin
+which uses Git transfer protocol~\cite{..}, a protocol not designed
+with distributed data stores in mind. Hence, we also evaluate the
+performance of synchronization and merging.
 
 \subsection{Benchmark: Collaborative editing}
 
