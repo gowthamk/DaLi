@@ -99,15 +99,15 @@ exposed to low-level operational details.
 
 There have been numerous proposals over the years for realizing
 distributed functionality in a functional programming context.
-Poly/ML~\cite{Mat97} and Facile~\cite{TLK+97} both extend Standard ML
+Poly/ML~\cite{Mat97} and Facile~\cite{TLK+93} both extend Standard ML
 with distributed programming abstractions.  Kali-Scheme~\cite{CJK95}
 defines a distributed extension for Scheme-48, and Cloud
-Haskell~\cite{EPPJ11} describes a domain-specific language that
+Haskell~\cite{EBPJ11} describes a domain-specific language that
 enables development of distributed Haskell programs.
 Obliq~\cite{Car95} explores issues related to mobility, lexical
 scoping, and network references in an object-oriented framework that
 enables safe (i.e., lexical) transmission of closures.  However,
-Unlike \name, none of these systems consider issues of object
+unlike \name, none of these systems consider issues of object
 replication or consistency as central to their programming models.
 The realities of modern-day scalable distributed systems, especially
 those that are constructed from geographically distributed
@@ -116,12 +116,14 @@ consistency issues to achieve any kind of reasonable performance; it
 is noteworthy that replication is inherent in many widely-used
 distributed system implementations today (e.g.,
 Cassandra~\cite{Cassandra} or Dynamo~\cite{Dynamo}), which provide
-only weak consistency guarantees.  In this context, we view our
-primary contribution as one that provides a principled high-level
-approach to framing consistency issues leveraging functional
-programming abstractions and techniques that minimizes disruption to
-the way programmers structure and reason about their applications,
-without compromising efficiency or performance.  Indeed, our semantics
-of mergeable types and state versioning has utility in any concurrent
-context with non-trivial coordination and synchronization costs, even
-without taking distribution or replication into account.
+only weak consistency guarantees.  Rather than providing, as other
+approaches have, a low-level operational treatment of replication, our
+primary contribution is the development of a principled high-level
+approach to framing issues of consistency and replication.  Our goal
+is to leverage functional programming principles to minimize
+disruption to the way programmers structure and reason about their
+applications, without compromising efficiency or performance.  Indeed,
+the semantics of mergeable types and versioning has utility in any
+concurrent setting that must deal with non-trivial coordination and
+synchronization costs, even without taking distribution or replication
+issues into account.
