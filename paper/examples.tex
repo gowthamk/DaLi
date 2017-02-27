@@ -1,5 +1,7 @@
 \section{Mergeable Types}
 
+\input{rope-sig}
+
 The \drawsome example demonstrates the utility of the \name
 programming model in building concurrent applications with conceptual
 state sharing. The model lets concurrent computations be composed
@@ -18,11 +20,29 @@ yeilds the larger string. The idea is to facilitate efficient lookups
 and insertions at random positions in the string by storing
 position indexes in the internal nodes of the tree. 
 
-Fig.~\ref{fig:rope-sig} shows a rope interface in OCaml. The type
-of the list of values is left abstract (\C{A.t}); it can be
-instantiated with any module that supports \C{concat} and \C{split}
-operations. The interface shown in Fig.~\ref{fig:rope-sig} is that of
-a mergeable rope (\C{MRope}); 
+Fig.~\ref{fig:mrope-sig} shows a rope interface in OCaml. The type of
+the list of values is left abstract (\C{A.t}); it can be instantiated
+with any module that supports \C{concat} and \C{split} operations. The
+interface shown in Fig.~\ref{fig:mrope-sig} is that of a mergeable
+rope (\C{MRope}), whose \C{merge} implementation is shown
+in Fig.~\ref{fig:mrope-merge}. The function returns one of the
+versions (\C{l} or \C{r}), if the other one is same as the common
+ancestor. Otherwise, it calls \C{merge\_rec}, which recursively
+compares the structures of merging ropes, and their common ancestor.
+The function recurses until one of the ropes differs from the other
+two, or all of them are leaf nodes, at which point it relies on the
+(abstract) list merge function (\C{A.merge}) to merge the lists
+represented by the ropes. \C{merge\_rec} relies on auxiliary
+functions, \C{mk\_rope} and \C{create\_index}, whose definitions are
+not shown. The former constructs a rope given a list (\C{A.t}), and
+the latter computes the index at a node, given its left sub-tree.
+
+One feature of the mergeable rope implementation in
+Fig.~\ref{fig:rope-sig}, that is characterisic of mergeable types in
+general, is compositionality; rope is a polymorphic mergeable data
+type that composes mergeability. The compositionality is concretized
+by the \C{MRope} signature , which requires the type of items in the
+list (\C{A.t}) to also be mergeable (\C{A.merge}).
 
 \input{list-sig}
 
@@ -50,11 +70,6 @@ mergeable if they preserve the following properties:
   merged list substitutes $x$ by a merge of $y$ and $z$, defined as
   per the merge semantics of the list element type.
 \end{itemize}
-Thus, lists serve as an example of a polymorphic mergeable data type that
-demonstrates how mergeability can be composed.  Compositionality is
-reified in the the signature of a mergeable list library as shown in
-Fig.~\ref{fig:mlist-sig}; observe that the type of items in the list
-(\C{A.t}) is also required to be mergeable (\C{A.merge}).
 
 The merge operation for lists is composed of two separate functions,
 \C{edit\_seq} and \C{op\_transform}. Both these functions have been
@@ -91,7 +106,7 @@ The functions are described below.
 		which maps the list \C{[a;b;c]} ($v$) to \C{[a;d]} ($v_1$). The \C{D} edit
 		deletes the first element of $v$. However, if $s_1$ is to be applied on the
 		list \C{[c;a;b;s]} ($v_2$), which has a new element at position 0, the
-		\C{D} edit must delete the the second element from $v_2$, if it were to
+		\C{D} edit must delete the second element from $v_2$, if it were to
 		have the same effect as it did on $v$. We say \C{D(1)} in $s_1$ has to be
 		transformed w.r.t the sequence $s_2 = \C{[I(c,0);S(3,c,s)]}$.  The function
 		\C{op\_transform} (Fig.~\ref{fig:mlist-sig}) computes such
