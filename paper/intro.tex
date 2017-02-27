@@ -179,12 +179,10 @@ bears strong similarity to the original sequential one:
   \begin{ocaml}
     module Replicated_Counter = struct
       include Counter
-      type mergeable_t = t
       let merge lca v1 v2 =
          lca + (v1 - lca) + (v2 - lca)
     end
   \end{ocaml}
-
 The role of \C{lca} (least common ancestor) here captures salient
 history - the state resulting from the merge of two versions derived
 from the same ancestor state should not unwittingly duplicate the
@@ -247,6 +245,26 @@ Our contributions are summarized below:
       that justify the practical utility of our approach.
 \end{itemize}
 
+The remainder of the paper is organized as follows.  We present the
+\name\ programming model informally in the next section.
+Sec.~\ref{sec:mergeable_types} develops a series of examples that
+illustrate how merge operations can be defined and used.
+Sec.~\ref{sec:formalization} defines an operational semantics, and
+formalizes our intution of a mergeable type in terms of morphisms over
+datatype operations.  We also present soundness (consistency) and
+progress guarantees enjoyed by the
+semantics. Sec.~\ref{sec:system-model} considers an instantiation of
+the model suitable for distributed environments with network
+partitions and failures.  Implementation details describing how we
+incorporate mergeable types into OCaml are presented in
+Sec.~\ref{sec:impl}.  Experimental results and benchmarks are given
+in Sec.~\ref{sec:evaluation}.
+
+
+
+, along with
+a series of examples illustrating how merge operations can be defined
+and used.  Sec.~\ref{sec:
 
 
 %% Persistence adds yet another dimension to the problem. Functional data

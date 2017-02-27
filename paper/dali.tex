@@ -243,14 +243,15 @@ morekeywords={module, match, when, @@deriving, not, : , /\\}
 \begin{abstract}
   Distributed applications often replicate data to improve
   availability and fault tolerance.  But, the use of replication leads
-  to a significantly more complex programming model.  To ensure a
-  sensible measure of consistency among different replicas of an
-  object, applications are typically structured so that the operations
-  applied to a replicated object on one node are subsequently
-  communicated to other nodes where they can be re-applied locally.
-  Oftentimes, the degree of restructuring and care necessary to
-  transform a sequential or shared-memory concurrent application to a
-  meaningful (replicated) distributed one can be substantial.
+  to a significantly more complex and onerous programming model.  To
+  ensure a sensible measure of consistency among different replicas of
+  an object, applications are typically structured so that the
+  operations applied to a replicated object on one node are
+  subsequently communicated to other nodes where they can be
+  re-applied locally.  Oftentimes, the degree of restructuring and
+  care necessary to transform a sequential or shared-memory concurrent
+  application to a meaningful (replicated) distributed one can be
+  substantial.
 
   In this paper, we present a new interpretation of replicated types
   that overcome these concerns.  Our declarative programming model
@@ -260,18 +261,17 @@ morekeywords={module, match, when, @@deriving, not, : , /\\}
   immutable object versions, with merge actions used explicitly by the
   application or implicitly by the underlying runtime system to
   periodically reconcile local versions to yield a consistent global
-  state.  Thus, our model frees the programmer from having to think of
+  state.  Our model frees the programmer from having to think of
   low-level operational notions related to distribution and
   replication, and therefore does not entail any restructuring of
   application logic to enable distributed programming.
 
-  We show how any ML datatype can be enriched with mergeable
-  semantics, formalize a rich concurrency model based on such types,
-  and describe an instantiation of OCaml equipped with these features.
-  Our implementation is integrated with a content-addressable
-  distributed storage layer that allows any OCaml program to be easily
-  transformed into an efficient, highly available, distributed
-  application.
+  We show how any ML datatype can be enriched to support mergeability,
+  formalize a concurrency semantics based on such types, and describe
+  an instantiation of OCaml equipped with these features.  Our
+  implementation is integrated with a content-addressable distributed
+  storage layer that allows any OCaml program to be easily transformed
+  into an efficient, highly available, distributed application.
 \end{abstract}
 
 
