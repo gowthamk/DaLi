@@ -56,7 +56,11 @@
                            {\begin{array}{c}#2\end{array}}}
 \newcommand{\denot}[1]{\llbracket #1 \rrbracket}
 \newcommand{\bind}{>\!\!>\!\!=}
-\newcommand{\coloneqq}{::=}
+\ifx\coloneqq\undefined
+  \newcommand{\coloneqq}{::=}
+\else
+  \renewcommand{\coloneqq}{::=}
+\fi
 \newcommand{\stepsto}{\longrightarrow}
 \newcommand{\return}[1]{\C{return}\;#1}
 \newcommand{\run}[2]{\C{run}\;#1\;#2}
@@ -260,7 +264,7 @@ morekeywords={module, match, when, @@deriving, not, : , /\\}
   low-level operational notions related to distribution and
   replication, and therefore does not entail any restructuring of
   application logic to enable distributed programming.
-    
+
   We show how any ML datatype can be enriched with mergeable
   semantics, formalize a rich concurrency model based on such types,
   and describe an instantiation of OCaml equipped with these features.
