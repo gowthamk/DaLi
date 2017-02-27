@@ -1,4 +1,5 @@
 \subsection{Properties of the LCA}
+\label{sec:meta}
 
 When merging two concurrent versions $v_1$ and $v_2$, the common
 ancestor argument for \C{merge} must be the LCA of $v_1$ and $v_2$,
@@ -7,17 +8,6 @@ demonstrated for the grow-only counter in
 Fig.~\ref{fig:merge-needs-lca}, where an incorrect count is obtained if a
 common ancestor that is not an LCA is used to merge 4 and 7. While in
 this example there is a unique LCA for 4 and 7, in general this may
-\begin{wrapfigure}{l}{.4\textwidth}
-\centering
-\includegraphics[scale=0.6]{Figures/merge-needs-lca}
-\caption{This example of a grow-only counter illustrate why \C{merge}
-needs a least common ancestor, and not just a common ancestor. Both 0
-and 2 are common ancestors of 4 and 7, while 2 is their least common
-ancestor (since $0 \preceq 2$). The result (v) of merging 4 and 7 is
-11 (incorrect) if 0 is used as the common ancestor for merge, and 9
-(correct, because 2+2+3+2 = 9) if 2 is used. }
-\label{fig:merge-needs-lca}
-\end{wrapfigure}
 not be the case. With unrestrained branching and merging, there is no
 bound on the number of LCAs a pair of versions can have.  For example,
 in Fig.~\ref{fig:criss-cross-lcas}, the merge of 0 with 3 is preceded
@@ -26,12 +16,23 @@ resulting in there being two LCAs (5 and 4) for 0 and 3.
 % Multiple LCAs can occur even without criss-cross merges, as
 % demonstrated by Fig.~\ref{fig:external-lcas}. 
 Concurrent versions with multiple LCAs do not lend themselves to
-three-way merging. If such versions are latest on their respective
+three-way merging. If such versions represent the tips of their respective
 branches, they render the branches unmergeable (since  \C{lca} is no
 longer a function). This problem also arises in the context of source
 control systems, which employ \emph{ad hoc} mechanisms to pave the way
 for three-way merging.  GitHub~\cite{github}, for instance,
 recursively merges LCAs to compute a virtual ancestor, which then
+\begin{wrapfigure}{l}{.4\textwidth}
+\centering
+\includegraphics[scale=0.45]{Figures/merge-needs-lca}
+\caption{This example of a grow-only counter illustrate why \C{merge}
+needs a least common ancestor, and not just a common ancestor. Both 0
+and 2 are common ancestors of 4 and 7, while 2 is their least common
+ancestor (since $0 \preceq 2$). The result (v) of merging 4 and 7 is
+11 (incorrect) if 0 is used as the common ancestor for merge, and 9
+(correct, because 2+2+3+2 = 9) if 2 is used. }
+\label{fig:merge-needs-lca}
+\end{wrapfigure}
 serves as the LCA for merging concurrent versions. This method is
 demonstrated in the branching structure for a mergeable, replicated
 counter as shown in Fig.~\ref{fig:criss-cross-lcas}, where LCAs 5 and

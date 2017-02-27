@@ -96,34 +96,35 @@ along a branch $b$ in $H$, if $\under{H}{v_1 \preceq v_2}$, then there
 exists a morphism $P:t\rightarrow t$ such that $v_2 = P(v_1)$.
 \end{theorem}
 
-Rather than specifying merge ($M$) in terms of an LCA,
-Definition~\ref{def:mergeable-type} specifies $M$ in terms of a pair
-of morphisms.  This specification is useful to avoid the expression of certain
-nonsensical merge functions, and thus enforce a useful branch-local
-consistency property (Theorem~\ref{thm:branch-consistency}). For
-instance, consider the counter data type from Sec.~\ref{sec:intro}. A
-three-way merge function can be defined to return a constant
-regardless of its arguments:
+\noindent Rather than specifying merge ($M$) in terms of an LCA as we
+did in describing our programming model,
+Def.~\ref{def:mergeable-type} specifies $M$ in terms of a pair
+of morphisms.  This specification is useful to avoid the expression of
+certain nonsensical merge functions, and thus enforce a useful
+branch-local consistency property
+(Theorem~\ref{thm:branch-consistency}). For instance, consider the
+counter data type from Sec.~\ref{sec:intro}. A three-way merge
+function can be defined to return a constant regardless of its
+arguments:
 \begin{ocaml}
   let merge lca a b = 0
-\end{ocaml}
-Such a merge function allows the client to
-witness the violation of the branch-local consistency property. For
-example, the client may \C{sync} the counter, whose current local
-value is $10$, and obtain $0$ as a result, thus witnessing a violation
-of counter's monotonicity property. Fortunately,
-Def.~\ref{def:mergeable-type} disallows this semantics. It is
-impossible to define the function $M$ for the counter data type that
-violates the monotonicity invariant, because no counter morphism
-violates the invariant. In general, the specification of $M$
+\end{ocaml}  
+Such a merge function allows the client to witness a violation of
+branch-local consistency. For example, the client may
+\C{sync} the counter, whose current local value is $10$, and obtain
+$0$ as a result, thus witnessing a violation of a counter's monotonicity
+property. Fortunately, Def.~\ref{def:mergeable-type} disallows this
+semantics. It is impossible to define the function $M$ for the counter
+data type that violates the monotonicity invariant, because no counter
+morphism violates the invariant. In general, the specification of $M$
 guarantees that the merge operation for a type $t$ preserves any
 invariants (e.g., balancedness of a tree, sortedness of a list,
 non-negativeness of an integer etc) that are preserved by all of $t$'s
 morphisms.  The commutativity of the diagram in
 Fig.~\ref{fig:pushouts} need not be enforced statically. It can
-equally be verified at run-time by checking that the morphisms returned by $M$
-map respective concurrent versions to the same value. The
-\rulelabel{E-Pull-Wait} rule of the operational semantics
+equally be verified at run-time by checking that the morphisms
+returned by $M$ map respective concurrent versions to the same
+value. The \rulelabel{E-Pull-Wait} rule of the operational semantics
 (Fig.~\ref{fig:opsem}) can be extended to this effect:
 \begin{smathpar}
 \begin{array}{c}
@@ -154,12 +155,6 @@ for counter is simple enough that it does not require great effort to
 identify the $P$ and $Q$ that lead to the concurrent counter versions,
 and transform them into $P'$ and $Q'$ such that the diagram in
 Fig.~\ref{fig:pushouts} commutes. For more
-\begin{wrapfigure}{l}{.4\textwidth}
-\centering
-\includegraphics[scale=0.35]{Figures/pushouts-2}
-\caption{Commutative diagram for Def.~\ref{def:mergeable-type-2}.}
-\label{fig:pushouts-2}
-\end{wrapfigure}
 sophisticated data types, such as list, this process is more involved,
 and may require the programmer to perform non-trivial reasoning. We
 now present an alternative definition of a mergeable type that is
@@ -195,7 +190,7 @@ conditions hold:
   $P'$ and $Q'$, such that for any object $A:t$, $(Q' \circ
   \denot{P^*})(A) = (P' \circ \denot{Q^*})(A)$.  
 \end{itemize}
-The Commutativity diagram of Fig.~\ref{fig:pushouts-2} visualizes this
+The commutativity diagram of Fig.~\ref{fig:pushouts-2} visualizes this
 definition. 
 \end{definition}
 
@@ -204,6 +199,12 @@ type $t$. First, the function $W$, which (implicitly) computes the
 edit distance between an object $A:t$ and its semantic successor
 $B:t$.  The sequence of primitive morphisms it returns ($P^*$) is
 called an edit sequence. Applying the edit sequence on $A$ produces
+\begin{wrapfigure}{l}{.4\textwidth}
+\centering
+\includegraphics[scale=0.35]{Figures/pushouts-2}
+\caption{Commutative diagram for Def.~\ref{def:mergeable-type-2}.}
+\label{fig:pushouts-2}
+\end{wrapfigure}
 $B$ (i.e., $\denot{P^*}(A) = B$). Second, the definition asserts the
 existence of a function $M$, which performs an operational
 transformation of the primitive morphisms in an edit script. An

@@ -195,7 +195,7 @@ let alice_f : L.t unit t =
 let bob_f : L.t unit t =
   get () >>= fun c0 ->
   let c0' = L.insert ("candy",Qty.of_int 1) 1 @@
-            L.delete @@ L.lookup "eggs" in
+            L.delete @@ L.lookup "milk" in
   sync () ~v:c0' >>=
   fun c1 -> return ()
 \end{ocaml}
@@ -225,7 +225,7 @@ considered distinct. A shopping list is a mergeable list of items,
 i.e., \C{MList(Item)} (a grocery shopping list may not be large enough
 to justify using ropes, but \C{MRope(MList(Item))} is definitely a
 possibility).  \C{MList(Item).merge} automatically lifts the merge
-semantics for items to merge semantics for lists of items.
+semantics for items to a merge semantics for lists of items.
 Fig.~\ref{fig:shopping-list} illustrates its behavior.  Here, two
 users, Alice and Bob, concurrently edit a shopping list whose initial
 contents are \C{milk} and \C{eggs}. While both simultaneously update
@@ -235,11 +235,11 @@ concurrent sessions. The merged shopping list contains \C{eggs} and
 \C{candy}, where the quantity of eggs is obtained by merging Alice's
 and Bob's quantity as per the definition of \C{Qty.merge}.
 
-The examples described above make certain assumptions about the model
-and the underlying system, such as the existence of a single least
-common ancestor (LCA) for any pair of versions, the ability to access
-a previous version on any branch, and mergeability of any two
-concurrent versions. Enforcing these guarantees in a fully
+The examples described above make certain assumptions about the
+concurrency model and the underlying system, such as the existence of
+a single least common ancestor (LCA) for any pair of versions, the
+ability to access a previous version on any branch, and mergeability
+of any two concurrent versions. Enforcing these guarantees in a fully
 decentralized distributed setting requires addressing non-trivial
 theoretical challenges. These, and other details that contribute to
 the practicality of our model, such as containing the complexity of
