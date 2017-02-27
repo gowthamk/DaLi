@@ -89,7 +89,9 @@ can be thought of as a stutter step; it doesn't reduce \C{pull}, but
 updates the branching structure by merging (the latest version of) a
 concurrent branch ($H(t')$) into (the latest version of) the current
 branch ($H(t)$), and extending the current branch with the merged
-version ($v_m$). The new version is tagged with a \C{MERGE} tag that,
+version ($v_m$). The versions are merged only if they are \emph{safely
+mergeable} (denoted $\under{H}{v' \mbleto v}$) - a notion that we will
+explain shorty. The new version is tagged with a \C{MERGE} tag that,
 like a \C{FORK} tag, records its origin. The rule assumes a function
 \C{lca} that computes the \emph{least common ancestor} (LCA) for the
 latest versions on the given pair of branches. The formal definition
@@ -147,12 +149,12 @@ observe that the definition of LCA doesn't guarantee its uniqueness;
 it has to be enforced explicitly.  The semantics enforces the
 uniqueness of LCA by constraining the branching structure via the
 \rulelabel{E-Pull-Wait} rule. The rule merges version $v'$ into
-version $v$ only if they are \emph{safely mergeable} (denoted
-$\under{H}{v' \mbleto t}$), i.e., they have a single LCA, and merging
-both versions does not lead to a case where a branch has multiple LCAs
-with rest of the branches, hence gets \emph{stuck}. Such nuances of
-LCA, and the guarantees provided by the system notwithstanding these
-nuances, are discussed in the subsection~\ref{sec:meta}. 
+version $v$ only if they are safely mergeable ($\under{H}{v' \mbleto
+v}$), i.e., they have a single LCA, and merging both versions does not
+lead to a case where a branch has multiple LCAs with rest of the
+branches, hence gets \emph{stuck}. Such nuances of LCA, and the
+guarantees provided by the system notwithstanding these nuances, are
+discussed in the Sec.~\ref{sec:meta}. 
 
 \input{mergeable-types}
 
