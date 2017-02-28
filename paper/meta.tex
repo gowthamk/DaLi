@@ -110,7 +110,7 @@ $b_3$ and $b$. We observe that this scenario can be prevented if, when
 merging $b_1$, $b_3$ insists on an ancestor relation between the last
 merged version ($v_{22}$) and the currently merging version.  We call
 the last merged version of a branch its \emph{locus}. By maintaining a
-total order of among locii of a branch $b$ as new versions are
+total order of among loci of a branch $b$ as new versions are
 created, we effectively guarantee the presence of a version (the
 locus) that is lower than all the ancestors of the latest version on
 $b$. Next, by requiring the locus to be an ancestor of the merging
@@ -200,7 +200,7 @@ key observation is that the smallest history that is the union of
 causal histories of two unmergeable versions (call them $v_i$ and
 $v_j$) is smaller than the history that includes the unmergeable
 versions. Since causal histories have maximum versions (respective
-locii), which, by the inductive hypothesis, can be made mergeable, we
+loci), which, by the inductive hypothesis, can be made mergeable, we
 merge them to yield a new version $v$ that is the maximum of the
 causal histories of both $v_i$ and $v_j$. If $v_i$ and $v_j$ are the
 latest versions on their respective branches, the branches are now
