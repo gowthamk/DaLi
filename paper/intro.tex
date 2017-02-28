@@ -43,7 +43,7 @@ come for free.  Attempting to update every replicated copy atomically
 is problematic in the absence of sophisticated transaction support,
 which impose significant performance penalties.  But, without such
 heavyweight mechanisms, applying an \C{Add} operation on one node may
-not be instanteously witnessed on another, which may be in the process of
+not be instantaneously witnessed on another, which may be in the process of
 simultaneously attempting to perform its own \C{Add} or \C{Mult}
 action.  While synchronizing the activities of all nodes to ensure at
 most one such operation is performed at a time is impractical,
@@ -52,7 +52,7 @@ replication altogether (as in a client-server
 configuration~\cite{Armstrong}), is also an undesirable solution,
 given the sensitivity of such architectures to network partitions and server failures, and
 the negative performance impact it incurs in geo-distributed
-environments~\cite{Walter}.  Removig coordination altogether by simply
+environments~\cite{Walter}.  Removing coordination altogether by simply
 replicating counter state without having any supporting consistency
 protocol is an equally infeasible approach.
 
@@ -132,7 +132,7 @@ The lack of composability is yet another important downside of this
 approach.  Consider an application that uses two replicated counters,
 $c_1$ and $c_2$, bound by the invariant $c_2 \ge c_1$, duly enforced
 by the application when updating $c_2$ or $c_1$.  An execution may
-nonetheless witness anamolous states that violate the invariant
+nonetheless witness anomalous states that violate the invariant
 because updates to $c_1$ and $c_2$ may be applied independently in any
 order on any replica.  For example, if a replica increments both
 counters, a \C{read} operation performed at another replica may
@@ -188,7 +188,7 @@ history - the state resulting from the merge of two versions derived
 from the same ancestor state should not unwittingly duplicate the
 contributions of the ancestor.  This interpretation of a replicated
 datatype is thus given in terms of the evolution of a program state
-impicitly associated with the different nodes that comprise a
+implicitly associated with the different nodes that comprise a
 distributed application with merge operations serving to communicate
 and reconcile different local states.
 
@@ -250,7 +250,7 @@ The remainder of the paper is organized as follows.  We present the
 Sec.~\ref{sec:mergeable_types} develops a series of examples that
 illustrate how merge operations can be defined and used.
 Sec.~\ref{sec:formalization} defines an operational semantics, and
-formalizes our intution of a mergeable type in terms of morphisms over
+formalizes our intuition of a mergeable type in terms of morphisms over
 datatype operations.  We also present soundness (consistency) and
 progress guarantees enjoyed by the
 semantics. Sec.~\ref{sec:system-model} considers an instantiation of
