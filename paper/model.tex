@@ -68,7 +68,7 @@ by different clients.
 \name requires a three-way \C{merge} function to merge concurrent
 versions of a drawing canvas (see Fig.~\ref{fig:merge-canvas}) that
 includes includes two concurrent versions (\C{v1} and \C{v2}),
-and their least common ancestor (\C{lca}) - the version from which the
+and their lowest common ancestor (\C{lca}) - the version from which the
 two concurrent versions evolved independently. The merge function can
 make use of the pixel values of the common ancestor to merge the pixel
 values on both the canvases. For instance, if the color of a pixel in
@@ -239,7 +239,7 @@ Alice's.  Cheryl's \C{sync} does not find any concurrent versions,
 hence installs the proposed version ($C_0'$) as the next version on
 Cheryl's branch. Bob's \C{sync} finds Cheryl's $C_0'$ as a concurrent
 version, and merges it with its proposal to produce the next version
-$C_1$, which is then installed on Bob's branch.  The least common
+$C_1$, which is then installed on Bob's branch.  The lowest common
 ancestor (LCA) for this merge is the initial version ($C_0$), and the
 two concurrent versions are Bob's $C_0'$ and Cheryl's $C_0'$. Next,
 Alice's \C{sync} finds Cheryl's $C_0'$ and Bob's $C_1$ as concurrent
