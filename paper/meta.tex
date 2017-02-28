@@ -79,7 +79,7 @@ ancestor and its concurrent versions; the former may not even be a
 legal ancestor of the latter as per the semantics of the data type.
 For instance, suppose the integer type in
 Fig.~\ref{fig:criss-cross-lcas} represents a bank account balance,
-which is expected to disallows any activity on the account if the
+which is expected to disallow any activity on the account if the
 balance is ever known to be less than zero.  From the perspective of
 the library designer and its clients, there is no meaningful scenario
 in which versions 3 and 0 can emerge from -1, since the only
@@ -93,18 +93,18 @@ structure from the programmer, and hence retains the ability to
 manifest it in a way that it deems fit. In particular, \name solves
 the problem of multiple LCAs by suitably constraining the branching
 structure such that the problem never arises. The constraints are
-imposed either implicitly, as a result of how operational semantics
+imposed either implicitly, as a result of how the operational semantics
 defines an atomic step, or explicitly, by insisting that certain
 conditions be met before merging a pair of versions
-(\rulelabel{E-Pull-Wait}). Firstly, the operational semantics already
+(\rulelabel{E-Pull-Wait}). First, the operational semantics already
 disables criss-cross merges since it only ever merges versions that
-are latest on their respective branches. Secondly, we impose certain
+are latest on their respective branches. Second, we impose certain
 pre-conditions on the merging branches to preempt the structure shown
 in Fig.~\ref{fig:external-lcas}. The intuition is as follows: consider
 the branch $b_3$ at the instance of merging $v_{12}$. Since it has
 already merged $v_{22}$, $v_{22}$ could be a common ancestor for $b_3$
 and some other branch (call it $b$). Now, if $b_3$ merges $v_{12}$,
-same could be true of $v_{12}$. Since $v_{12}$ and $v_{22}$ are not
+the same could be true of $v_{12}$. Since $v_{12}$ and $v_{22}$ are not
 orderd by the ancestor relation, both become LCAs of
 $b_3$ and $b$. We observe that this scenario can be prevented if, when
 merging $b_1$, $b_3$ insists on an ancestor relation between the last
@@ -128,7 +128,7 @@ branch $b'\neq b$.
 \end{definition}
 
 \begin{definition} [\bfseries Locus]
-Given a branch $b$ and a version $v\in b$, locus ($v_o$) of $v$ is an
+Given a branch $b$ and a version $v\in b$, the locus ($v_o$) of $v$ is an
 ancestor that is not an ancestor of any other external ancestor of
 $v$. That is, $\under{H}{v_o \preceq v}$, and there does not exist a
 $v_o' \not\in b$ such that $\under{H}{v_o' \preceq v}$ and
@@ -138,8 +138,8 @@ its latest version.
 \end{definition}
 
 In a legal branching history, every version has a unique locus
-(property follows from Def.~\ref{def:mergeability} below). Let
-\emph{causal history} of a version be defined as the set of all
+(property follows from Def.~\ref{def:mergeability} below). We
+define the \emph{causal history} of a version as the set of all
 ancestors of that version. A locus ($v_o$) of a version ($v$) is
 therefore the maximum element (lowest element in the ancestor
 relation) of the causal history of $v$'s internal ancestor that was
@@ -182,20 +182,21 @@ asserts that this is not the case:
 \begin{theorem} [\bfseries Progress]
 In a legal branching history $H$ produced by the operational
 semantics, if two branches, $b_i$ and $b_j$ are not mergeable (as per
-Def.~\ref{def:mergeability}), then there exist a sequence of fork and
+Def.~\ref{def:mergeability}), then there exists a sequence of fork and
 merge operations (between mergeable versions) that can be performed on
 $H$ to yeild a new history $H'$, where $b_i$ and $b_j$ are mergeable.
 \end{theorem}
 
-Proof is by the induction on the size of branching history. The
-observation that the smallest history that is the union of causal
-histories of two unmergeable versions (call them $v_i$ and $v_j$) is
-smaller than the history that includes the unmergeable versions. Since
-causal histories have maximum versions (respective locii), which, by
-inductive hypothesis, can be made mergeable, we merge them to yeild a
-new version $v$ that is the maximum of the causal histories of both
-$v_i$ and $v_j$. If $v_i$ and $v_j$ are the latest versions on their
-respective branches, the branches are now mergeable.
+The proof is by the induction on the size of branching history. The
+key observation is that the smallest history that is the union of
+causal histories of two unmergeable versions (call them $v_i$ and
+$v_j$) is smaller than the history that includes the unmergeable
+versions. Since causal histories have maximum versions (respective
+locii), which, by the inductive hypothesis, can be made mergeable, we
+merge them to yield a new version $v$ that is the maximum of the
+causal histories of both $v_i$ and $v_j$. If $v_i$ and $v_j$ are the
+latest versions on their respective branches, the branches are now
+mergeable.
 
 % Observe that $v$ and $v_i$ are mergeable (with
 % $v_i$'s locus as the LCA), and so do $v$ and $v_j$. If $v_i$ and $v_j$

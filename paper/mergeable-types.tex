@@ -170,7 +170,7 @@ i.e., $\C{fold\_left}\;(\lambda f.\lambda g. f \circ g)\; id\; P^*$,
 where $\C{fold\_left}$ has its usual OCaml type. The length of a
 sequence $S$ is written $\length{S}$.
 
-\begin{definition} [\bfseries Mergeable Type]
+\begin{definition} [\bfseries Mergeable Type (Strengthened)]
 \label{def:mergeable-type-2}
 A type $t$ is said to be mergeable if and only if the following
 conditions hold:
@@ -215,7 +215,7 @@ $A$.
 
 Def.~\ref{def:mergeable-type-2} is immediately applicable to the list
 type, and lets us explain why it is a mergeable type.  \C{MList.edit\_seq}
-and \C{MList.op\_transform}, respectively, are the evidences for the
-existence of $W$ and $M$ functions.
+and \C{MList.op\_transform}, respectively, provide evidences for the
+existence of $W$ and $M$.
 
 

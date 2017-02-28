@@ -57,13 +57,13 @@ process of simultaneously attempting to perform its own \C{Add} or
 \C{Mult} action.  While synchronizing the activities of all nodes to
 ensure at most one such operation is performed at a time is
 impractical, designating a single node to hold the counter state
-eschewing replication altogether (as in a client-server
-configuration~\cite{Armstrong}), is also an undesirable solution,
-given the sensitivity of such architectures to network partitions and
-server failures, and the negative performance impact it incurs in
-geo-distributed environments~\cite{Walter}.  Removing coordination
-altogether by simply replicating counter state without having any
-supporting consistency protocol is an equally infeasible approach.
+eschewing replication altogether (as in a typical client-server
+configuration), is also an undesirable solution, given the sensitivity
+of such architectures to network partitions and server failures, and
+the negative performance impact it incurs in geo-distributed
+environments~\cite{Walter}.  Removing coordination altogether by
+simply replicating counter state without having any supporting
+consistency protocol is an equally infeasible approach.
 
 A method often adopted to address these concerns is to re-define a
 datatype's operations to return \emph{effects} instead of
@@ -163,7 +163,7 @@ counters, a \C{read} operation performed at another replica may
     produced through merging, and blue circles represent state
     produced by applying counter operations on a node-local version.
   }
-	\vspace*{-1.2in}
+	\vspace*{-1in}
 \end{wrapfigure}
 witness the increment to $c_1$, but not $c_2$, thus violating the
 invariant. The intention to atomically apply both effects cannot be
@@ -206,27 +206,27 @@ and reconcile different local states.
 
 Our main innovation is thus the development of a programming model
 that realizes a monadic version control system centered around data,
-rather than file, coherence.  The \name (Versioned ML) monad lets
-programmers write and compose concurrent computations around multiple
-(implicit) versions of a mergeable datatype, an ordinary ML datatype
-additionally equipped with a \emph{merge} function responsible for
-deriving a consistent global state from a collection of local versions
-of that state.  A computation progresses by forking (i.e.,
-replicating) new versions of existing versions, allowing
-synchronization-free local computation to proceed on those nodes,
-creating new versions along an existing \emph{branch} that represents
-updated local instances, and by merging branches to realize global
-consistency.
+rather than file, coherence.  The \name (Versioned ML) programming
+model comprises the {\sc vst} monad which lets programmers write and
+compose concurrent computations around multiple (implicit) versions of
+a mergeable datatype, an ordinary ML datatype additionally equipped
+with a \emph{merge} function responsible for deriving a consistent
+global state from a collection of local versions of that state.  A
+computation progresses by forking (i.e., replicating) new versions of
+existing versions, allowing synchronization-free local computation to
+proceed on those nodes, creating new versions along an existing
+\emph{branch} that represents updated local instances, and by merging
+branches to realize global consistency.
 
 Our model allows ML programmers to get the benefits of achieving
 highly available (low-latency) distributed computation, while
 continuing to enjoy the comforts of high-level reasoning and the
 familiarity of using standard libraries already provided by the
-language.  Notably, while \name's programming model makes no explicit
-reference to any specific operational manifestation of a distributed
-system (e.g., programmers do not need to explicitly manage replicas),
-we demonstrate that it can be nonetheless efficiently realized on
-existing real-world geo-replicated distributed systems.
+language.  Notably, while \name\ makes no explicit reference to any
+specific operational manifestation of a distributed system (e.g.,
+programmers do not need to explicitly manage replicas), we demonstrate
+that it can be nonetheless efficiently realized on existing real-world
+geo-replicated distributed systems.
 
 Our contributions are summarized below:
 
@@ -235,15 +235,15 @@ Our contributions are summarized below:
       datatype to admit high-level declarative reasoning about
       distributed computation and replicated state in ML programs.
 
-    \item We describe \name programming model that brings to bear the
-      power and flexibility of a version control system to the
-      administration of replicated data. \name hides the complexity of
-      version control behind a monad, and exposes its functionality
-      via a simple API that lets programmers define and compose
-      distributed ML computations around such data.  Issues related to
-      replication only manifest implicitly in the definition of a
-      merge operation that defines coherence among different instances
-      of replicated state.
+    \item We describe \name, a programming model that extends ML to
+      brings to bear the power and flexibility of a version control
+      system to the administration of replicated data. \name hides the
+      complexity of version control behind a monad, and exposes its
+      functionality via a simple API that lets programmers define and
+      compose distributed ML computations around such data.  Issues
+      related to replication only manifest implicitly in the
+      definition of a merge operation that defines coherence among
+      different instances of (presumably) replicated state.
 
     \item We present a formalization of the \name programming model,
       and establish the conditions under which eventual convergence of

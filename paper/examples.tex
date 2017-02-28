@@ -3,14 +3,13 @@
 
 \input{rope-sig}
 
-The \drawsome example demonstrates the utility of the \name
-programming model in building concurrent applications with conceptual
-state sharing that make them suitable for transparent deployment in a
-distributed setting. The model allows concurrent computations to be
-composed around any mergeable type. We now present a series of
-examples that demonstrate how mergeable types are built: either by
-defining merge functions for ML data types, or by composing existing
-mergeable types.
+The \drawsome example demonstrates the \name's utility in building
+concurrent applications with conceptual state sharing that make them
+suitable for transparent deployment in a distributed setting. The
+model allows concurrent computations to be composed around any
+mergeable type. We now present a series of examples that demonstrate
+how mergeable types are built - either by defining merge functions for
+ML data types, or by composing existing mergeable types.
 
 \subsection{Ropes}
 \label{sec:ropes}
@@ -21,7 +20,7 @@ at a random position etc., for a list of values in a distributed
 setting. The values are usually characters, with their lists being
 strings. The data structure is a binary tree, whose leaf nodes store
 substrings of a larger string such that their left-to-right (in-order)
-concatenation yeilds the larger string. The idea is to facilitate
+concatenation yields the larger string. The idea is to facilitate
 efficient lookups and insertions at random positions in the string by
 storing position indexes in the internal nodes of the tree.
 
@@ -188,17 +187,10 @@ tuple of its name (a string) and the quantity (A \C{Qty.t}).  The
 merge function for \C{Item.t} merges the quantities of items (using
 \C{Qty.merge}) having the same names. Items with different names are
 considered distinct. A shopping list is a mergeable list of items,
-i.e., \C{MList(Item)} (a grocery shopping list may not be large enough
-to justify using ropes, but \C{MRope(MList(Item))} is certainly
-allowed).  \C{MList(Item).merge} automatically lifts the merge
-semantics for items to a merge semantics for lists of items.
-\begin{wrapfigure}{r}{.35\textwidth}
-  \centering
-  \includegraphics[width=0.25\textwidth]{Figures/shopping-list}
-  \caption{Merging concurrent shopping lists}
-  \label{fig:shopping-list}
-  \vspace*{-.35in}
-\end{wrapfigure}
+i.e., \C{MList(Item)} (although a grocery shopping list may not be
+large enough to justify using ropes, \C{MRope(MList(Item))} is
+certainly allowed).  \C{MList(Item).merge} automatically lifts the
+merge semantics for items to a merge semantics for lists of items.
 Fig.~\ref{fig:shopping-list} illustrates its behavior.  Here, two
 users, Alice and Bob, concurrently edit a shopping list whose initial
 contents are \C{milk} and \C{eggs}. While both simultaneously update
@@ -206,6 +198,13 @@ the quantity of eggs, Bob also removes \C{milk} and inserts \C{candy}.
 Fig.~\ref{fig:shopping-list-code} shows the \name code for two
 concurrent sessions. The merged shopping list contains \C{eggs} and
 \C{candy}, where the quantity of eggs is obtained by merging Alice's
+\begin{wrapfigure}{r}{.35\textwidth}
+  \centering
+  \includegraphics[width=0.25\textwidth]{Figures/shopping-list}
+  \caption{Merging concurrent shopping lists}
+  \label{fig:shopping-list}
+  \vspace*{.25in}
+\end{wrapfigure}
 and Bob's quantity as per the definition of \C{Qty.merge}.
 The examples described above make certain assumptions about the
 concurrency model and the underlying system, such as the existence of
