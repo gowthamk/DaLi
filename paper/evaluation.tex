@@ -7,9 +7,9 @@ eventually consistent applications. In particular, we are interested in the
 horizontal scalability of applications built using \name. Typical distributed
 eventually consistent data stores use custom synchronization and dissemination
 protocols for transferring updates between replicas. In contrast, \name is
-realized over Irmin~\cite{irmin} which uses Git transfer protocol~\cite{..}, a
-protocol not designed with distributed data stores in mind. Hence, we also
-evaluate the performance of synchronization and merging.
+realized over Irmin~\cite{irmin} which uses Git transfer
+protocol~\cite{git-tp}, a protocol not designed with distributed data stores in
+mind. Hence, we also evaluate the performance of synchronization and merging.
 
 \subsection{Benchmark: Collaborative editing}
 

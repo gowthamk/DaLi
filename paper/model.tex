@@ -115,18 +115,17 @@ let rec merge lca v1 v2 =
 \end{center}
 \end{figure}
 
-The \name programming model lets programmers define and compose
-concurrent computations around versioned data structures.
-Fig.~\ref{fig:dali-monad} shows the signature of the \name module that
-implements the programming model along the lines of the well-known
-\C{State} monad~\cite{wadler-monad}. The monad encapsulates a
-versioned functional state (\C{'a}) and the type \C{('a, 'b) t}
-represents a monadic computation that returns a \C{'b} result.
-Functions \C{return} and \C{bind} have their usual monadic
+\name\ lets programmers define and compose concurrent computations
+around versioned data structures.  Fig.~\ref{fig:dali-monad} shows the
+signature of the \nameMonad module that implements the programming
+model along the lines of the well-known \C{State} monad. The monad
+encapsulates a versioned functional state (\C{'a}) and the type
+\C{('a, 'b) t} represents a monadic computation that returns a \C{'b}
+result.  Functions \C{return} and \C{bind} have their usual monadic
 \begin{figure}
 \begin{center}
   \begin{ocaml}
-  module type VST = sig
+  module type VML = sig
     type ('a, 'b) t
     val return : 'b -> ('a, 'b) t
     val bind : ('a, 'b) t -> ('b -> ('a, 'c) t) -> ('a, 'c) t

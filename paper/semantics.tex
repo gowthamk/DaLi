@@ -12,14 +12,11 @@ For brevity, we use short names for \name primitives: \C{run} for
 simplify the technical development, \name's \C{sync\_next\_version}
 operation is broken down into two primitives - \C{push} and \C{pull},
 which can be composed to get the desired effect of the original:
-\begin{smathpar}
-  \C{sync}\;x \;=\; (\lambda y.\pull)\; (\push\,x)
-\end{smathpar}
-The semantics of\C{get\_current\_version} is subsumed by \C{pull},
-hence elided.  Values ($v$) are constants and lambda abstractions.  A
-program ($p$) is a parallel composition of threads, where each thread
-is an expression ($s$) indexed by the corresponding thread identifier
-($t$).
+$\C{sync}\;x \;=\; (\lambda y.\pull)\; (\push\,x)$.  The semantics
+of\C{get\_current\_version} is subsumed by \C{pull}, hence elided.
+Values ($v$) are constants and lambda abstractions.  A program ($p$)
+is a parallel composition of threads, where each thread is an
+expression ($s$) indexed by the corresponding thread identifier ($t$).
 
 \input{opsem}
 
@@ -46,7 +43,7 @@ programs ($P$), with the latter subsuming the former.
 
 $E$ is defined to evaluate the first argument of a \C{run} expression
 to a value that constitutes an initial version (recall that \C{run}
-models \name's \C{with\_init\_version\_do}). A program evaluation
+models \nameMonad's \C{with\_init\_version\_do}). A program evaluation
 context non-deterministically picks an extant thread to evaluate. The
 administrative rule that relates transitions of holes to transitions
 of expressions and programs is straightforward, and hence elided. The
@@ -105,7 +102,7 @@ thus: \C{sync} pushes the given value onto the current (local) branch,
 merges a (possibly empty) subset of concurrent branches into the local
 branch, and returns the result.  (The operation is not guaranteed to
 synchronize with all concurrent branches because not all such branches
-may be available.)
+may be available, because of e.g., network partitions.)
 
 To define LCA, we formalize the intuitive notation of the ancestor
 relationship between versions of a legal branching history (i.e., a
@@ -123,7 +120,7 @@ following is true:
   \C{FORK}\; (v_1,f_1)::b_1)$, for some $f_1$ and $b_1$,
   \item There exists a branch $b$ in $H$ that contains
   $(v_2, \C{MERGE}\;(v_1,f_1)::b_1)$, for some $f_1$ and $b_1$,
-  \item $v_1 = v_2$, or $v_1$ is transitively a ancestor of
+  \item $v_1 = v_2$, or $v_1$ is transitively an ancestor of
   $v_2$, i.e., $\exists v.~ \under{H}{v_1 \preceq v} \conj
   \under{H}{v \preceq v}$
 \end{itemize}
@@ -151,11 +148,12 @@ it has to be enforced explicitly.  The semantics enforces the
 uniqueness of LCA by constraining the branching structure via the
 \rulelabel{E-Pull-Wait} rule. The rule merges version $v'$ into
 version $v$ only if they are safely mergeable ($\under{H}{v' \mbleto
-v}$), i.e., they have a single LCA, and merging both versions does not
-lead to a case where a branch (i.e., its latest version) has multiple
-LCAs with rest of the branches, hence gets \emph{stuck}. Such nuances
-of LCA, and the guarantees provided by the system notwithstanding
-these nuances, are discussed in the Sec.~\ref{sec:meta}.
+  v}$), i.e., they have a single LCA, and merging both versions does
+not lead to a case where a branch (i.e., its latest version) has
+multiple LCAs with remaining branches, andd hence gets
+\emph{stuck}. Such nuances of LCA, and the guarantees provided by the
+system notwithstanding these nuances, are discussed in 
+Sec.~\ref{sec:meta}.
 
 \input{mergeable-types}
 
