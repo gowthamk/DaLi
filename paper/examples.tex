@@ -80,8 +80,7 @@ the following properties:
 
 \noindent The merge operation for lists is composed of two separate functions,
 \C{edit\_seq} and \C{op\_transform}. Both these functions have been
-implemented in less than 50 lines of OCaml included in the appendix.
-The functions are described below.
+implemented in less than 50 lines of OCaml.  The functions are described below.
 \begin{itemize}
 	\item \C{edit\_seq} takes a pair of lists, \C{v} and $\C{v'}$, and computes
 		the shortest sequence of list operations that need to be applied on \C{v}
@@ -89,8 +88,8 @@ The functions are described below.
 		length of the sequence corresponds to the standard notion of the \emph{edit
 		distance} between the two lists, which can be computed in polynomial
 		time~\cite{wagner-fischer}.  \C{edit\_seq} modifies one such algorithm to
-		also compute the edit sequence (an \C{edit list}). The implementation
-		specified in Fig.~\ref{fig:mlist-sig} represents edits using the type
+		also compute the edit sequence (an \C{edit list}). The signature
+		specified in Fig.~\ref{fig:mlist} represents edits using the type
 		\C{edit}.  Constructors \C{I}, \C{D}, and \C{S} stand for \C{insert},
 		\C{delete}, and \C{subst}, respectively.\footnote{ Note that \C{I}, \C{D}
 		and \C{S} are \emph{not} effects; no list function generates them, and
