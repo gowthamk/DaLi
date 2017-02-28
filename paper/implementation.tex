@@ -75,7 +75,7 @@ representational mismatch with the help of OCaml's PPX metaprogramming
 support~\cite{ppx} to derive bi-directional transformations between
 objects on OCaml and Irmin heaps. We also derive the various
 serialization functions required by Irmin\footnote{
-  The Since \nameMonad monad relies on Irmin for realizing the branch
+  Since the \nameMonad monad relies on Irmin for realizing the branch
   structure, it is in fact parameterized over a mergeable type that
   implements all these functions. Thus the monad is functorized over
   the mergeable type, but not polymorphic. The convenience of type
