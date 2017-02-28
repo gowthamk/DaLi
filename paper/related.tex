@@ -150,3 +150,17 @@ two concurrent versions. If a 3-way merge is desired, then the causal
 history has to be explicitly encoded in the data type. As a result,
 constructing even simple data types like counters are more complicated
 using CRDTs~\cite{crdt} compared to their implementation in \name.
+
+\name uses 3-way merges using the lowest common ancestor, which is critical for
+all of our user-defined merges. However, CRDTs do not have the benefit of
+lowest common ancestor for merges and are only presented with the two
+concurrent versions. If a 3-way merge is desired, then the causal history has
+to be explicitly encoded in the data type. As a result, constructing even
+simple data types like counters are more complicated using CRDTs~\cite{crdt}
+compared to their implementation in \name. CRDTs also tend to be implemented
+directly over the network protocols. Hence, low-level concerns such as
+duplicate delivery, lost messages, message reordering are explicitly handled in
+the data type definition. In \name, the programmer does not have to deal with
+underlying network issues since \name is realized on Irmin, a high-level
+branch-consistent distributed store.
+
