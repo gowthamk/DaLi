@@ -24,8 +24,17 @@ structures~\cite{Burckhardt2014,BFL+12,SPB+11} or control
 primitives~\cite{Calm}, simplicity, composability, and
 ease-of-reasoning can suffer.
 
-To illustrate how these kinds of problems manifest in practice,
-consider how we might write a simple counter library (see
+In this paper, we consider how declarative abstractions can be used to
+overcome this tension to provide the best of both worlds: functional
+programs whose logical structure can be seamlessly transplanted to a
+distributed setting, while nonetheless being resilient to system
+realities such as network failure and latency.  Our key insight is the
+development of a principled methodology that allows us transform
+low-level operational details such as replication and consistency
+into high-level compositional reasoning on language-level datatypes.
+
+To illustrate how the kinds of problems described above manifest in
+practice, consider how we might write a simple counter library (see
 Fig.~\ref{fig:counter-adt}).  A \C{Counter} supports two (update)
 operations - \C{add} and \C{mult} - that lets a non-negative integer
 value be added or multiplied to the counter, resp.  Observe that the
@@ -43,18 +52,18 @@ come for free.  Attempting to update every replicated copy atomically
 is problematic in the absence of sophisticated transaction support,
 which impose significant performance penalties.  But, without such
 heavyweight mechanisms, applying an \C{Add} operation on one node may
-not be instantaneously witnessed on another, which may be in the process of
-simultaneously attempting to perform its own \C{Add} or \C{Mult}
-action.  While synchronizing the activities of all nodes to ensure at
-most one such operation is performed at a time is impractical,
-designating a single node to hold the counter state eschewing
-replication altogether (as in a client-server
+not be instantaneously witnessed on another, which may be in the
+process of simultaneously attempting to perform its own \C{Add} or
+\C{Mult} action.  While synchronizing the activities of all nodes to
+ensure at most one such operation is performed at a time is
+impractical, designating a single node to hold the counter state
+eschewing replication altogether (as in a client-server
 configuration~\cite{Armstrong}), is also an undesirable solution,
-given the sensitivity of such architectures to network partitions and server failures, and
-the negative performance impact it incurs in geo-distributed
-environments~\cite{Walter}.  Removing coordination altogether by simply
-replicating counter state without having any supporting consistency
-protocol is an equally infeasible approach.
+given the sensitivity of such architectures to network partitions and
+server failures, and the negative performance impact it incurs in
+geo-distributed environments~\cite{Walter}.  Removing coordination
+altogether by simply replicating counter state without having any
+supporting consistency protocol is an equally infeasible approach.
 
 A method often adopted to address these concerns is to re-define a
 datatype's operations to return \emph{effects} instead of
@@ -154,7 +163,7 @@ counters, a \C{read} operation performed at another replica may
     produced through merging, and blue circles represent state
     produced by applying counter operations on a node-local version.
   }
-\vspace*{-.85in}
+\vspace*{-1.2in}
 \end{wrapfigure}
 witness the increment to $c_1$, but not $c_2$, thus violating the
 invariant. The intention to atomically apply both effects cannot be
@@ -162,17 +171,20 @@ captured in the absence of external mechanisms to compose effects
 (such as effect-based transactions~\cite{pldi15}).  Rather than
 viewing a distributed computation in terms of \C{Add} effects produced
 by operations, can we formulate a more declarative interpretation,
-directly in terms of the counter value maintained by each node.  In
-doing so, we observe that each replica essentially operates over its
-own version of a counter.  Local operations on a replicated object can
-be thought of as yielding new versions, thus producing a version tree,
-with one branch for each replica.  Thus, every branch represents
-different (immutable) versions maintained by different nodes, with the
-state produced by the computation performed over a counter on a node
-recorded along the node's local branch for the counter.  Now, to
-generate a globally consistent view of a counter, we only need to
-define a merge operation that explains how to combine two local
-versions to produce a new version that reflects both their states.
+directly in terms of the counter value maintained by each node?  To do
+so, we first observe that each replica essentially operates over its
+own version of a counter.  Thus, local operations on a replicated
+object can be thought of as yielding new versions, collectively
+producing a version tree, with one branch for each replica.  Every
+branch represents different (immutable) versions maintained by
+different nodes, with the state produced by the computation performed
+over a counter on a node recorded along the node's local branch for
+the counter.  Now, to generate a globally consistent view of a
+counter, we only need to define a merge operation that explains how to
+combine two local versions to produce a new version that reflects both
+their states.  This operation is defined not in terms of replicas or
+other system-specific artifacts, but in terms of the semantics of the
+datatype itself.
 
 Framing replication as merging leads to a counter implementation that
 bears strong similarity to the original sequential one:
@@ -192,19 +204,18 @@ implicitly associated with the different nodes that comprise a
 distributed application with merge operations serving to communicate
 and reconcile different local states.
 
-In this paper, we develop a programming model that realizes a monadic
-version control system centered around data, rather than file,
-coherence.  The \name monad lets programmers write and compose
-concurrent computations around multiple (implicit) versions of a
-mergeable datatype, an ordinary ML datatype additionally equipped with
-a \emph{merge} function responsible for deriving a consistent global
-state from a collection of local versions of that state.  A
-computation progresses by forking (i.e., replicating) new versions of
-existing versions on geo-distributed nodes, allowing
-synchronization-free local computation to proceed on those nodes,
-creating new versions along an existing \emph{branch} that represents
-updated local instances, and by merging branches to realize global
-consistency.
+Our main innovation is thus the development of a programming model
+that realizes a monadic version control system centered around data,
+rather than file, coherence.  The \name monad lets programmers write
+and compose concurrent computations around multiple (implicit)
+versions of a mergeable datatype, an ordinary ML datatype additionally
+equipped with a \emph{merge} function responsible for deriving a
+consistent global state from a collection of local versions of that
+state.  A computation progresses by forking (i.e., replicating) new
+versions of existing versions, allowing synchronization-free local
+computation to proceed on those nodes, creating new versions along an
+existing \emph{branch} that represents updated local instances, and by
+merging branches to realize global consistency.
 
 Our model allows ML programmers to get the benefits of achieving
 highly available (low-latency) distributed computation, while
@@ -214,7 +225,7 @@ language.  Notably, while \name's programming model makes no explicit
 reference to any specific operational manifestation of a distributed
 system (e.g., programmers do not need to explicitly manage replicas),
 we demonstrate that it can be nonetheless efficiently realized on
-existing geo-replicated distributed systems.
+existing real-world geo-replicated distributed systems.
 
 Our contributions are summarized below:
 
@@ -245,7 +256,7 @@ Our contributions are summarized below:
       that justify the practical utility of our approach.
 \end{itemize}
 
-The remainder of the paper is organized as follows.  We present the
+\noindent The remainder of the paper is organized as follows.  We present the
 \name\ programming model informally in the next section.
 Sec.~\ref{sec:mergeable_types} develops a series of examples that
 illustrate how merge operations can be defined and used.

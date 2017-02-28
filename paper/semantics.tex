@@ -3,8 +3,6 @@
 
 \subsection{Operational Semantics}
 
-\input{opsem}
-
 We formalize our ideas in the context of a lambda calculus ($\lang$)
 shown in Fig.~\ref{fig:opsem}. Expressions of $\lang$ are variables,
 constants, and \name primitives composed using the lambda combinator.
@@ -21,6 +19,9 @@ hence elided.  Values ($v$) are constants and lambda abstractions.  A
 program ($p$) is a parallel composition of threads, where each thread
 is an expression ($s$) indexed by the corresponding thread identifier
 ($t$). 
+
+\input{opsem}
+
 
 Fig.~\ref{fig:opsem} also shows the syntax of \emph{branches}, which
 are artifacts of evaluation and only appear during run-time. A branch

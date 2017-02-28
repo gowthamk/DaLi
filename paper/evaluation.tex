@@ -7,26 +7,28 @@ geo-distributed eventually consistent applications. In particular, we
 are interested in the horizontal scalability of applications built
 using \name. Typical distributed eventually consistent data stores use
 custom synchronization and dissemination protocols for transferring
-updates between replicas. Unlike this, \name is realized over Irmin
+updates between replicas. In contrast, \name is realized over Irmin~\cite{Irmin}
 which uses Git transfer protocol~\cite{..}, a protocol not designed
 with distributed data stores in mind. Hence, we also evaluate the
 performance of synchronization and merging.
 
 \subsection{Benchmark: Collaborative editing}
 
-In order to evaluate this, we have implemented a collaborative editing
-application that simulates concurrent editing of the same document by several
-authors. This application is not unlike Google Docs, but also differs from it
-by the fact that we do not need a central server that coordinates the edits.
-Instead, edits from each author is asynchronously sent to other authors. The
-shared document itself is represented by a mergeable rope of characters
-(Section~\ref{sec:model}), and hence, the remote edits can be correctly
-reconciled into the local document. We resolve conflicts on concurrent
-substitutions at the same position (such as two authors concurrently editing
-\C{"abc"} to \C{"xbc"} and \C{"ybc"}, respectively) by choosing the character
-with the smaller ASCII code. For the benchmarks, the initial document that we
-use has 1576 characters. The workload consists of 4000 edit operations at
-random indices with 85\% insertions and 15\% deletions.
+To evaluate the effectiveness of our model, we have implemented a
+collaborative editing application that simulates concurrent editing of
+the same document by several authors. This application is not unlike
+Google Docs, but differs from it by the fact that we do not need a
+central server that coordinates the edits.  Instead, edits from each
+author is asynchronously sent to other authors. The shared document
+itself is represented by a mergeable rope of characters
+(Section~\ref{sec:model}), and hence, the remote edits can be
+correctly reconciled into each local document. We resolve conflicts on
+concurrent substitutions at the same position (such as two authors
+concurrently editing \C{"abc"} to \C{"xbc"} and \C{"ybc"},
+respectively) by choosing the character with the smaller ASCII
+code. For the benchmarks, the initial document that we use has 1576
+characters. The workload consists of 4000 edit operations at random
+indices with 85\% insertions and 15\% deletions.
 
 \subsection{Experimental setup}
 
@@ -34,10 +36,13 @@ random indices with 85\% insertions and 15\% deletions.
   \centering
 	\begin{subfigure}{0.45\textwidth}
 		\includegraphics[width=0.9\textwidth]{Figures/cluster.pdf}
-		\caption{8-node ring cluster on Google Cloud Platform used for
-			benchmarking. US-C, EU-W, ASIA-NE and ASIA-E are availability zones
-			us-central1-b, europe-west1-b, asia-northeast1-b and asia-east1-b
-			respectively. Edge labels are inter-node latencies in milliseconds.}
+		\caption{Our experimental configuration consists of an
+                  8-node ring cluster on executing on a Google Cloud
+                  Platform. US-C, EU-W, ASIA-NE and ASIA-E are
+                  availability zones us-central1-b, europe-west1-b,
+                  asia-northeast1-b and asia-east1-b
+                  respectively. Edge labels are inter-node latencies
+                  in milliseconds.}
 		\label{fig:cluster}
 	\end{subfigure}
 	\hfill
@@ -65,17 +70,19 @@ random indices with 85\% insertions and 15\% deletions.
   \label{grf:evaluation}
 \end{figure}
 
-For our experiments, we instantiate an 8-node geo-distributed cluster in Google
-Cloud Platform~\cite{gcp}. Each node is an \C{n1-standard-4} instance with 2
-virtual CPUs and 7.5 GB of memory. The nodes are arranged in a ring as shown in
-Figure~\ref{fig:cluster} and synchronize (push and pull updates) when necessary
-with its successor. While \name does not impose any restrictions on
-synchronizing with other nodes, we choose to only synchronize with the
-successor since we are guaranteed eventual convergence with a ring cluster. If
-the successor becomes unavailable, the node synchronizes with other available
-nodes. Operations are generated and applied locally on each node before they
-are propagated eventually to other nodes with the help of a background thread
-that synchronizes with its successor every second.
+For our experiments, we instantiate an 8-node geo-distributed cluster
+using the Google Cloud Platform~\cite{gcp}. Each node is an
+\C{n1-standard-4} instance with 2 virtual CPUs and 7.5 GB of
+memory. The nodes are arranged in a ring as shown in
+Figure~\ref{fig:cluster} and synchronize (push and pull updates) when
+necessary with its successor. While \name does not impose any
+restrictions on synchronizing with other nodes, we choose to only
+synchronize with the successor since we are guaranteed eventual
+convergence with a ring cluster. If the successor becomes unavailable,
+the node synchronizes with other available nodes. Operations are
+generated and applied locally on each node before they are propagated
+eventually to other nodes with the help of a background thread that
+synchronizes with its successor every second.
 
 \subsection{Results}
 
@@ -107,10 +114,10 @@ the throughput asymptotically approaches the asynchronous case
 
 Finally, we evaluate the performance of merge functions. For this experiment,
 we consider the nodes 1 (\C{us-central1-b}) and 2 (\C{europe-west1-b}). Both
-nodes start with the initial document and perform \C{n} concurrent edits
+nodes start with the initial document and perform $n$ concurrent edits
 without synchronization. After this, the nodes synchronize pushing the local
 edits and pulling the remote edits, and merge to produce the final document. In
-this case, we indicate the distance of synchronization as \C{2n}.
+this case, we indicate the distance of synchronization as $2n$.
 Figure~\ref{grf:merge} presents the time share between network and computation
 for performing 3-way merge as we increase the operation distance between the
 remote branches. We see that the merge time is dominated by the network
@@ -120,15 +127,20 @@ but also Git internal objects for history, directory structure and branches. We
 observe that we can improve the network performance by implementing a streaming
 protocol that eagerly transfers objects.
 
-More importantly, the cost of computation grows sub-linearly. This is because
-of efficient merge function on ropes~\ref{sec:ropes} enabled by Irmin's
-content-addressed storage backend, and more expensive operational
-transformation of merging concurrent edits to leaf nodes~\ref{sec:lists} is invoked
-rarely on small. On average, we measured that at a distance of 256, for merging
-the two documents with 1743 characters, 50 list merges were performed on
-strings of average length 13. A purely list based approach would require the
-polynomial time edit sequence algorithm to be applied on the entire document
-twice. Compare to this, the rope implementation has much better algorithmic
-complexity. We measured that by representing the entire document using
-mergeable list type, in addition to slowing down each edit operation, the merge
-at a distance of 256 was 2.3 times slower than the rope implementation.
+More importantly, the cost of computation grows sub-linearly. This is
+because of efficient merge function on ropes (Sec.~\ref{sec:ropes})
+enabled by Irmin's content-addressed storage backend, and more
+expensive operational transformation of merging concurrent edits to
+leaf nodes (Sec.~\ref{sec:lists}) is invoked rarely on small. On
+average, we measured that with a distance of 256, for merging the two
+documents with 1743 characters, 50 list merges were performed on
+strings of average length 13. A purely list based approach would
+require a polynomial time edit sequence algorithm to be applied on the
+entire document twice. Compared to this, the rope implementation has
+much better algorithmic complexity.  While not depicted here, we
+measured that by representing the entire document using a mergeable
+list type, in addition to slowing down each edit operation, the merge
+at a distance of 256 was 2.3 times slower than the rope
+implementation.  We conclude that versioning and merging as found in
+\name\ can yield substantial throughput and latency gains with low
+computational cost on modern eventually-consistent cloud systems.
