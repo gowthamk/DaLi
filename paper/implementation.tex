@@ -29,17 +29,16 @@ other replicas, resulting in a highly available distributed system.
 	\begin{center}
 	\includegraphics[scale=0.8]{Figures/partitions}
 	\end{center}
-	\caption{Network partitions may leave branches $b_1$ and $b_4$ in one
-		partition (red background), and branches $b_2$ and $b_3$ in the other
-		(yellow background). Since $b_2$ and $b_3$ cannot merge unless $b_1$ and
-		$b_4$ merge, they cannot communicate among themselves even though they are in
-		the same network partition.}
+  \caption{Network partitions may leave branches $b_1$ and $b_4$ in
+  one partition (red background), and branches $b_2$ and $b_3$ in the
+  other (yellow background). Access to full history on both sides of
+  the partition lets both sides make progress.}
 	\label{fig:partitions}
 \end{wrapfigure}
 
 Concurrent operations in Irmin are tracked using the notion of
 branches, allowing the programmer to explicitly merge branches on
-demand. \name's concurrency and distribution model is realized in
+demand. \name's concurrency and distribution model is also realized in
 terms of branches; each replica operates on its own branch, and thus
 is isolated from the actions on other replicas. In the presence of
 network partitions, the nodes in one partition may not receive updates
@@ -68,8 +67,8 @@ types. The \nameMonad conceals branching structure, but also
 transparently performs the necessary merges to obtain a history graph
 with a unique lowest common ancestor.
 
-Importantly, Irmin supports user-defined three-way merge functions for
-reconciling concurrent operations. While Irmin's merge functions are defined
+Importantly, Irmin supports user-defined three-way merge functions to
+reconcile concurrent operations.  While Irmin's merge functions are defined
 over objects on Irmin's content-addressable heap, \name's merge functions are
 defined over OCaml types. We address this representational mis-match with the
 help of OCaml's PPX metaprogramming support~\cite{ppx} to derive bi-directional
