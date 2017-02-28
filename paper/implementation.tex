@@ -27,11 +27,10 @@ replicas, resulting in a fully available distributed database system.
 	\begin{center}
 	\includegraphics[scale=0.8]{Figures/partitions}
 	\end{center}
-	\caption{Network partitions may leave branches $b_1$ and $b_4$ in one
-		partition (red background), and branches $b_2$ and $b_3$ in the other
-		(yellow background). Since $b_2$ and $b_3$ cannot merge unless $b_1$ and
-		$b_4$ merge, they cannot communicate among themselves even though they are in
-		the same network partition.}
+  \caption{Network partitions may leave branches $b_1$ and $b_4$ in
+  one partition (red background), and branches $b_2$ and $b_3$ in the
+  other (yellow background). Access to full history on both sides of
+  the partition lets both sides make progress.}
 	\label{fig:partitions}
 \end{wrapfigure}
 
@@ -40,28 +39,27 @@ allowing the programmer to explicitly merge the branches on demand. \name
 realizes the concurrent programming model on top of the notion of branches;
 each replica operates on its own branch, and thus is isolated from actions on
 other replicas. In presence of network partitions, the nodes in one partition
-may not receive updates from the other partition, hence merges cannot happen
-across a partition. This can be a problem if a pair of branches in one
-partition (the current partition) have multiple LCAs in the other partition
-(the remote partition), hence cannot merge. Fig.~\ref{fig:partitions}
-illustrate this problem for the branching structure of
+may not receive updates from the other partition, hence merges cannot
+happen across a partition. This can be a problem if a pair of branches
+in one partition (the current partition) have their loci
+(Sec.~\ref{sec:meta}) in the other partition (the remote partition),
+hence cannot merge. Fig.~\ref{fig:partitions} illustrate this problem
+for the branching structure of
 Fig.~\ref{fig:external-lcas}.
 
-Fortunately, the access to full (causal) branching history assured by Irmin at
-every node comes to the rescue. Relying on the history, the current partition
-can fork-off (\C{fork}) new branches that start where the remote branches left,
-and map them to new (virtual) nodes that emulate the nodes in the remote
-partition. For the example in Fig.~\ref{fig:partitions}, the partition of $b_1$
-and $b_4$ can fork new branches $b_2'$ and $b_3'$ from $b_2$ and $b_3$,
-respectively, and resume the activity as if the partition never happened. After
-merging the first versions on $b_2'$ and $b_3'$, branches $b_1$ and $b_2$ will
-be in the same state as before (when the partition happened), except that the
-branches are now mergeable because $b_2'$ and $b_3'$ can merge. The ability to
-track full provenance information is thus crucial for \name to overcome network
-partitions, making it an appropriate programming model for highly-available
-replicated data types. \name monad conceals the branching structure, but also
-transparently performs the necessary merges to obtain a history graph with a
-unique lowest common ancestor.
+Fortunately, the access to full (causal) branching history assured by
+Irmin at every node comes to the rescue. Relying on the history, the
+current partition can fork-off (\C{fork}) new branches that start
+where the remote branches left, and map them to new (virtual) nodes
+that emulate the nodes in the remote partition. For the example in
+Fig.~\ref{fig:partitions}, the partition of $b_1$ and $b_4$ can fork
+new branches $b_2'$ and $b_3'$ from $b_2$ and $b_3$, respectively, and
+resume the activity as if the partition never happened. The ability to
+track full provenance information is thus crucial for \name to
+overcome network partitions, making it an appropriate programming
+model for highly-available replicated data types. \name monad conceals
+the branching structure, but also transparently performs the necessary
+merges to obtain a history graph with a unique lowest common ancestor.
 
 Importantly, Irmin supports user-defined three-way merge functions for
 reconciling concurrent operations. While Irmin's merge functions are defined
