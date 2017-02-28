@@ -46,7 +46,7 @@
 	<key>Creator</key>
 	<string>Administrator</string>
 	<key>DisplayScale</key>
-	<string>1 0/72 in = 1 0/72 in</string>
+	<string>1 0/72 in = 1.0000 in</string>
 	<key>GraphDocumentVersion</key>
 	<integer>8</integer>
 	<key>GraphicsList</key>
@@ -58,13 +58,20 @@
 			<array>
 				<dict>
 					<key>Bounds</key>
-					<string>{{419, 453}, {18, 14}}</string>
+					<string>{{419, 453}, {18, 19}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
 					<string>Vertical</string>
 					<key>Flow</key>
 					<string>Resize</string>
+					<key>FontInfo</key>
+					<dict>
+						<key>Font</key>
+						<string>Helvetica</string>
+						<key>Size</key>
+						<real>16</real>
+					</dict>
 					<key>ID</key>
 					<integer>172</integer>
 					<key>Shape</key>
@@ -98,20 +105,27 @@
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
-\f0\fs24 \cf0 25}</string>
+\f0\fs32 \cf0 25}</string>
 						<key>VerticalPad</key>
 						<integer>0</integer>
 					</dict>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{222, 403}, {18, 14}}</string>
+					<string>{{222, 403}, {18, 19}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
 					<string>Vertical</string>
 					<key>Flow</key>
 					<string>Resize</string>
+					<key>FontInfo</key>
+					<dict>
+						<key>Font</key>
+						<string>Helvetica</string>
+						<key>Size</key>
+						<real>16</real>
+					</dict>
 					<key>ID</key>
 					<integer>173</integer>
 					<key>Shape</key>
@@ -145,20 +159,27 @@
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
-\f0\fs24 \cf0 25}</string>
+\f0\fs32 \cf0 25}</string>
 						<key>VerticalPad</key>
 						<integer>0</integer>
 					</dict>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{421, 338}, {18, 14}}</string>
+					<string>{{421, 338}, {18, 19}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
 					<string>Vertical</string>
 					<key>Flow</key>
 					<string>Resize</string>
+					<key>FontInfo</key>
+					<dict>
+						<key>Font</key>
+						<string>Helvetica</string>
+						<key>Size</key>
+						<real>16</real>
+					</dict>
 					<key>ID</key>
 					<integer>174</integer>
 					<key>Shape</key>
@@ -192,20 +213,27 @@
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
-\f0\fs24 \cf0 20}</string>
+\f0\fs32 \cf0 20}</string>
 						<key>VerticalPad</key>
 						<integer>0</integer>
 					</dict>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{54, 399}, {18, 14}}</string>
+					<string>{{54, 399}, {18, 19}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
 					<string>Vertical</string>
 					<key>Flow</key>
 					<string>Resize</string>
+					<key>FontInfo</key>
+					<dict>
+						<key>Font</key>
+						<string>Helvetica</string>
+						<key>Size</key>
+						<real>16</real>
+					</dict>
 					<key>ID</key>
 					<integer>175</integer>
 					<key>Shape</key>
@@ -239,20 +267,27 @@
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
-\f0\fs24 \cf0 15}</string>
+\f0\fs32 \cf0 15}</string>
 						<key>VerticalPad</key>
 						<integer>0</integer>
 					</dict>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{224, 320}, {18, 14}}</string>
+					<string>{{224, 320}, {18, 19}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
 					<string>Vertical</string>
 					<key>Flow</key>
 					<string>Resize</string>
+					<key>FontInfo</key>
+					<dict>
+						<key>Font</key>
+						<string>Helvetica</string>
+						<key>Size</key>
+						<real>16</real>
+					</dict>
 					<key>ID</key>
 					<integer>176</integer>
 					<key>Shape</key>
@@ -286,20 +321,27 @@
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
-\f0\fs24 \cf0 15}</string>
+\f0\fs32 \cf0 15}</string>
 						<key>VerticalPad</key>
 						<integer>0</integer>
 					</dict>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{421, 281}, {18, 14}}</string>
+					<string>{{421, 281}, {18, 19}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
 					<string>Vertical</string>
 					<key>Flow</key>
 					<string>Resize</string>
+					<key>FontInfo</key>
+					<dict>
+						<key>Font</key>
+						<string>Helvetica</string>
+						<key>Size</key>
+						<real>16</real>
+					</dict>
 					<key>ID</key>
 					<integer>177</integer>
 					<key>Shape</key>
@@ -333,7 +375,7 @@
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
-\f0\fs24 \cf0 10}</string>
+\f0\fs32 \cf0 10}</string>
 						<key>VerticalPad</key>
 						<integer>0</integer>
 					</dict>
@@ -381,13 +423,20 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{223, 233}, {18, 14}}</string>
+					<string>{{223, 233}, {18, 19}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
 					<string>Vertical</string>
 					<key>Flow</key>
 					<string>Resize</string>
+					<key>FontInfo</key>
+					<dict>
+						<key>Font</key>
+						<string>Helvetica</string>
+						<key>Size</key>
+						<real>16</real>
+					</dict>
 					<key>ID</key>
 					<integer>179</integer>
 					<key>Shape</key>
@@ -421,20 +470,27 @@
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
-\f0\fs24 \cf0 10}</string>
+\f0\fs32 \cf0 10}</string>
 						<key>VerticalPad</key>
 						<integer>0</integer>
 					</dict>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{422, 211}, {18, 14}}</string>
+					<string>{{422, 211}, {18, 19}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
 					<string>Vertical</string>
 					<key>Flow</key>
 					<string>Resize</string>
+					<key>FontInfo</key>
+					<dict>
+						<key>Font</key>
+						<string>Helvetica</string>
+						<key>Size</key>
+						<real>16</real>
+					</dict>
 					<key>ID</key>
 					<integer>180</integer>
 					<key>Shape</key>
@@ -468,20 +524,27 @@
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
-\f0\fs24 \cf0 10}</string>
+\f0\fs32 \cf0 10}</string>
 						<key>VerticalPad</key>
 						<integer>0</integer>
 					</dict>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{61, 159}, {7, 14}}</string>
+					<string>{{61, 159}, {9, 19}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
+					<key>FontInfo</key>
+					<dict>
+						<key>Font</key>
+						<string>Helvetica</string>
+						<key>Size</key>
+						<real>16</real>
+					</dict>
 					<key>ID</key>
 					<integer>181</integer>
 					<key>Shape</key>
@@ -515,7 +578,7 @@
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
-\f0\fs24 \cf0 5}</string>
+\f0\fs32 \cf0 5}</string>
 						<key>VerticalPad</key>
 						<integer>0</integer>
 					</dict>
@@ -565,13 +628,20 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{425, 162}, {7, 14}}</string>
+					<string>{{425, 162}, {9, 19}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
+					<key>FontInfo</key>
+					<dict>
+						<key>Font</key>
+						<string>Helvetica</string>
+						<key>Size</key>
+						<real>16</real>
+					</dict>
 					<key>ID</key>
 					<integer>183</integer>
 					<key>Shape</key>
@@ -605,7 +675,7 @@
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
-\f0\fs24 \cf0 0}</string>
+\f0\fs32 \cf0 0}</string>
 						<key>VerticalPad</key>
 						<integer>0</integer>
 					</dict>
@@ -614,13 +684,20 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{60, 73}, {7, 14}}</string>
+					<string>{{60, 73}, {9, 19}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
+					<key>FontInfo</key>
+					<dict>
+						<key>Font</key>
+						<string>Helvetica</string>
+						<key>Size</key>
+						<real>16</real>
+					</dict>
 					<key>ID</key>
 					<integer>184</integer>
 					<key>Shape</key>
@@ -654,7 +731,7 @@
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
-\f0\fs24 \cf0 0}</string>
+\f0\fs32 \cf0 0}</string>
 						<key>VerticalPad</key>
 						<integer>0</integer>
 					</dict>
@@ -663,13 +740,20 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{278.5, 71}, {7, 14}}</string>
+					<string>{{278.5, 71}, {9, 19}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
+					<key>FontInfo</key>
+					<dict>
+						<key>Font</key>
+						<string>Helvetica</string>
+						<key>Size</key>
+						<real>16</real>
+					</dict>
 					<key>ID</key>
 					<integer>185</integer>
 					<key>Shape</key>
@@ -703,7 +787,7 @@
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
-\f0\fs24 \cf0 0}</string>
+\f0\fs32 \cf0 0}</string>
 						<key>VerticalPad</key>
 						<integer>0</integer>
 					</dict>
@@ -712,13 +796,20 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{383, 130}, {39, 14}}</string>
+					<string>{{383, 130}, {52, 19}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
+					<key>FontInfo</key>
+					<dict>
+						<key>Font</key>
+						<string>Helvetica</string>
+						<key>Size</key>
+						<real>16</real>
+					</dict>
 					<key>ID</key>
 					<integer>186</integer>
 					<key>Shape</key>
@@ -752,7 +843,7 @@
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
-\f0\fs24 \cf0 Node 3}</string>
+\f0\fs32 \cf0 Node 3}</string>
 						<key>VerticalPad</key>
 						<integer>0</integer>
 					</dict>
@@ -761,13 +852,20 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{235, 34}, {39, 14}}</string>
+					<string>{{235, 34}, {52, 19}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
+					<key>FontInfo</key>
+					<dict>
+						<key>Font</key>
+						<string>Helvetica</string>
+						<key>Size</key>
+						<real>16</real>
+					</dict>
 					<key>ID</key>
 					<integer>187</integer>
 					<key>Shape</key>
@@ -801,7 +899,7 @@
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
-\f0\fs24 \cf0 Node 1}</string>
+\f0\fs32 \cf0 Node 1}</string>
 						<key>VerticalPad</key>
 						<integer>0</integer>
 					</dict>
@@ -810,13 +908,20 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{66, 46}, {39, 14}}</string>
+					<string>{{66, 46}, {52, 19}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
 					<string>YES</string>
 					<key>Flow</key>
 					<string>Resize</string>
+					<key>FontInfo</key>
+					<dict>
+						<key>Font</key>
+						<string>Helvetica</string>
+						<key>Size</key>
+						<real>16</real>
+					</dict>
 					<key>ID</key>
 					<integer>188</integer>
 					<key>Shape</key>
@@ -850,7 +955,7 @@
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
-\f0\fs24 \cf0 Node 2}</string>
+\f0\fs32 \cf0 Node 2}</string>
 						<key>VerticalPad</key>
 						<integer>0</integer>
 					</dict>
@@ -1760,7 +1865,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2017-02-20 21:01:14 +0000</string>
+	<string>2017-02-25 19:53:49 +0000</string>
 	<key>Modifier</key>
 	<string>Administrator</string>
 	<key>NotesVisible</key>
