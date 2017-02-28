@@ -84,8 +84,7 @@ serialization functions required by Irmin\footnote{
   Implicits~\cite{implicits}.
 }.
 Synchronization between replicas is performed using Git's notion of
-pushing and pulling updates from remotes over the Git transfer
-protocol~\cite{git-tp}. As a result, we reap the benefits of efficient
-delta-transfer (only missing objects are transferred between
+pushing and pulling updates from remotes~\cite{git-tp}. As a result, we reap the
+benefits of efficient delta-transfer (only missing objects are transferred between
 replicas), compression and end-to-end encrypted communication between
-he replicas.
+the replicas.

@@ -94,52 +94,73 @@ of system- or architecture-specific details.  This reasoning phase
 implicitly expresses salient semantic invariants without having to be
 exposed to low-level operational details.
 
-There have been numerous proposals over the years for realizing distributed
-functionality in a functional programming context. Poly/ML~\cite{Mat97} and
-Facile~\cite{TLK+93} extend Standard ML, while Acute~\cite{SLW+05} and
-HashCaml~\cite{BSS+06} extend OCaml, with distributed programming abstractions
-and support, with particular focus on type-safe marshalling and mobility.
-Kali-Scheme~\cite{CJK95} defines a distributed extension for Scheme-48, and
-Cloud Haskell~\cite{EBPJ11} describes a domain-specific language that enables
-development of distributed Haskell programs. Obliq~\cite{Car95} explores issues
-related to mobility, lexical scoping, and network references in an
-object-oriented framework that enables safe (i.e., lexical) transmission of
-closures. Orleans~\cite{Orleans} provides persistent actor-based programming
-model for elastic cloud application, but the focus is on strong consistency,
-mirroring a single-threaded execution.
+There have been numerous proposals over the years for realizing
+distributed programming functionality in a functional programming
+context.  Erlang~\cite{Armstrong}, which is the most well-known, is
+based on a ``shared-nothing'' message-passing programming methodology.
+Poly/ML~\cite{Mat97} and Facile~\cite{TLK+93} extend Standard ML,
+while Acute~\cite{SLW+05} and HashCaml~\cite{BSS+06} extend OCaml,
+with distributed programming abstractions and support, with particular
+focus on type-safe marshalling and mobility.  Kali-Scheme~\cite{CJK95}
+defines a distributed extension for Scheme-48, and Cloud
+Haskell~\cite{EBPJ11} describes a domain-specific language that
+enables development of distributed Haskell
+programs. Obliq~\cite{Car95} explores issues related to mobility,
+lexical scoping, and network references in an object-oriented
+framework that enables safe (i.e., lexical) transmission of
+closures. Orleans~\cite{Orleans} provides persistent actor-based
+programming model for elastic cloud application, but the focus is on
+strong consistency, mirroring a single-threaded execution.
 
 However, unlike \name, none of these systems consider issues of object
 replication or consistency as central to their programming models. The
-realities of modern-day scalable distributed systems, especially those that are
-constructed from geographically distributed participants, dictate that we must
-necessarily grapple with consistency issues to achieve any kind of reasonable
-performance; it is noteworthy that replication is inherent in many widely-used
+realities of modern-day scalable cloud-based distributed systems,
+especially those that are constructed from geographically distributed
+participants, dictate that we must necessarily grapple with
+consistency issues to achieve any kind of reasonable performance; it
+is noteworthy that replication is inherent in many widely-used
 cloud-based distributed system implementations today (e.g.,
-Cassandra~\cite{Cassandra} or Dynamo~\cite{Dynamo}), which provide only weak
-consistency guarantees.  Rather than exposing a low-level operational treatment
-of replication, foisting the burden of reasoning about replicated state onto
-the programmer, our primary contribution is the development of a principled
-high-level approach to framing these issues that abstracts these kinds of
-system-level details.  Our goal is to leverage functional programming
-principles to minimize disruption to the way programmers structure and reason
-about their applications, without compromising efficiency or performance.
-Indeed, the semantics of mergeable types and versioning has utility in any
+Cassandra~\cite{Cassandra} or Dynamo~\cite{Dynamo}), which provide
+only weak consistency guarantees.  Rather than exposing a low-level
+operational treatment of replication, foisting the burden of reasoning
+about replicated state onto the programmer, our primary contribution
+is the development of a principled high-level approach to framing
+these issues that abstracts these kinds of system-level details.  Our
+goal is to leverage functional programming principles to minimize
+disruption to the way programmers structure and reason about their
+applications, without compromising efficiency or performance.  Indeed,
+the semantics of mergeable types and versioning has utility in any
 concurrent setting that must deal with non-trivial coordination and
-synchronization costs, even without taking distribution or replication issues
-into account.
+synchronization costs, even without taking distribution or replication
+issues into account.
 
-\name shares resemblance to conflict-free replicated data types
-(CRDT)~\cite{crdt}. CRDTs define abstract data types such as counters, sets,
-etc., with commutative operations such that the state of the data type always
-converges. Unlike CRDTs, the operations on mergeable types in \name need not
-commute and the reconciliation protocol is defined by user-defined merge
-functions. Moreover, CRDTs are not composable and each CRDT tends to be built
-from scratch over the network protocol. Compare to this, \name types are
-composable; mergeable ropes are polymorphic over its mergeable content. \name
-uses 3-way merges using the lowest common ancestor, which is critical for all
-of our user-defined merges. However, CRDTs do not have the benefit of lowest
-common ancestor for merges and are only presented with the two concurrent
-versions. If a 3-way merge is desired, then the causal history has to be
-explicitly encoded in the data type. As a result, constructing even simple data
-types like counters are more complicated using CRDTs~\cite{crdt} compared to
-their implementation in \name.
+Finally, \name shares some resemblance to conflict-free replicated
+data types (CRDT)~\cite{crdt}. CRDTs define abstract data types such
+as counters, sets, etc., with commutative operations such that the
+state of the data type always converges. Unlike CRDTs, the operations
+on mergeable types in \name need not commute and the reconciliation
+protocol is defined by user-defined merge functions. Moreover, CRDTs
+are not composable and each CRDT tends to be built from scratch over
+the network protocol. Compared to this, \name types are composable;
+mergeable ropes are polymorphic over its mergeable content. \name uses
+3-way merges using the lowest common ancestor, which is critical for
+all of our user-defined merges. However, CRDTs do not have the benefit
+of lowest common ancestor for merges and are only presented with the
+two concurrent versions. If a 3-way merge is desired, then the causal
+history has to be explicitly encoded in the data type. As a result,
+constructing even simple data types like counters are more complicated
+using CRDTs~\cite{crdt} compared to their implementation in \name.
+
+\name uses 3-way merges using the lowest common ancestor, which is critical for
+all of our user-defined merges. However, CRDTs do not have the benefit of
+lowest common ancestor for merges and are only presented with the two
+concurrent versions. If a 3-way merge is desired, then the causal history has
+to be explicitly encoded in the data type. As a result, constructing even
+simple data types like counters are more complicated using CRDTs~\cite{crdt}
+compared to their implementation in \name. CRDTs also tend to be implemented
+directly over the network protocols. Hence, low-level concerns such as
+duplicate delivery, lost messages, message reordering are explicitly handled in
+the data type definition. In \name, the programmer does not have to deal with
+underlying network issues since \name is realized on Irmin, a high-level
+branch-consistent distributed store.
+
