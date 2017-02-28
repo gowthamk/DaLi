@@ -3,23 +3,21 @@
 
 Our idea of versioning state bears resemblance to Concurrent
 Revisions~\cite{BBL+10}, a programming abstraction that provides
-deterministic concurrent execution by forking and merging
-\emph{versions}, portions of state shared among concurrent threads.
-The idea of using revisions as a means to programming eventually
-consistent distributed systems was further developed
-in~\cite{BFL+12,Burckhardt2012}.  The \name\ programming model,
-however, differs substantially from a concurrent revisions model
-because it imposes no distinction between \emph{servers}, machines
-that hold global state, and \emph{clients}, devices that operate on
-local, potentially stale, data - any computation executing in a
-distributed environment is free to fork new versions, and synchronize
-against other replicated state.  Our model, furthermore, supports
-fully decentralized operation and is robust to network partitions and
-failures. Just as significantly, \name\ allows applications to
-customize join semantics with programmable merge operations.  Indeed,
-the integration of a version-based mechanism within OCaml allows a
-degree of type safety, composability, and profitable use of
-polymorphism not available in related systems.
+deterministic concurrent execution.  The idea of using revisions as a
+means to programming eventually consistent distributed systems was
+further developed in~\cite{BFL+12,BLF+12}.  The
+\name\ programming model, however, differs substantially from a
+concurrent revisions model because it imposes no distinction between
+\emph{servers}, machines that hold global state, and \emph{clients},
+devices that operate on local, potentially stale, data - any
+computation executing in a distributed environment is free to fork new
+versions, and synchronize against other replicated state.  Our model,
+furthermore, supports fully decentralized operation and is robust to
+network partitions and failures. Just as significantly, \name\ allows
+applications to customize join semantics with programmable merge
+operations.  Indeed, the integration of a version-based mechanism
+within OCaml allows a degree of type safety, composability, and
+profitable use of polymorphism not available in related systems.
 
 \cite{Burckhardt2015} also presents an operational model of a
 replicated data store that is based on the abstract system model
@@ -31,11 +29,11 @@ that are performed locally on each replica.  In contrast,
 abstractions when developing distributed applications.  As we
 illustrated in Fig.~\ref{fig:counter-rdt}, using effects and
 operations to coordinate the activities of replicas may involve
-addressing subtleties that do not manifest otherwise.  Our case
-studies and experimental results support our contention that using
-well-understood state (heap)-based abstractions to build distributed
-applications greatly simplifies program reasoning and eases
-development, without compromising efficiency.
+addressing subtleties that would not manifest in their absence.  Our
+case studies and experimental results support our contention that
+using well-understood state (heap)-based abstractions to build
+distributed applications greatly simplifies program reasoning and
+eases development, without compromising efficiency.
 
 Modern distributed systems are often equipped with only parsimonious
 data models (e.g., key-value model) and poorly understood low-level
@@ -99,8 +97,10 @@ exposed to low-level operational details.
 
 There have been numerous proposals over the years for realizing
 distributed functionality in a functional programming context.
-Poly/ML~\cite{Mat97} and Facile~\cite{TLK+93} both extend Standard ML
-with distributed programming abstractions.  Kali-Scheme~\cite{CJK95}
+Poly/ML~\cite{Mat97} and Facile~\cite{TLK+93} extend Standard ML,
+while Acute~\cite{SLW+05} and HashCaml~\cite{BSS+06} extend OCaml, with
+distributed programming abstractions and support, with particular
+focus on type-safe marshalling and mobility.  Kali-Scheme~\cite{CJK95}
 defines a distributed extension for Scheme-48, and Cloud
 Haskell~\cite{EBPJ11} describes a domain-specific language that
 enables development of distributed Haskell programs.
@@ -114,13 +114,14 @@ those that are constructed from geographically distributed
 participants, dictate that we must necessarily grapple with
 consistency issues to achieve any kind of reasonable performance; it
 is noteworthy that replication is inherent in many widely-used
-distributed system implementations today (e.g.,
+cloud-based distributed system implementations today (e.g.,
 Cassandra~\cite{Cassandra} or Dynamo~\cite{Dynamo}), which provide
-only weak consistency guarantees.  Rather than providing, as other
-approaches have, a low-level operational treatment of replication, our
-primary contribution is the development of a principled high-level
-approach to framing issues of consistency and replication.  Our goal
-is to leverage functional programming principles to minimize
+only weak consistency guarantees.  Rather than exposing a low-level
+operational treatment of replication, foisting the burden of reasoning
+about replicated state onto the programmer, our primary contribution
+is the development of a principled high-level approach to framing
+these issues that abstracts these kinds of system-level details.  Our
+goal is to leverage functional programming principles to minimize
 disruption to the way programmers structure and reason about their
 applications, without compromising efficiency or performance.  Indeed,
 the semantics of mergeable types and versioning has utility in any

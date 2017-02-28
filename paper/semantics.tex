@@ -3,8 +3,6 @@
 
 \subsection{Operational Semantics}
 
-\input{opsem}
-
 We formalize our ideas in the context of a lambda calculus ($\lang$)
 shown in Fig.~\ref{fig:opsem}. Expressions of $\lang$ are variables,
 constants, and \name primitives composed using the lambda combinator.
@@ -21,6 +19,9 @@ hence elided.  Values ($v$) are constants and lambda abstractions.  A
 program ($p$) is a parallel composition of threads, where each thread
 is an expression ($s$) indexed by the corresponding thread identifier
 ($t$). 
+
+\input{opsem}
+
 
 Fig.~\ref{fig:opsem} also shows the syntax of \emph{branches}, which
 are artifacts of evaluation and only appear during run-time. A branch
@@ -68,7 +69,7 @@ thread ($t$) forked-off from the top branch.  The first version on the
 current branch ($H(t)$) denotes the same value ($v$) as the initial
 version on the top branch, although versions themselves are deemed
 distinct. The new version is tagged with a \C{FORK} tag that keeps the
-record of its orgin, namely the \C{fork} operation and the branch from
+record of its origin, namely the \C{fork} operation and the branch from
 which the current branch is forked. The \rulelabel{E-Fork} rule forks
 a new thread with a fresh id ($t'$) and adds it to the thread pool.
 The corresponding branch ($H(t')$) is forked from the parent thread's
