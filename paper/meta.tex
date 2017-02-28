@@ -55,7 +55,7 @@ can make the branches merge again. Thus the system is effectively
 \hfill
 \subcaptionbox[] {\small
   In this example, latest versions on $b_1$ and $b_3$, and
-  $b_2$ and $b_3$ have two LCAs each, hence are unmergeable. 
+  $b_2$ and $b_3$ have two LCAs each, hence are unmergeable.
   \label{fig:external-lcas}
 } [0.47\columnwidth] {
   \includegraphics[scale=0.7]{Figures/2-external-LCAs}
@@ -105,7 +105,7 @@ the branch $b_3$ at the instance of merging $v_{12}$. Since it has
 already merged $v_{22}$, $v_{22}$ could be a common ancestor for $b_3$
 and some other branch (call it $b$). Now, if $b_3$ merges $v_{12}$,
 the same could be true of $v_{12}$. Since $v_{12}$ and $v_{22}$ are not
-orderd by the ancestor relation, both become LCAs of
+ordered by the ancestor relation, both become LCAs of
 $b_3$ and $b$. We observe that this scenario can be prevented if, when
 merging $b_1$, $b_3$ insists on an ancestor relation between the last
 merged version ($v_{22}$) and the currently merging version.  We call
@@ -167,18 +167,18 @@ If $v_1$ and $v_2$ referred in the above definition are the latest
 versions on their respective branches $b_1$ and $b_2$, we say $b_2$ is
 mergeable into $b_1$, or more generally, $b_1$ and $b_2$ are
 mergeable. The definition essentially requires all of $v_1$'s causal
-history that preceeds its locus $v_o$ to be included in $v_2$'s causal
+history that precedes its locus $v_o$ to be included in $v_2$'s causal
 history, and none of $v_1$'s history that succeeds $v_o$ to be
 included in $v_2$'s history. This allows us to view versions $v_1$ and
 $v_2$ as having been independently evolved from a common causal
 history whose maximum (w.r.t the ancestor relation) is the version
-$v_o$. Consquently, $v_o$ becomes the LCA for $v_2$'s merge into
+$v_o$. Consequently, $v_o$ becomes the LCA for $v_2$'s merge into
 $v_1$. Generalizing this observation for the latest versions on
 any two branches, we state the following theorem:
 
 \begin{theorem} [\bfseries Unique LCA]
 Every pair of branches in a legal history $H$, if mergeable as per
-Def.~\ref{def:mergeability}, have a unique least common ancestor.
+Def.~\ref{def:mergeability}, have a unique lowest common ancestor.
 \end{theorem}
 
 While the definition of mergeability is sufficient to enforce
@@ -192,7 +192,7 @@ In a legal branching history $H$ produced by the operational
 semantics, if two branches, $b_i$ and $b_j$ are not mergeable (as per
 Def.~\ref{def:mergeability}), then there exists a sequence of fork and
 merge operations (between mergeable versions) that can be performed on
-$H$ to yeild a new history $H'$, where $b_i$ and $b_j$ are mergeable.
+$H$ to yield a new history $H'$, where $b_i$ and $b_j$ are mergeable.
 \end{theorem}
 
 The proof is by the induction on the size of branching history. The
