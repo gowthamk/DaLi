@@ -23,8 +23,15 @@ repository. Due to \name's mergeable type, each replica can operate completely
 independently, accepting client requests, even when disconnected from other
 replicas, resulting in a fully available distributed database system.
 
-Concurrent operations are tracked within the notion of branches, but
-importantly, Irmin supports user-defined three-way merge functions for
+Concurrent operations in Irmin are tracked within the notion of branches,
+allowing the programmer to explicitly merge the branches on demand. \name
+realizes the concurrent programming model on top of the notion of branches;
+each replica operates on its own branch, and thus is isolated from actions on
+other replicas. \name monad conceals the branching structure, but also
+transparently performs the necessary merges to obtain a history graph with a
+unique lowest common ancestor.
+
+Importantly, Irmin supports user-defined three-way merge functions for
 reconciling concurrent operations. While Irmin's merge functions are defined
 over objects on Irmin's content-addressable heap, \name's merge functions are
 defined over OCaml types. We address this representational mis-match with the
