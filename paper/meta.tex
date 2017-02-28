@@ -68,8 +68,8 @@ cannot merge. }
 
 The problem of multiple LCAs also arises in the context of source
 control systems, which employ \emph{ad hoc} mechanisms to pave the way
-for three-way merging.  GitHub~\cite{github}, for instance,
-recursively merges LCAs to compute a virtual ancestor, which then
+for three-way merging.  Git~\cite{git}, for instance,
+recursively merges LCAs by default to compute a virtual ancestor, which then
 serves as the LCA for merging concurrent versions. This method is
 demonstrated in the branching structure for a mergeable, replicated
 counter as shown in Fig.~\ref{fig:criss-cross-lcas}, where LCAs 5 and
@@ -136,7 +136,7 @@ definitions that help us state the guarantees offered by the system.
 Given a branch $b$ and a version $v\in b$, an internal ancestor
 ($\preceq_i$) of $v$ is an ancestor from the same branch $b$. An
 external ancestor ($\preceq_o$) of $v$ is an ancestor from a different
-branch $b'\neq b$. 
+branch $b'\neq b$.
 \end{definition}
 
 \begin{definition} [\bfseries Locus]
@@ -156,7 +156,7 @@ ancestors of that version. A locus ($v_o$) of a version ($v$) is
 therefore the maximum element (lowest element in the ancestor
 relation) of the causal history of $v$'s internal ancestor that was
 the result of the last merge. We make use of this observation while
-defining mergeability. 
+defining mergeability.
 
 \begin{definition} [\bfseries Mergeability]
 \label{def:mergeability}
@@ -164,7 +164,7 @@ Given a history $H$, a version $v_1$ and a version $v_2$ that is not
 an ancestor of $v_1$ under $H$, $v_2$ is mergeable into $v_1$ (denoted
 $\under{H}{v_2 \mbleto v_1}$) if and only if the locus ($v_o$) of
 $v_1$ is an ancestor of $v_2$, and no internal ancestor of $v_1$ that
-is not also an ancestor of $v_o$ is an ancestor of $v_2$.    
+is not also an ancestor of $v_o$ is an ancestor of $v_2$.
 \end{definition}
 
 If $v_1$ and $v_2$ referred in the above definition are the latest
@@ -182,7 +182,7 @@ any two branches, we state the following theorem:
 
 \begin{theorem} [\bfseries Unique LCA]
 Every pair of branches in a legal history $H$, if mergeable as per
-Def.~\ref{fig:mergeability}, have a unique least common ancestor.
+Def.~\ref{def:mergeability}, have a unique least common ancestor.
 \end{theorem}
 
 While the definition of mergeability is sufficient to enforce
@@ -196,7 +196,7 @@ In a legal branching history $H$ produced by the operational
 semantics, if two branches, $b_i$ and $b_j$ are not mergeable (as per
 Def.~\ref{def:mergeability}), then there exist a sequence of fork and
 merge operations (between mergeable versions) that can be performed on
-$H$ to yeild a new history $H'$, where $b_i$ and $b_j$ are mergeable.  
+$H$ to yeild a new history $H'$, where $b_i$ and $b_j$ are mergeable.
 \end{theorem}
 
 Proof is by the induction on the size of branching history. The
@@ -207,13 +207,13 @@ causal histories have maximum versions (respective locii), which, by
 inductive hypothesis, can be made mergeable, we merge them to yeild a
 new version $v$ that is the maximum of the causal histories of both
 $v_i$ and $v_j$. If $v_i$ and $v_j$ are the latest versions on their
-respective branches, the branches are now mergeable.  
+respective branches, the branches are now mergeable.
 
 % Observe that $v$ and $v_i$ are mergeable (with
 % $v_i$'s locus as the LCA), and so do $v$ and $v_j$. If $v_i$ and $v_j$
 % are the latest versions on their respective branches, then merging $v$
 % into $v_i$ and $v$ into $v_j$ makes $v$ the locus of both the
-% branches, thus making them mergeable again. 
+% branches, thus making them mergeable again.
 
 % \begin{theorem} [\bfseries Progress and Eventual Convergence] Given a
 % legal branching history $H$, and a program $p$, where every thread
