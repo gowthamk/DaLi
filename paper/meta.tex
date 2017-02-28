@@ -199,12 +199,15 @@ The proof is by the induction on the size of branching history. The
 key observation is that the smallest history that is the union of
 causal histories of two unmergeable versions (call them $v_i$ and
 $v_j$) is smaller than the history that includes the unmergeable
-versions. Since causal histories have maximum versions (respective
-loci), which, by the inductive hypothesis, can be made mergeable, we
-merge them to yield a new version $v$ that is the maximum of the
-causal histories of both $v_i$ and $v_j$. If $v_i$ and $v_j$ are the
-latest versions on their respective branches, the branches are now
-mergeable.
+versions. As shown in Fig.~\ref{fig:causal-history}, causal
+histories have maximum versions (respective loci of $v_i$ and $v_j$),
+which, by the inductive hypothesis, can be made mergeable. We
+therefore can merge them to yield a new version $v$. Since $v$
+immediately follows the loci of both $v_i$ and $v_j$, and since both
+the versions are the latest versions on their respective branches, $v$
+can be merged into $v_i$ and $v_j$ to create new versions $v_i'$ and
+$v_j'$ on their respective branches, which have a single LCA - $v$.
+Thus the branches are now mergeable.
 
 % Observe that $v$ and $v_i$ are mergeable (with
 % $v_i$'s locus as the LCA), and so do $v$ and $v_j$. If $v_i$ and $v_j$
