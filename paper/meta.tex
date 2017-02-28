@@ -12,8 +12,8 @@ this example there is a unique LCA for 4 and 7, in general this may
 \centering
 \includegraphics[scale=0.6]{Figures/merge-needs-lca}
 \caption{This example of a grow-only counter illustrate why \C{merge}
-needs a least common ancestor, and not just a common ancestor. Both 0
-and 2 are common ancestors of 4 and 7, while 2 is their least common
+needs a lowest common ancestor, and not just a common ancestor. Both 0
+and 2 are common ancestors of 4 and 7, while 2 is their lowest common
 ancestor (since $0 \preceq 2$). The result (v) of merging 4 and 7 is
 11 (incorrect) if 0 is used as the common ancestor for merge, and 9
 (correct, because 2+2+3+2 = 9) if 2 is used. }
@@ -30,9 +30,9 @@ branches\footnote{
   versions merge. Likewise, LCA of two branches means the LCA of their
   latest versions.
 }
-resulting in there being two LCAs (5 and 4) for 0 and 3. 
+resulting in there being two LCAs (5 and 4) for 0 and 3.
 Multiple LCAs can occur even without criss-cross merges, as
-demonstrated by Fig.~\ref{fig:external-lcas}. 
+demonstrated by Fig.~\ref{fig:external-lcas}.
 Concurrent versions with multiple LCAs do not lend themselves to
 three-way merging. If such versions are latest on their respective
 branches, they render the branches unmergeable (since  \C{lca} is no
@@ -40,7 +40,7 @@ longer a function) as demonstrated by examples in
 Fig.~\ref{fig:many-lcas}. Note that for both the examples in
 Fig.~\ref{fig:many-lcas}, no extension of the branching structure
 can make the branches merge again. Thus the system is effectively
-\emph{partitioned} permanently. This is clearly a problem. 
+\emph{partitioned} permanently. This is clearly a problem.
 
 \begin{figure}[!t]
 \centering

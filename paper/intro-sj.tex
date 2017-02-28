@@ -48,7 +48,7 @@ Fig.~\ref{fig:counter-adt}).
   \begin{ocaml}
     module Counter: sig
       type t
-      type eff 
+      type eff
       val add: int -> t-> eff
       val mult: int -> t -> eff
       val apply: eff -> t -> t
@@ -140,7 +140,7 @@ sequential one:
       let merge lca v1 v2 = lca + (v1 - lca) + (v2 - lca)
     end
   \end{ocaml}
-The role of \C{lca} (least common ancestor) here captures salient
+The role of \C{lca} (lowest common ancestor) here captures salient
 history - the state resulting from the merge of two versions derived
 from the same ancestor should not unwittingly duplicate the
 contributions of the ancestor.  This interpretation of a replicated
@@ -148,7 +148,7 @@ data type is thus given in terms of multi-versions of a program state
 impicitly associated with the different nodes that comprise a
 distributed application and a logical notion of a \emph{master}
 representing some consistent, but not necessarily current, view of
-global state.  
+global state.
 \begin{figure}
   \begin{center}
     \includegraphics[scale=0.4]{Figures/dali-counter}

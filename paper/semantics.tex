@@ -2,6 +2,7 @@
 \label{sec:formalization}
 
 \subsection{Operational Semantics}
+\label{sec:opsem}
 
 We formalize our ideas in the context of a lambda calculus ($\lang$)
 shown in Fig.~\ref{fig:opsem}. Expressions of $\lang$ are variables,
@@ -18,10 +19,9 @@ The semantics of\C{get\_current\_version} is subsumed by \C{pull},
 hence elided.  Values ($v$) are constants and lambda abstractions.  A
 program ($p$) is a parallel composition of threads, where each thread
 is an expression ($s$) indexed by the corresponding thread identifier
-($t$). 
+($t$).
 
 \input{opsem}
-
 
 Fig.~\ref{fig:opsem} also shows the syntax of \emph{branches}, which
 are artifacts of evaluation and only appear during run-time. A branch
@@ -94,7 +94,7 @@ version ($v_m$). The versions are merged only if they are \emph{safely
 mergeable} (denoted $\under{H}{v' \mbleto v}$) - a notion that we will
 explain shorty. The new version is tagged with a \C{MERGE} tag that,
 like a \C{FORK} tag, records its origin. The rule assumes a function
-\C{lca} that computes the \emph{least common ancestor} (LCA) for the
+\C{lca} that computes the \emph{lowest common ancestor} (LCA) for the
 latest versions on the given pair of branches. The formal definition
 of LCA is given below. The \rulelabel{E-Pull-Wait} and
 \rulelabel{E-Pull} rules thus let a thread synchronize with other
@@ -119,13 +119,13 @@ following is true:
   \item There exists a branch $b$ in $H$ (i.e., $\exists(t\in
   dom(H)).\,H(t) = b$) in which $v_2$ immediately succeeds
   $v_1$,
-  \item There exists a branch $b$ in $H$ that contains $(v_2, 
+  \item There exists a branch $b$ in $H$ that contains $(v_2,
   \C{FORK}\; (v_1,f_1)::b_1)$, for some $f_1$ and $b_1$,
   \item There exists a branch $b$ in $H$ that contains
   $(v_2, \C{MERGE}\;(v_1,f_1)::b_1)$, for some $f_1$ and $b_1$,
   \item $v_1 = v_2$, or $v_1$ is transitively a ancestor of
   $v_2$, i.e., $\exists v.~ \under{H}{v_1 \preceq v} \conj
-  \under{H}{v \preceq v}$ 
+  \under{H}{v \preceq v}$
 \end{itemize}
 \end{definition}
 
@@ -133,12 +133,12 @@ The ancestor relation is therefore a partial order with a greatest
 lower bound (the initial version).  Thus, for any two versions in a
 legal history, there exists at least one common ancestor.  The ancestor
 relationship among all common ancestors lets us define the notion of a
-least common ancestor (LCA):
+lowest common ancestor (LCA):
 
-\begin{definition} [\bfseries Least Common Ancestor]
+\begin{definition} [\bfseries Lowest Common Ancestor]
 Version $v$ is said to be a common ancestor of versions $v_1$ and
 $v_2$ under a history $H$ if and only if $\under{H}{v \preceq v_1}$
-and $\under{H}{v \preceq v_2}$. It is said to be the least common
+and $\under{H}{v \preceq v_2}$. It is said to be the lowest common
 ancestor (LCA) of $v_1$ and $v_2$, iff there does not exist a $v'$
 such that $\under{H}{v' \preceq v_1}$ and $\under{H}{v' \preceq v_2}$
 and $\under{H}{v \preceq v'}$.
@@ -155,7 +155,7 @@ v}$), i.e., they have a single LCA, and merging both versions does not
 lead to a case where a branch (i.e., its latest version) has multiple
 LCAs with rest of the branches, hence gets \emph{stuck}. Such nuances
 of LCA, and the guarantees provided by the system notwithstanding
-these nuances, are discussed in the Sec.~\ref{sec:meta}. 
+these nuances, are discussed in the Sec.~\ref{sec:meta}.
 
 \input{mergeable-types}
 

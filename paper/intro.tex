@@ -163,7 +163,7 @@ counters, a \C{read} operation performed at another replica may
     produced through merging, and blue circles represent state
     produced by applying counter operations on a node-local version.
   }
-\vspace*{-1.2in}
+	\vspace*{-1.2in}
 \end{wrapfigure}
 witness the increment to $c_1$, but not $c_2$, thus violating the
 invariant. The intention to atomically apply both effects cannot be
@@ -195,7 +195,7 @@ bears strong similarity to the original sequential one:
          lca + (v1 - lca) + (v2 - lca)
     end
   \end{ocaml}
-The role of \C{lca} (least common ancestor) here captures salient
+The role of \C{lca} (lowest common ancestor) here captures salient
 history - the state resulting from the merge of two versions derived
 from the same ancestor state should not unwittingly duplicate the
 contributions of the ancestor.  This interpretation of a replicated

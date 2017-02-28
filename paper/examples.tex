@@ -137,12 +137,16 @@ of them (say, $s_1$) w.r.t $s_2$ to obtain $s_1'$, and finally applies
 \subsection{Lists of Integers and Quantities}.
 
 A mergeable list of integers can be composed using mergeable lists and
-mergeable integers.  Concretely, it is a composition of \C{MList} and
-\C{Int} types (i.e., \C{MList(Int)}), where \C{Int.merge} is the same
-as \C{Counter.merge} described in the introduction.  An alternative
-instantiation of \C{MList} is for a quantity type
-(\C{Qty}) that supports \C{add} and \C{subtract} operations, and
-defines its \C{merge} operation a little differently:
+mergeable integers.  Concretely, it is a composition of \C{MList} and \C{Int}
+types (i.e., \C{MList(Int)}), where \C{Int.merge} is the same as
+\C{Counter.merge} described in the introduction.  An alternative instantiation
+of \C{MList} is for a quantity type (\C{Qty}) that supports \C{add} and
+\C{subtract} operations, and defines its \C{merge} operation a little
+differently:
+\begin{ocaml}
+let merge lca v1 v2 = if v1 = lca then v2
+    else (if v2 = lca then v1 else max v1 v2)
+\end{ocaml}
 \begin{wrapfigure}{l}{.45\textwidth}
   \centering
   \includegraphics[scale=0.4]{Figures/list-eg}
@@ -150,14 +154,10 @@ defines its \C{merge} operation a little differently:
   \label{fig:list-eg}
   \vspace*{-.45in}
 \end{wrapfigure}
-\begin{ocaml}
-let merge lca v1 v2 = if v1 = lca then v2
-    else (if v2 = lca then v1 else max v1 v2)
-\end{ocaml}
-\C{MList(Qty)}, like \C{MList(Int)}, is a list of integers, and has
-the same semantics under a sequential execution. Their differences
-however manifest under a concurrent execution, where both adopt
-different methods to reconcile concurrent updates.
+\C{MList(Qty)}, like \C{MList(Int)}, is a list of integers, and has the same
+semantics under a sequential execution. Their differences however manifest
+under a concurrent execution, where both adopt different methods to reconcile
+concurrent updates.
 
 If efficient insertions and lookups (by position) are desired over a
 large list of integers, while admitting concurrent updates, we require
@@ -178,7 +178,6 @@ composing \C{MList(Int)} with \C{MRope} (i.e., \C{MRope(MList(Int))}).
 
 \subsection{Shopping List}
 
-
 A non-trivial demonstration illustrating the compositional power of
 mergeable types is a shopping list application that allows its users
 to collaboratively build a shopping list (listing items in the
@@ -189,17 +188,17 @@ tuple of its name (a string) and the quantity (A \C{Qty.t}).  The
 merge function for \C{Item.t} merges the quantities of items (using
 \C{Qty.merge}) having the same names. Items with different names are
 considered distinct. A shopping list is a mergeable list of items,
-\begin{wrapfigure}{l}{.5\textwidth}
-  \centering
-  \includegraphics[scale=0.3]{Figures/shopping-list}
-  \caption{Merging concurrent shopping lists}
-  \label{fig:shopping-list}
-  \vspace*{-.35in}
-\end{wrapfigure}
 i.e., \C{MList(Item)} (a grocery shopping list may not be large enough
 to justify using ropes, but \C{MRope(MList(Item))} is certainly
 allowed).  \C{MList(Item).merge} automatically lifts the merge
 semantics for items to a merge semantics for lists of items.
+\begin{wrapfigure}{r}{.35\textwidth}
+  \centering
+  \includegraphics[width=0.25\textwidth]{Figures/shopping-list}
+  \caption{Merging concurrent shopping lists}
+  \label{fig:shopping-list}
+  \vspace*{-.35in}
+\end{wrapfigure}
 Fig.~\ref{fig:shopping-list} illustrates its behavior.  Here, two
 users, Alice and Bob, concurrently edit a shopping list whose initial
 contents are \C{milk} and \C{eggs}. While both simultaneously update
@@ -210,7 +209,7 @@ concurrent sessions. The merged shopping list contains \C{eggs} and
 and Bob's quantity as per the definition of \C{Qty.merge}.
 The examples described above make certain assumptions about the
 concurrency model and the underlying system, such as the existence of
-a single least common ancestor (LCA) for any pair of versions, the
+a single lowest common ancestor (LCA) for any pair of versions, the
 ability to access a previous version on any branch, and mergeability
 of any two concurrent versions. Enforcing these guarantees in a fully
 decentralized distributed setting requires addressing non-trivial
