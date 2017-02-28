@@ -54,9 +54,8 @@ can make the branches merge again. Thus the system is effectively
 }
 \hfill
 \subcaptionbox[] {\small
-  In this example, versions $v_{13}$ and $v_{44}$ have two LCAs
-  ($v_{22}$ and $v_{32}$)  despite there not being any previous merges
-  between their respective branches.
+  In this example, latest versions on $b_1$ and $b_3$, and
+  $b_2$ and $b_3$ have two LCAs each, hence are unmergeable. 
   \label{fig:external-lcas}
 } [0.47\columnwidth] {
   \includegraphics[scale=0.7]{Figures/2-external-LCAs}
@@ -99,26 +98,15 @@ defines an atomic step, or explicitly, by insisting that certain
 conditions be met before merging a pair of versions
 (\rulelabel{E-Pull-Wait}). Firstly, the operational semantics already
 disables criss-cross merges since it only ever merges versions that
-are latest on their respective branches. For instance, suppose
-$v_{11}$ and $v_{21}$ are the latest versions on branches $b_1$ and
-$b_2$, respectively. Merging $b_2$ into $b_1$ entails merging $v_{21}$
-into $v_{11}$ to generate version $v_{12}$ on $b_1$.  Now, merging
-$b_1$ into $b_2$ involves merging $v_{12}$, the latest version on
-$b_1$, into $v_{21}$, but not $v_{11}$ into $v_{21}$, thus preempting
-a criss-cross branching structure.
-
-Secondly, we impose certain pre-conditions on the merging branches to
-preempt the structure shown in Fig.~\ref{fig:external-lcas}. The
-intuition is as follows: consider the branch $b_3$ at the instance of
-merging $b_1$. Since it has already merged $b_2$, a version on $b_2$
-($v_{21}$) could be a common ancestor for $b_3$ and some other branch
-(call it $b$). Now, if $b_3$ merges $b_1$, same could be true of $b_3$
-and $b_1$: a version on $b_1$ ($v_{11}$) could be a common ancestor
-for $b_3$ and the other branch $v$. Since $v_{21}$ is also a common
-ancestor for both the branches, and the ancestors are not ordered by
-the ancestor relation, $b_3$ and $b$ end up with two LCAs. In
-Fig.~\ref{fig:external-lcas}, the role of $b$ is played both by $b_1$
-and $b_2$. We observe that this scenario can be prevented if, when
+are latest on their respective branches. Secondly, we impose certain
+pre-conditions on the merging branches to preempt the structure shown
+in Fig.~\ref{fig:external-lcas}. The intuition is as follows: consider
+the branch $b_3$ at the instance of merging $v_{12}$. Since it has
+already merged $v_{22}$, $v_{22}$ could be a common ancestor for $b_3$
+and some other branch (call it $b$). Now, if $b_3$ merges $v_{12}$,
+same could be true of $v_{12}$. Since $v_{12}$ and $v_{22}$ are not
+orderd by the ancestor relation, both become LCAs of
+$b_3$ and $b$. We observe that this scenario can be prevented if, when
 merging $b_1$, $b_3$ insists on an ancestor relation between the last
 merged version ($v_{22}$) and the currently merging version.  We call
 the last merged version of a branch its \emph{locus}. By maintaining a
