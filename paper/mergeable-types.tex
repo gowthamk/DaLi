@@ -96,6 +96,12 @@ along a branch $b$ in $H$, if $\under{H}{v_1 \preceq v_2}$, then there
 exists a morphism $P:t\rightarrow t$ such that $v_2 = P(v_1)$.
 \end{theorem}
 
+The proof follows directly from the fact that the values on branches
+are computed from previous values either by applying morphisms
+locally, or by merging from the remote branches. In the latter case,
+Def.~\ref{def:mergeable-type} guarantees that the existence of a
+morphism from the merging value to the merged value.
+
 \noindent Rather than specifying merge ($M$) in terms of an LCA as we
 did in describing our programming model,
 Def.~\ref{def:mergeable-type} specifies $M$ in terms of a pair
