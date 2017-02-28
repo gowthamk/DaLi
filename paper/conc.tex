@@ -1,0 +1,19 @@
+\section{Conclusions}
+\label{sec:conclusions}
+
+Replication is a critical feature in geo-distributed systems used to
+improve latency and availability.  Existing approaches to dealing with
+replicated data often involve complex and subtle code restructuring,
+and the use of specialized datatypes that interact poorly with other
+language structures.  \name\ is a programming model that extends ML
+with implicit support for replication that overcomes these concerns.
+Its notion of concurrency and synchronization is encapsulated within a
+monad that considers distrbuted computation in terms of typed versions
+of replicated state.  Notably, any ML data structure can participate
+in a distributed computation using this monad by providing a merge
+function that dictates how different versions of that structure can be
+reconciled.  Our versioning semantics enjoys strong consistency and
+progress guarantees that make it useful in a fully decentralized (and
+unreliable) cloud environment.  Furthermore, our experimental results
+demonstrate that using such high-level abstractions need not come at
+the expense of efficient implementations.
