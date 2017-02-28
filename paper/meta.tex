@@ -137,14 +137,22 @@ level of branches by defining the locus of a branch as the locus of
 its latest version.
 \end{definition}
 
+\begin{wrapfigure}{l}{.4\textwidth}
+\centering
+\includegraphics[scale=0.6]{Figures/causal-history}
+\caption{The cloud represents the set of all ancestors of versions $v_i$ and
+$v_{i+1}$, i.e., their causal history. The locus $v_k$ of both is the
+version that succeeds every other ancestor in the causal history.}
+\label{fig:causal-history}
+\end{wrapfigure}
 In a legal branching history, every version has a unique locus
-(property follows from Def.~\ref{def:mergeability} below). We
-define the \emph{causal history} of a version as the set of all
-ancestors of that version. A locus ($v_o$) of a version ($v$) is
-therefore the maximum element (lowest element in the ancestor
-relation) of the causal history of $v$'s internal ancestor that was
-the result of the last merge. We make use of this observation while
-defining mergeability.
+(property follows from Def.~\ref{def:mergeability} below). We define
+the \emph{causal history} of a version as the set of all ancestors of
+that version. A locus ($v_o$) of a version ($v$) is therefore the
+maximum element (lowest element in the ancestor relation) of the
+causal history of $v$'s internal ancestor that was the result of the
+last merge. This is illustrated in Fig.~\ref{fig:causal-history}. We
+make use of this observation while defining mergeability.
 
 \begin{definition} [\bfseries Mergeability]
 \label{def:mergeability}
