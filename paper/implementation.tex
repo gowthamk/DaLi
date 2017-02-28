@@ -62,15 +62,24 @@ the branching structure, but also transparently performs the necessary
 merges to obtain a history graph with a unique lowest common ancestor.
 
 Importantly, Irmin supports user-defined three-way merge functions for
-reconciling concurrent operations. While Irmin's merge functions are defined
-over objects on Irmin's content-addressable heap, \name's merge functions are
-defined over OCaml types. We address this representational mis-match with the
-help of OCaml's PPX metaprogramming support~\cite{ppx} to derive bi-directional
-transformations between objects on OCaml and Irmin heaps. We also derive the
-various serialization functions required Irmin. This address the representation
-mismatch between the application and storage layers. Synchronization between
-replicas is performed using Git's notion of pushing and pulling updates from
-remotes over the Git transfer protocol~\cite{git-tp}. As a result, we reap the
-benefits of efficient delta-transfer (only missing objects are transferred
-between replicas), compression and end-to-end encrypted communication between
+reconciling concurrent operations. While Irmin's merge functions are
+defined over objects on Irmin's content-addressable heap, \name's
+merge functions are defined over OCaml types. We address this
+representational mismatch with the help of OCaml's PPX metaprogramming
+support~\cite{ppx} to derive bi-directional transformations between
+objects on OCaml and Irmin heaps. We also derive the various
+serialization functions required by Irmin\footnote{
+  The Since \nameMonad monad relies on Irmin for realizing the branch
+  structure, it is in fact parameterized over a mergeable type that
+  implements all these functions. Thus the monad is functorized over
+  the mergeable type, but not polymorphic. The convenience of type
+  parameter inference that polymorphism offers can however be obtained
+  for module parameters using OCaml extensioms, such as Modular
+  Implicits~\cite{implicits}.
+}.
+Synchronization between replicas is performed using Git's notion of
+pushing and pulling updates from remotes over the Git transfer
+protocol~\cite{git-tp}. As a result, we reap the benefits of efficient
+delta-transfer (only missing objects are transferred between
+replicas), compression and end-to-end encrypted communication between
 the replicas.
