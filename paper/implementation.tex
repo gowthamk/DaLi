@@ -5,23 +5,25 @@ We describe the realization of \name on top of a persistent
 distributed store and the language extensions to enable and enforce
 the constraints of the \name.
 
-\name programming model is realized on top of Irmin~\cite{irmin}, an OCaml
-library database implementation that is part of the MirageOS
-project~\cite{mirage}. Irmin provides a persistent multi-versioned store with
-with a content-addressable heap abstraction. Simply put, content-addressability
-means that the address of a data block is determined by its content. If the
-content changes, then so does the address. Old content continues to be
-available the old address. Content-addressability also results in constant time
+The \name programming model is realized on top of Irmin~\cite{irmin},
+an OCaml library database implementation that is part of the MirageOS
+project~\cite{mirage}. Irmin provides a persistent multi-versioned
+store with a content-addressable heap abstraction. Simply put,
+content-addressability means that the address of a data block is
+determined by its content. If the content changes, then so does the
+address. Old content continues to be available from the old
+address. Content-addressability also results in constant time
 structural equality checks, which we exploit in our mergeable rope
-implementation (Section~\ref{sec:ropes}).
+implementation (Section~\ref{sec:ropes}), among others.
 
-Irmin provides support for distribution, fault-tolerance and concurrency
-control by incorporating Git distributed version control~\cite{git} protocol
-over its object model. Indeed, Irmin is fully compatible with the Git command
-line tools. Distributed replicas in \name are created by cloning a \name
-repository. Due to \name's mergeable type, each replica can operate completely
-independently, accepting client requests, even when disconnected from other
-replicas, resulting in a fully available distributed database system.
+Irmin provides support for distribution, fault-tolerance and
+concurrency control by incorporating the Git distributed version
+control~\cite{git} protocol over its object model. Indeed, Irmin is
+fully compatible with Git command line tools. Distributed replicas in
+\name are created by cloning a \name repository. Due to \name's
+support for mergeable types, each replica can operate completely
+independently, accepting client requests, even when disconnected from
+other replicas, resulting in a highly available distributed system.
 
 \begin{wrapfigure}{L}{.5\textwidth}
 	\begin{center}
@@ -35,33 +37,36 @@ replicas, resulting in a fully available distributed database system.
 	\label{fig:partitions}
 \end{wrapfigure}
 
-Concurrent operations in Irmin are tracked within the notion of branches,
-allowing the programmer to explicitly merge the branches on demand. \name
-realizes the concurrent programming model on top of the notion of branches;
-each replica operates on its own branch, and thus is isolated from actions on
-other replicas. In presence of network partitions, the nodes in one partition
-may not receive updates from the other partition, hence merges cannot happen
-across a partition. This can be a problem if a pair of branches in one
-partition (the current partition) have multiple LCAs in the other partition
-(the remote partition), hence cannot merge. Fig.~\ref{fig:partitions}
-illustrate this problem for the branching structure of
-Fig.~\ref{fig:external-lcas}.
+Concurrent operations in Irmin are tracked using the notion of
+branches, allowing the programmer to explicitly merge branches on
+demand. \name's concurrency and distribution model is realized in
+terms of branches; each replica operates on its own branch, and thus
+is isolated from the actions on other replicas. In the presence of
+network partitions, the nodes in one partition may not receive updates
+from the other partition, preventing merges from happening across a
+partition. This can be a problem if a pair of branches in one
+partition (the current partition) have multiple LCAs in the other
+partition (the remote partition), and hence cannot
+merge. Fig.~\ref{fig:partitions} illustrate this problem for the
+branching structure of Fig.~\ref{fig:external-lcas}.
 
-Fortunately, the access to full (causal) branching history assured by Irmin at
-every node comes to the rescue. Relying on the history, the current partition
-can fork-off (\C{fork}) new branches that start where the remote branches left,
-and map them to new (virtual) nodes that emulate the nodes in the remote
-partition. For the example in Fig.~\ref{fig:partitions}, the partition of $b_1$
-and $b_4$ can fork new branches $b_2'$ and $b_3'$ from $b_2$ and $b_3$,
-respectively, and resume the activity as if the partition never happened. After
-merging the first versions on $b_2'$ and $b_3'$, branches $b_1$ and $b_2$ will
-be in the same state as before (when the partition happened), except that the
-branches are now mergeable because $b_2'$ and $b_3'$ can merge. The ability to
-track full provenance information is thus crucial for \name to overcome network
-partitions, making it an appropriate programming model for highly-available
-replicated data types. \name monad conceals the branching structure, but also
-transparently performs the necessary merges to obtain a history graph with a
-unique lowest common ancestor.
+Fortunately, access to full (causal) branching history assured by
+Irmin at every node comes to the rescue. Relying on the history, the
+current partition can fork-off (\C{fork}) new branches that start
+where the remote branches left, and map them to new (virtual) nodes
+that emulate the nodes in the remote partition. For the example in
+Fig.~\ref{fig:partitions}, the partition of $b_1$ and $b_4$ can fork
+new branches $b_2'$ and $b_3'$ from $b_2$ and $b_3$, respectively, and
+resume the activity as if the partition never happened. After merging
+the first versions on $b_2'$ and $b_3'$, branches $b_1$ and $b_2$ will
+be in the same state as before (when the partition happened), except
+that the branches are now mergeable because $b_2'$ and $b_3'$ can
+merge. The ability to track full provenance information is thus
+crucial for \name to overcome network partitions, making it an
+appropriate programming model for highly-available replicated data
+types. The \nameMonad conceals branching structure, but also
+transparently performs the necessary merges to obtain a history graph
+with a unique lowest common ancestor.
 
 Importantly, Irmin supports user-defined three-way merge functions for
 reconciling concurrent operations. While Irmin's merge functions are defined
@@ -69,7 +74,7 @@ over objects on Irmin's content-addressable heap, \name's merge functions are
 defined over OCaml types. We address this representational mis-match with the
 help of OCaml's PPX metaprogramming support~\cite{ppx} to derive bi-directional
 transformations between objects on OCaml and Irmin heaps. We also derive the
-various serialization functions required Irmin. This address the representation
+various serialization functions required by Irmin. This address the representation
 mismatch between the application and storage layers. Synchronization between
 replicas is performed using Git's notion of pushing and pulling updates from
 remotes over the Git transfer protocol~\cite{git-tp}. As a result, we reap the
