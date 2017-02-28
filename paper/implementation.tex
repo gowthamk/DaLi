@@ -28,10 +28,10 @@ replicas, resulting in a fully available distributed database system.
 	\includegraphics[scale=0.8]{Figures/partitions}
 	\end{center}
 	\caption{Network partitions may leave branches $b_1$ and $b_4$ in one
-		partition (red background), and branches $b_2$ and $b_3$ in the other (yellow
-		background). Since $b_2$ and $b_3$ cannot merge unless $b_1$ and $b_4$ merge
-		(Fig.~\ref{fig:legal-extensions}), they cannot communicate among themselves
-		even though they are in the same network partition.}
+		partition (red background), and branches $b_2$ and $b_3$ in the other
+		(yellow background). Since $b_2$ and $b_3$ cannot merge unless $b_1$ and
+		$b_4$ merge, they cannot communicate among themselves even though they are in
+		the same network partition.}
 	\label{fig:partitions}
 \end{wrapfigure}
 
