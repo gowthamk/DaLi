@@ -29,9 +29,9 @@ overcome this tension to provide the best of both worlds: functional
 programs whose logical structure can be seamlessly transplanted to a
 distributed setting, while nonetheless being resilient to system
 realities such as network failure and latency.  Our key insight is the
-development of a principled methodology that allows us transform
-low-level operational details such as replication and consistency
-into high-level compositional reasoning on language-level datatypes.
+development of a principled methodology that allows us to transform
+low-level operational details such as replication and consistency into
+high-level compositional abstractions over language-level datatypes.
 
 To illustrate how the kinds of problems described above manifest in
 practice, consider how we might write a simple counter library (see
@@ -206,16 +206,17 @@ and reconcile different local states.
 
 Our main innovation is thus the development of a programming model
 that realizes a monadic version control system centered around data,
-rather than file, coherence.  The \name monad lets programmers write
-and compose concurrent computations around multiple (implicit)
-versions of a mergeable datatype, an ordinary ML datatype additionally
-equipped with a \emph{merge} function responsible for deriving a
-consistent global state from a collection of local versions of that
-state.  A computation progresses by forking (i.e., replicating) new
-versions of existing versions, allowing synchronization-free local
-computation to proceed on those nodes, creating new versions along an
-existing \emph{branch} that represents updated local instances, and by
-merging branches to realize global consistency.
+rather than file, coherence.  The \name (Versioned ML) monad lets
+programmers write and compose concurrent computations around multiple
+(implicit) versions of a mergeable datatype, an ordinary ML datatype
+additionally equipped with a \emph{merge} function responsible for
+deriving a consistent global state from a collection of local versions
+of that state.  A computation progresses by forking (i.e.,
+replicating) new versions of existing versions, allowing
+synchronization-free local computation to proceed on those nodes,
+creating new versions along an existing \emph{branch} that represents
+updated local instances, and by merging branches to realize global
+consistency.
 
 Our model allows ML programmers to get the benefits of achieving
 highly available (low-latency) distributed computation, while
@@ -258,19 +259,16 @@ Our contributions are summarized below:
 
 \noindent The remainder of the paper is organized as follows.  We present the
 \name\ programming model informally in the next section.
-Sec.~\ref{sec:mergeable_types} develops a series of examples that
-illustrate how merge operations can be defined and used.
-Sec.~\ref{sec:formalization} defines an operational semantics, and
-formalizes our intuition of a mergeable type in terms of morphisms over
-datatype operations.  We also present soundness (consistency) and
-progress guarantees enjoyed by the
-semantics. Sec.~\ref{sec:system-model} considers an instantiation of
-the model suitable for distributed environments with network
-partitions and failures.  Implementation details describing how we
-incorporate mergeable types into OCaml are presented in
-Sec.~\ref{sec:impl}.  Experimental results and benchmarks are given in
-Sec.~\ref{sec:evaluation}.  Secs.~\ref{sec:related}
-and~\ref{sec:conclusions} describes related work and conclusions.
+Sec.~\ref{sec:mergeable_types} develops a series of examples that illustrate
+how merge operations can be defined and used. Sec.~\ref{sec:formalization}
+defines an operational semantics, and formalizes our intuition of a mergeable
+type in terms of morphisms over datatype operations.  We also present soundness
+(consistency) and progress guarantees enjoyed by the semantics.
+Sec.~\ref{sec:implementation} presents an instantiation of the model suitable
+for highly-available distributed environments with network partitions and
+failures. Experimental results and benchmarks are given in
+Sec.~\ref{sec:evaluation}.  Secs.~\ref{sec:related} and~\ref{sec:conclusions}
+describes related work and conclusions.
 
 
 %% Persistence adds yet another dimension to the problem. Functional data
