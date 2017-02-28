@@ -29,7 +29,7 @@ programming model via a series of examples.
   \begin{ocaml}
     module Counter: sig
       type t
-      type eff 
+      type eff
       val add: int -> t-> eff
       val mult: int -> t -> eff
       val apply: eff -> t -> t
@@ -52,7 +52,7 @@ programming model via a series of examples.
 %     module Counter = struct
 %       include Counter
 %       type t = counter [@@deriving persistence]
-%       let merge old v1 v2 = old + (v1 - old) 
+%       let merge old v1 v2 = old + (v1 - old)
 %                                 + (v2 - old)
 %     end
 %   \end{ocaml}
@@ -74,7 +74,7 @@ that let a non-negative integer value to be added to the counter, and
 multiply the counter, respectively. Observe that the library is
 written in an idiomatic style in OCaml; any OCaml programmer faced
 with the task of implementing the counting functionality would
-presumably write the same.  
+presumably write the same.
 
 The counter implementation of Fig.~\ref{fig:counter-adt} serves the
 application well as long as it is used in-memory on a single machine.
@@ -88,11 +88,11 @@ return \emph{effects} instead of values.  An \emph{effect} is a tag that
 identifies the operation to be applied uniformly at all
 replicas to incorporate the effects of the original operation. For
 instance, \C{Counter.add x v} operation returns \C{Add x} effect,
-which, when applied at a replica (see \C{apply}), adds \C{x} to the 
+which, when applied at a replica (see \C{apply}), adds \C{x} to the
 local counter value.  Fig.~\ref{fig:counter-rdt} shows the
 \C{Counter} library with operations re-defined to returns effects.
 Such re-engineering has to be done carefully, lest an operation may
-may end up causing an unintended effect at a remote replica. For
+end up causing an unintended effect at a remote replica. For
 instance, one may incorrectly define \C{mult x v} operation as
 generating a \C{Mult x} effect, for it is easy to overlook the fact
 that \C{apply (Mult x)} affects different replicas differently
@@ -119,7 +119,7 @@ another replica, where $(c_1,c_2) = (2,2)$ may witness the increment
 to $c_1$, but not $c_2$, thus violating the invariant. The intention
 to atomically apply both the effects cannot be captured in the absence
 of external mechanisms to compose effects (such as effect-based
-transactions~\cite{pldi15}).  
+transactions~\cite{pldi15}).
 
 Persistence adds another dimension to the problem. Functional data
 structures are often large in-memory linked structures that admit

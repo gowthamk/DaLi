@@ -1,12 +1,10 @@
 \section{Distributed Instantiation}
 \label{sec:system-model}
 
-
-
 The operational semantics of \name describe a concurrency model based
 on versions and branches for computations on replicated data, without
 referring to any particular instantiation. A useful instantiation of
-the model is for a distributed system with multiple nodes, where each
+the model is for a distributed system with multiple nodes, where
 each node hosts a \emph{replica} of the data. Thus, each node
 instantiates a branch. The node responds to user requests to perform
 updates to the replica, and publishes the results on its local branch
