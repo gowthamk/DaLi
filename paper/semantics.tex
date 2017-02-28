@@ -68,7 +68,7 @@ thread ($t$) forked-off from the top branch.  The first version on the
 current branch ($H(t)$) denotes the same value ($v$) as the initial
 version on the top branch, although versions themselves are deemed
 distinct. The new version is tagged with a \C{FORK} tag that keeps the
-record of its orgin, namely the \C{fork} operation and the branch from
+record of its origin, namely the \C{fork} operation and the branch from
 which the current branch is forked. The \rulelabel{E-Fork} rule forks
 a new thread with a fresh id ($t'$) and adds it to the thread pool.
 The corresponding branch ($H(t')$) is forked from the parent thread's
@@ -151,10 +151,10 @@ uniqueness of LCA by constraining the branching structure via the
 \rulelabel{E-Pull-Wait} rule. The rule merges version $v'$ into
 version $v$ only if they are safely mergeable ($\under{H}{v' \mbleto
 v}$), i.e., they have a single LCA, and merging both versions does not
-lead to a case where a branch has multiple LCAs with rest of the
-branches, hence gets \emph{stuck}. Such nuances of LCA, and the
-guarantees provided by the system notwithstanding these nuances, are
-discussed in the Sec.~\ref{sec:meta}. 
+lead to a case where a branch (i.e., its latest version) has multiple
+LCAs with rest of the branches, hence gets \emph{stuck}. Such nuances
+of LCA, and the guarantees provided by the system notwithstanding
+these nuances, are discussed in the Sec.~\ref{sec:meta}. 
 
 \input{mergeable-types}
 

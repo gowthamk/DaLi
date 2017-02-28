@@ -86,7 +86,7 @@ application and its libraries to support replication. A method often
 adopted~\cite{crdts, pldi15, gotsman-popl16} is to re-define the operations to
 return \emph{effects} instead of values.  An \emph{effect} is a tag that
 identifies the operation to be applied uniformly at all
-replicas to incorporate the effects of the original operaton. For
+replicas to incorporate the effects of the original operation. For
 instance, \C{Counter.add x v} operation returns \C{Add x} effect,
 which, when applied at a replica (see \C{apply}), adds \C{x} to the 
 local counter value.  Fig.~\ref{fig:counter-rdt} shows the
@@ -112,7 +112,7 @@ is that they don't compose. For instance, let us say that an
 application wants to use two replicated counters, $c_1$ and $c_2$,
 bound by an invariant $c_2 \ge c_1$, which the application duly
 enforces when updating $c_2$ and $c_1$. Nonetheless, it may still
-witness anamolous states that violate the invariant because updates to
+witness anomalous states that violate the invariant because updates to
 $c_1$ and $c_2$ are applied independently in any order. For example,
 if a replica increments both the counters by 1 each, the \C{read} at
 another replica, where $(c_1,c_2) = (2,2)$ may witness the increment
@@ -137,7 +137,7 @@ data model) in order to maintain coherence between in-memory and
 on-disk representations. Safety guarantees over the in-memory data do
 not carry over to the disk, which introduces additional complications
 and the possibility of new bugs. Thus, adding persistence to
-applications while preserving high-level safety gurantees offered by
+applications while preserving high-level safety guarantees offered by
 the language abstraction is a non-trivial problem.
 
 \name lets programmers add replication and persistence to their

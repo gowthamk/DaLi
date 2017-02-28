@@ -11,4 +11,4 @@ haste:
 	pdflatex -shell-escape dali
 
 clean:
-	rm *.log *.aux *.bbl *.out
+	rm -f *.log *.aux *.bbl *.out *~

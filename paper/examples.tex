@@ -15,7 +15,7 @@ mergeable types.
 \subsection{Ropes}
 \label{sec:ropes}
 
-A rope is a data structure that faciliates efficient implementations
+A rope is a data structure that facilitates efficient implementations
 of operations such as concatenation, splitting, lookup and insertion
 at a random position etc., for a list of values in a distributed
 setting. The values are usually characters, with their lists being
@@ -42,7 +42,7 @@ represented by the ropes. \C{merge\_rec} uses auxiliary functions,
 construct a rope given a list (\C{A.t}), and to compute the index at a
 node, given its left sub-tree, resp.
 
-One feature of the mergeable rope implementation that is characterisic
+One feature of the mergeable rope implementation that is characteristic
 of mergeable types in general is compositionality; a rope is a
 polymorphic mergeable data type that composes mergeability over its
 polymorphic constituents.   Compositionality is concretized by the
@@ -142,14 +142,14 @@ mergeable integers.  Concretely, it is a composition of \C{MList} and
 as \C{Counter.merge} (Sec.~\ref{sec:intro}).  An alternative
 instantiation of \C{MList} is for a quantity type
 (\C{Qty}) that supports \C{add} and \C{subtract} operations, but
-\begin{wrapfigure}{l}{.45\textwidth}
+\begin{wrapfigure}{L}{.45\textwidth}
   \centering
   \includegraphics[scale=0.4]{Figures/list-eg}
   \caption{Lists of mergeable values are mergeable. }
   \label{fig:list-eg}
   \vspace*{-.2in}
 \end{wrapfigure}
-defines its \C{merge} opeation a little differently:
+defines its \C{merge} operation a little differently:
 \begin{ocaml}
 let merge lca v1 v2 = if v1 = lca then v2
     else (if v2 = lca then v1 else max v1 v2)
@@ -210,7 +210,7 @@ mergeable types is shopping list application, that allows its users to
 collaboratively build a shopping list (listing items in the decreasing
 order of their priority), by adding new items with a
 specified quantity, deleting existing items, and increasing or
-\begin{wrapfigure}{l}{.5\textwidth}
+\begin{wrapfigure}{L}{.5\textwidth}
   \centering
   \includegraphics[scale=0.3]{Figures/shopping-list}
   \caption{Merging concurrent shopping lists}
