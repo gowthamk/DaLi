@@ -2,13 +2,13 @@
 \label{sec:model}
 
 \begin{figure}
-\begin{center}
+\centering
   \begin{ocaml}
   module type CANVAS = sig
     type pixel = {r:char; g:char; b:char}
     type tree =
       | N of pixel
-      | B of {tl: tree; tr: tree; bl: tree; br: tree}
+      | B of {tl_t: tree; tr_t: tree; bl_t: tree; br_t: tree}
     type t = {max_x:int; max_y:int; canvas:tree}
     type loc = {x:int; y:int}
 
@@ -18,7 +18,6 @@
     val merge: (* lca *)t -> (* v1 *)t -> (* v2 *)t -> t
   end
   \end{ocaml}
-\end{center}
 \caption{\drawsome: a sample \name application}
 \label{fig:canvas-sig}
 \end{figure}
@@ -27,9 +26,10 @@ In this section, we describe the \name programming model through the
 example of a collaborative drawing application we call \drawsome.
 Fig.~\ref{fig:canvas-sig} shows the signature of the \drawsome
 application. \drawsome represents a free-hand drawing canvas in terms
-of a tree of quadrants.  Each quadrant is simply a leaf node
-containing a single pixel (\C{r},\C{g}, or \C{b}) or a tree, if the
-quadrant contains multiple pixels of different colors. Quadrants are
+of a tree of quadrants.  A quadrant is either a leaf node containing a
+single pixel (an \C{r}-\C{g}-\C{b} tuple), or a tree of sub-quadrants,
+if the quadrant contains multiple pixels of different colors.
+Quadrants are
 \begin{wrapfigure}{l}{.4\textwidth}
 \centering
 \includegraphics[scale=0.43]{Figures/canvas-merging}
@@ -117,7 +117,7 @@ let rec merge lca v1 v2 =
 
 \name\ lets programmers define and compose concurrent computations
 around versioned data structures.  Fig.~\ref{fig:dali-monad} shows the
-signature of the \nameMonad module that implements the programming
+signature of the \nameMonad monad that implements the programming
 model along the lines of the well-known \C{State}
 monad~\cite{wadler-monad}. The monad encapsulates a versioned
 functional state (\C{'a}) and the type \C{('a, 'b) t} represents a
@@ -126,7 +126,7 @@ monadic computation that returns a \C{'b} result.  Functions
 \begin{figure}
 \begin{center}
   \begin{ocaml}
-  module type VML = sig
+  module type VST = sig
     type ('a, 'b) t
     val return : 'b -> ('a, 'b) t
     val bind : ('a, 'b) t -> ('b -> ('a, 'c) t) -> ('a, 'c) t
@@ -136,7 +136,7 @@ monadic computation that returns a \C{'b} result.  Functions
     val sync_next_version: unit -> 'a -> ('a, 'a) t
   end
   \end{ocaml}
-  \caption{Signature of the \name monad}
+  \caption{Signature of the Versioned State (\nameMonad) monad}
   \label{fig:dali-monad}
 \end{center}
 \end{figure}
@@ -156,8 +156,8 @@ version, which becomes the current version for the rest of the
 computation.  This version is created by merging the proposal with a
 subset of concurrent versions that have become available since the
 last merge or fork. Thus, \C{sync} effectively lets a computation
-synchronize with a subset of concurrent computations to obtain their
-latest updates.
+synchronize with concurrent computations to obtain their latest
+updates.
 
 \begin{figure}
 \centering
@@ -246,7 +246,7 @@ Alice's \C{sync} finds Cheryl's $C_0'$ and Bob's $C_1$ as concurrent
 versions, and merges them successively with Alice's proposal. For the
 first merge, the two concurrent versions are Alice's $C_0'$ and
 Cheryl's $C_0'$, and the LCA is the initial version ($C_0$). The
-result of this merge is installed as the next version ($\C{V_1}$) on
+result of this merge is installed as the next version ($V_1$) on
 Alice's branch. For the next merge, the two concurrent versions are
 Alice's $V_1$ and Bob's $C_1$ and the LCA is Cheryl's
 $C_0'$\footnote{Thus, the LCA of versions on two branches can lie

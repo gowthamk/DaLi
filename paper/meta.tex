@@ -4,14 +4,14 @@
 When merging two concurrent versions $v_1$ and $v_2$, the common
 ancestor argument for \C{merge} must be the LCA of $v_1$ and $v_2$,
 without which \C{merge} may yield unexpected results. This is
-demonstrated for the grow-only counter in
+demonstrated for the monotonic counter in
 Fig.~\ref{fig:merge-needs-lca}, where an incorrect count is obtained if a
 common ancestor that is not an LCA is used to merge 4 and 7. While in
 this example there is a unique LCA for 4 and 7, in general this may
 \begin{wrapfigure}{l}{.4\textwidth}
 \centering
 \includegraphics[scale=0.6]{Figures/merge-needs-lca}
-\caption{This example of a grow-only counter illustrate why \C{merge}
+\caption{This example of a monotonic counter illustrate why \C{merge}
 needs a lowest common ancestor, and not just a common ancestor. Both 0
 and 2 are common ancestors of 4 and 7, while 2 is their lowest common
 ancestor (since $0 \preceq 2$). The result (v) of merging 4 and 7 is

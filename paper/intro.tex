@@ -34,13 +34,13 @@ low-level operational details such as replication and consistency into
 high-level compositional abstractions over language-level data types.
 
 To illustrate how the kinds of problems described above manifest in
-practice, consider how we might write a simple counter library (see
-Fig.~\ref{fig:counter-adt}).  A \C{Counter} supports two (update)
-operations - \C{add} and \C{mult} - that lets a non-negative integer
-value be added or multiplied to the counter, resp.  Observe that the
-library is written in an idiomatic functional style, with no special
-reasoning principles needed to realize desired functionality.  As long
-as applications use the library on a single machine, this
+practice, consider how we might write a simple monotonic counter
+library (see Fig.~\ref{fig:counter-adt}).  A \C{Counter} supports two
+(update) operations - \C{add} and \C{mult} - that lets a non-negative
+integer value be added or multiplied to the counter, resp.  Observe
+that the library is written in an idiomatic functional style, with no
+special reasoning principles needed to realize desired functionality.
+As long as applications use the library on a single machine, this
 implementation behaves as expected.  However, if the library is used
 in the context of a more sophisticated application, say one whose
 computation is distributed among a collection of machines, its
@@ -66,12 +66,12 @@ simply replicating counter state without having any supporting
 consistency protocol is an equally infeasible approach.
 
 A method often adopted to address these concerns is to re-define a
-datatype's operations to return \emph{effects} instead of
+data type's operations to return \emph{effects} instead of
 values~\cite{SPB+11,Burckhardt2014}.  An \emph{effect} is a tag that
 identifies the operation to be applied uniformly at all replicas to
 incorporate the effects of the original
 operation. Fig.~\ref{fig:counter-rdt} shows the \C{Counter} library
-with operations re-defined to returns effects.  Observe that the
+with operations re-defined to return effects.  Observe that the
 \C{Counter.add x v} operation now returns an \C{Add x} effect, which,
 when applied at a replica (see \C{apply} in the figure), adds \C{x} to
 the local counter value.  Note, however, that \C{add} and \C{mult} are
@@ -207,16 +207,17 @@ and reconcile different local states.
 Our main innovation is thus the development of a programming model
 that realizes a monadic version control system centered around data,
 rather than file, coherence.  The \name (Versioned ML) programming
-model comprises the {\sc vst} monad which lets programmers write and
-compose concurrent computations around multiple (implicit) versions of
-a mergeable datatype, an ordinary ML datatype additionally equipped
-with a \emph{merge} function responsible for deriving a consistent
-global state from a collection of local versions of that state.  A
-computation progresses by forking (i.e., replicating) new versions of
-existing versions, allowing synchronization-free local computation to
-proceed on those nodes, creating new versions along an existing
-\emph{branch} that represents updated local instances, and by merging
-branches to realize global consistency.
+model comprises the \nameMonad (Versioned State) monad which lets
+programmers write and compose concurrent computations around multiple
+(implicit) versions of a mergeable datatype, an ordinary ML datatype
+additionally equipped with a \emph{merge} function responsible for
+deriving a consistent global state from a collection of local versions
+of that state.  A computation progresses by forking (i.e.,
+replicating) new versions of existing versions, allowing
+synchronization-free local computation to proceed on those nodes,
+creating new versions along an existing \emph{branch} that represents
+updated local instances, and by merging branches to realize global
+consistency.
 
 Our model allows ML programmers to get the benefits of achieving
 highly available (low-latency) distributed computation, while
@@ -236,7 +237,7 @@ Our contributions are summarized below:
       distributed computation and replicated state in ML programs.
 
     \item We describe \name, a programming model that extends ML to
-      brings to bear the power and flexibility of a version control
+      bring to bear the power and flexibility of a version control
       system to the administration of replicated data. \name hides the
       complexity of version control behind a monad, and exposes its
       functionality via a simple API that lets programmers define and
@@ -246,8 +247,7 @@ Our contributions are summarized below:
       different instances of (presumably) replicated state.
 
     \item We present a formalization of the \name programming model,
-      and establish the conditions under which eventual convergence of
-      concurrent version state can be guaranteed.
+      and establish its soundess (consistency) and progress guarantees.
 
     \item We describe an implementation of the \name library that
       transparently adds persistence and replication features to a
@@ -257,18 +257,19 @@ Our contributions are summarized below:
       that justify the practical utility of our approach.
 \end{itemize}
 
-\noindent The remainder of the paper is organized as follows.  We present the
-\name\ programming model informally in the next section.
-Sec.~\ref{sec:mergeable_types} develops a series of examples that illustrate
-how merge operations can be defined and used. Sec.~\ref{sec:formalization}
-defines an operational semantics, and formalizes our intuition of a mergeable
-type in terms of morphisms over datatype operations.  We also present soundness
-(consistency) and progress guarantees enjoyed by the semantics.
-Sec.~\ref{sec:implementation} presents an instantiation of the model suitable
-for highly-available distributed environments with network partitions and
-failures. Experimental results and benchmarks are given in
-Sec.~\ref{sec:evaluation}.  Secs.~\ref{sec:related} and~\ref{sec:conclusions}
-describes related work and conclusions.
+\noindent The remainder of the paper is organized as follows.  We
+present the \name\ programming model informally in the next section.
+Sec.~\ref{sec:mergeable_types} develops a series of examples that
+illustrate how merge operations can be defined and composed for
+non-trivial data types.  Sec.~\ref{sec:formalization} defines an
+operational semantics, and formalizes our intuition of a mergeable
+type in terms of morphisms over datatype operations.  We also present
+soundness (consistency) and progress guarantees enjoyed by the
+semantics.  Sec.~\ref{sec:implementation} presents an instantiation of
+the model suitable for highly-available distributed environments with
+network partitions and failures. Experimental results and benchmarks
+are given in Sec.~\ref{sec:evaluation}.  Secs.~\ref{sec:related}
+and~\ref{sec:conclusions} describes related work and conclusions.
 
 
 %% Persistence adds yet another dimension to the problem. Functional data

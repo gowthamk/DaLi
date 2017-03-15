@@ -1,11 +1,11 @@
 all:
-	pdflatex -shell-escape dali
-	pdflatex -shell-escape dali
-	bibtex dali
-	bibtex dali
-	pdflatex -shell-escape dali
-	bibtex dali
-	pdflatex -shell-escape dali
+	pdflatex -shell-escape vml
+	pdflatex -shell-escape vml
+	bibtex vml
+	bibtex vml
+	pdflatex -shell-escape vml
+	bibtex vml
+	pdflatex -shell-escape vml
 
 # Check style:
 proof:
@@ -20,7 +20,7 @@ proof:
 
 
 haste:
-	pdflatex -shell-escape dali
+	pdflatex -shell-escape vml
 
 clean:
 	rm -f *.log *.aux *.bbl *.out *~

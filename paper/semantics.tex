@@ -36,8 +36,8 @@ distinction, and uses values and versions interchangeably.
 The small-step operational semantics of $\lang$ is defined via a
 reduction relation ($\stepsto$) that relates \emph{program states}. A
 program state ($p;\,H$) consists of a program $p$ and a \emph{branch
-  history} $H$ that maps thread identifiers to corresponding branches;
-each thread is associated with a branch during evaluation. Evaluation
+history} $H$ that maps thread identifiers to corresponding branches.
+Each thread is associated with a branch during evaluation. Evaluation
 contexts have been defined separately for expressions ($E$) and
 programs ($P$), with the latter subsuming the former.
 
@@ -150,7 +150,7 @@ uniqueness of LCA by constraining the branching structure via the
 version $v$ only if they are safely mergeable ($\under{H}{v' \mbleto
   v}$), i.e., they have a single LCA, and merging both versions does
 not lead to a case where a branch (i.e., its latest version) has
-multiple LCAs with remaining branches, andd hence gets
+multiple LCAs with remaining branches, and hence gets
 \emph{stuck}. Such nuances of LCA, and the guarantees provided by the
 system notwithstanding these nuances, are discussed in 
 Sec.~\ref{sec:meta}.
