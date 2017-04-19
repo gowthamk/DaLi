@@ -20,7 +20,7 @@ suggestions.
    where merges happen in a circular order, satisfies the side
    condition on merges by construction. 
 
-2. **Comparison with Concurrent Revisions (CRs)** Intuitively, the set
+3. **Comparison with Concurrent Revisions (CRs)** Intuitively, the set
    of history graphs allowed under our model is a strict superset of
    revision diagrams. For instance, CR allows a branch to only merge
    with its parent, while VML allows merges between arbitrary
