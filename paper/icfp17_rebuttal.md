@@ -35,5 +35,17 @@ suggestions.
    specific instance of VML. We accept reviewer B's suggestion to
    include a performance comparison with CR.
 
-
+4. **Associativity** In the example with associative rope structures,
+   reviewer A is right in observing that the element `y` is duplicated
+   only if it is added independenty on two merging branches (can be
+   determined using the history). We understand reviewer C's intuition
+   about the need for associativity. However, associativity
+   requirement is waived in VML due to the system-level guarantees,
+   which only allow the latest states on the branches to be merged (no
+   criss-cross merges in the graph structure). Thus, if `a` is merged
+   onto `b`, then `b` can be merged onto `c` only if `a` is merged
+   onto `c`. The result of this merge (`a → b`, then `a → c`, then `b
+   → c`) is `a/2 + b/4 + c/4`. Subsequent merge from `c` to `b` would
+   be a fast-forward merge (no modification on `c`), replacing the
+   state on `c` with `a/2 + b/4 +c/4`.
 
