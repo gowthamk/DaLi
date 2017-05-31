@@ -193,8 +193,9 @@ Attempting to update every replicated copy atomically is problematic in the
 absence of distributed transaction support, which impose significant
 performance penalties.  But, without such heavyweight mechanisms, applying an
 |Add| operation on one replica may not be instantaneously witnessed on another,
-which may be in the process of simultaneously attempting to perform its own
-|Add| or |Mult| action.
+which may be in the process of simultaneously attempting to perform
+its own |Add| or |Mult| action. Since |Add| and |Mult| do not commute,
+this may result in divergence of the counter state across various replicas.
 
 Rather than viewing each operation in terms its effect on the global state, can
 we formulate a more declarative interpretation, directly in terms of the
@@ -313,9 +314,11 @@ such case, an appropriate color-mixing algorithm can be used to determine the
 color of pixel.  For instance, the pixel can be colored yellow - an additive
 combination of red and green. The logic is illustrated below.
 
+\vspace*{-0.1in}
 \begin{center}
-\includegraphics[scale=0.4]{Figures/canvas-merging}
+\includegraphics[scale=0.35]{Figures/canvas-merging}
 \end{center}
+\vspace*{-0.1in}
 
 We have built several mergeable datatypes including lists, ropes, etc, which
 can be freely composed together. That is, a list of counters behaves like a
